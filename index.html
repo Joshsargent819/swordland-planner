@@ -308,7 +308,7 @@ table.counts tr:last-child td{border-bottom:0;font-weight:700}
 .modal input[data-set],.modal select[data-set]{padding:4px 6px;font-size:13.5px}
 table.roster td{padding:5px 6px}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0b0f17;border:1px solid var(--gold);color:var(--text);border-radius:10px;padding:10px 16px;z-index:70;font-size:14px;display:none;max-width:90vw}
+#toast{pointer-events:none;position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0b0f17;border:1px solid var(--gold);color:var(--text);border-radius:10px;padding:10px 16px;z-index:70;font-size:14px;display:none;max-width:90vw}
 footer{color:var(--muted);font-size:12.5px;text-align:center}
 details.bench summary{cursor:pointer;font-family:var(--display);font-size:17px}
 details.bench .chips{margin-top:10px}
@@ -329,6 +329,37 @@ details.bench .chips{margin-top:10px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .pulse{animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{stroke-opacity:.3}}
+
+.mapbox.editing svg,.mapbox.editing [data-marker]{touch-action:none}
+@media (max-width:700px){
+ .roster thead{display:none}
+ table.roster,.roster tbody{display:block;width:100%}
+ .roster tr{display:grid;grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 78px;gap:6px 8px;padding:10px 6px;border-bottom:1px solid var(--line);align-items:center}
+ table.sched.roster td{display:block;padding:0;border:0;min-width:0}
+ .roster td:nth-child(1){grid-column:1;grid-row:1}
+ .roster td:nth-child(2){grid-column:2/4;grid-row:1}
+ .roster td:nth-child(3){grid-column:4;grid-row:1}
+ .roster td:nth-child(4){grid-column:2/3}
+ .roster td:nth-child(5){grid-column:3/5}
+ .roster td:nth-child(6){grid-column:2/5}
+ .roster td:nth-child(7){grid-column:2/5;white-space:normal!important;display:flex;gap:6px;flex-wrap:wrap}
+ .roster input[data-set],.roster select{width:100%!important;max-width:none!important;min-width:0}
+ .roster td:nth-child(6) select{flex:1 1 140px}
+ .modal-bg{padding:10px 6px}
+ .modal{padding:14px 12px}
+ .modal .schedwrap{max-height:none!important;overflow:visible!important;border:0!important}
+ .editbar .btn{flex:1 1 auto}
+}
+
+@media (max-width:520px){
+ table.counts{font-size:12.5px}
+ table.counts th,table.counts td{padding:4px 3px!important;white-space:nowrap}
+ table.counts th{font-size:10px!important;letter-spacing:0!important}
+}
+
+.touchonly{display:none}@media (hover:none){.touchonly{display:inline}}
+
+.chgbanner{background:#3a2a07;border:1px solid var(--gold);color:#ffe8a8;border-radius:10px;padding:10px 12px;margin:8px 0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}.chgbanner b{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -449,6 +480,37 @@ function BB(bid){var a=BL();for(var i=0;i<a.length;i++)if(a[i].id===bid)return a
 function bm(pl,bid){if(!pl.bmap[bid])pl.bmap[bid]={zone:'',lead:null};return pl.bmap[bid];}
 function bz(pl,bid){var m=pl.bmap[bid];return m&&m.zone&&Z(pl,m.zone)?m.zone:'';}
 function bph(pl,bid){var m=pl.bmap[bid];return (m&&m.phase)||1;}
+function changesUI(pl,bid){var m=pl.bmap[bid]||{},raw=rawChanges(pl,bid),st0={lead:blead(pl,bid),co:coOf(pl,bid)};
+ var mem=function(sel,excl){return pl.zones.map(function(z){var c=z.members.filter(function(x){return x!==excl;});return c.length?'<optgroup label="'+esc(z.name)+'">'+c.map(function(x){return '<option value="'+esc(x)+'"'+(sel===x?' selected':'')+'>'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'';}).join('');};
+ var o='<label>Changes during the match</label><p class="note" style="margin:0 0 4px">Swap the lead and/or co-leads at a phase or a set time. Add as many as you need.</p>';
+ raw.forEach(function(c,k){var before=stateAt(pl,bid,(c.at!=null?phaseAtT(pl,c.at):c.ph)-0.5,c.at!=null?c.at-1:null);
+  o+='<div style="border:1px solid var(--line);border-radius:8px;padding:8px;margin:6px 0"><div class="row" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><select data-set="chw" data-b="'+bid+'" data-k="'+k+'" aria-label="When">'+phaseOpts(pl,c.at!=null?-1:c.ph)+'<option value="t"'+(c.at!=null?' selected':'')+'>At a set time…</option></select>'+(c.at!=null?'<input data-set="cht" data-b="'+bid+'" data-k="'+k+'" value="'+esc(fmtOff(+c.at))+'" placeholder="20:00" style="width:70px" aria-label="Time into the match">':'')+'<button class="mini" data-act="chdel" data-b="'+bid+'" data-k="'+k+'" title="Remove this change">✕</button></div>'+
+   '<div class="row" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="note">Lead:</span><select data-set="chl" data-b="'+bid+'" data-k="'+k+'"><option value="">No change'+(before.lead?' ('+esc(nm(before.lead))+')':'')+'</option>'+mem(c.lead,null)+'</select></div>'+
+   '<div class="row" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px"><span class="note">Co-leads:</span><select data-set="chcm" data-b="'+bid+'" data-k="'+k+'"><option value="keep"'+(c.co===undefined?' selected':'')+'>No change'+(before.co.length?' ('+esc(before.co.map(nm).join(', '))+')':'')+'</option><option value="set"'+(c.co!==undefined?' selected':'')+'>Change to…</option></select></div>';
+  if(c.co!==undefined){var lz=c.lead||before.lead;o+='<div style="display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px">'+pl.zones.map(function(z){return z.members.filter(function(x){return x!==lz;}).map(function(x){return '<label style="display:flex;gap:4px;align-items:center;font-weight:400;font-size:13px"><input type="checkbox" data-set="chco" data-b="'+bid+'" data-k="'+k+'" value="'+esc(x)+'"'+(c.co.indexOf(x)>=0?' checked':'')+'>'+esc(nm(x))+'</label>';}).join('');}).join('')+'</div>';}
+  o+='</div>';});
+ return o+'<button class="btn" data-act="chadd" data-b="'+bid+'">+ Add a change</button>';}
+function rawChanges(pl,bid){var m=pl.bmap[bid];if(!m)return [];if(!m.changes&&m.hand){m.changes=[m.hand];delete m.hand;}return (m.changes||[]).slice().sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});}
+function saveChanges(pl,bid,arr){var m=bm(pl,bid);delete m.hand;var c=arr.filter(function(x){return x&&(x.ph||x.at!=null);}).map(function(x){var o=x.at!=null?{at:+x.at}:{ph:+x.ph};if(x.lead)o.lead=x.lead;if(x.co!==undefined)o.co=x.co.slice();return o;}).sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});if(c.length)m.changes=c;else delete m.changes;}
+function changeSteps(pl,bid){if(!bz(pl,bid))return [];var cur={lead:blead(pl,bid),co:coOf(pl,bid).slice()},out=[];
+ rawChanges(pl,bid).forEach(function(c){var valid=c.at!=null?+c.at>0:(c.ph>1&&c.ph<=pl.phases.length);if(!valid)return;var t=moveT(pl,c),ph=c.at!=null?phaseAtT(pl,+c.at):c.ph,st={t:t,ph:ph,at:c.at!=null?+c.at:null,from:cur.lead,to:cur.lead,added:[],removed:[]};
+  if(c.lead&&S.players[c.lead]&&c.lead!==cur.lead){st.to=c.lead;cur.co=cur.co.filter(function(x){return x!==c.lead;});cur.lead=c.lead;}
+  if(c.co!==undefined){var nc=c.co.filter(function(x){return S.players[x]&&x!==cur.lead;});st.added=nc.filter(function(x){return cur.co.indexOf(x)<0;});st.removed=cur.co.filter(function(x){return nc.indexOf(x)<0;});cur.co=nc;}
+  st.lead=cur.lead;st.co=cur.co.slice();if(st.to!==st.from||st.added.length||st.removed.length)out.push(st);});return out;}
+function stateAt(pl,bid,ph,t){var st={lead:blead(pl,bid),co:coOf(pl,bid).slice()};changeSteps(pl,bid).forEach(function(c){if(t!=null?c.t<=t:c.ph<=ph){st={lead:c.lead,co:c.co};}});return st;}
+function chWhen(pl,c,T){return c.at!=null?moveWhen(pl,{at:c.at}):(T?phTimeT(pl,c.ph):'Phase '+c.ph);}
+function handWhen(pl,h,T){return chWhen(pl,h,T);}
+function handOf(pl,bid){var c=changeSteps(pl,bid).filter(function(x){return x.to!==x.from;})[0];return c?{lead:c.to,ph:c.ph,at:c.at,t:c.t}:null;}
+function leadAt(pl,bid,ph){return stateAt(pl,bid,ph).lead;}
+function stepChips(pl,bid){return changeSteps(pl,bid).map(function(c){var w=chWhen(pl,c,true),h='';if(c.to!==c.from)h+=chip(c.to,'→ '+Tt('Lead')+' · '+w);c.added.forEach(function(x){h+=chip(x,'+ '+Tt('Co-Lead')+' · '+w);});c.removed.forEach(function(x){h+=chip(x,'✕ '+Tt('Co-Lead')+' · '+w);});return h;}).join('');}
+function stepTasksFor(pl,id,task,BN,NM){var o='';BL().forEach(function(b){changeSteps(pl,b.id).forEach(function(c){var w=esc(chWhen(pl,c,true));
+  if(c.to!==c.from&&c.from===id)o+=task(w,Th('Hand **{building}** over to {player}.',{building:BN(b.id),player:NM(c.to)}));
+  if(c.to!==c.from&&c.to===id)o+=task(w,Th('Take command of **{building}** from {player}.',{building:BN(b.id),player:c.from?NM(c.from):Th('the lead')}));
+  if(c.added.indexOf(id)>=0)o+=task(w,Th('Join **{building}** as co-lead.',{building:BN(b.id)}));
+  if(c.removed.indexOf(id)>=0)o+=task(w,Th('Stop co-leading **{building}**.',{building:BN(b.id)}));});});return o;}
+function stepNotesFor(pl,id){var out=[];BL().forEach(function(b){changeSteps(pl,b.id).forEach(function(c){var w=chWhen(pl,c),bn=bname(pl,b.id);
+  if(c.to!==c.from&&c.from===id)out.push('Hands '+bn+' to '+nm(c.to)+' ('+w+')');if(c.to!==c.from&&c.to===id)out.push('Takes '+bn+' ('+w+')');
+  if(c.added.indexOf(id)>=0)out.push('Co-leads '+bn+' from '+w);if(c.removed.indexOf(id)>=0)out.push('Stops co-leading '+bn+' ('+w+')');});});return out;}
 function blead(pl,bid){var m=pl.bmap[bid];return (m&&bz(pl,bid)&&m.lead)||null;}
 function concedeOf(pl,zid){var z=Z(pl,zid);return z?(+z.concede||0):0;}
 function fullCon(pl,bid){var z=bz(pl,bid);return !!z&&concedeOf(pl,z)>=pl.phases.length;}
@@ -513,9 +575,9 @@ function uid(p){return p+Math.random().toString(36).slice(2,7);}
 
 /* ---------- mutations ---------- */
 var HIST=[];function snap(){HIST.push(JSON.stringify(S));if(HIST.length>60)HIST.shift();}
-function touch(){dirty=true;snap();rerender();}
+function touch(){dirty=true;queueSave();snap();rerender();}
 function rerender(){PHC={};var mod=view.modal,sc=0;var mb=document.querySelector('.modal-bg');if(mb)sc=mb.scrollTop;render();if(mod==='roster'||mod==='setups'||mod==='tpls'||mod==='i18n'){openModal(mod);var nb=document.querySelector('.modal-bg');if(nb)nb.scrollTop=sc;}}
-function undo(){if(HIST.length<2){toast('Nothing to undo.');return;}HIST.pop();S=JSON.parse(HIST[HIST.length-1]);dirty=HIST.length>1;if(!S.plans[view.plan])view.plan=S.livePlan;if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;rerender();toast('Undone.');}
+function undo(){if(HIST.length<2){toast('Nothing to undo.');return;}HIST.pop();S=JSON.parse(HIST[HIST.length-1]);dirty=true;queueSave();if(!S.plans[view.plan])view.plan=S.livePlan;if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;rerender();toast('Undone.');}
 function detach(pl,id){pl.zones.forEach(function(z){z.members=z.members.filter(function(x){return x!==id;});});pl.subs=pl.subs.filter(function(x){return x!==id;});}
 function clearLeads(pl,id){for(var b in pl.bmap){var m=pl.bmap[b];if(m.lead===id)m.lead=null;if(m.co)m.co=m.co.filter(function(x){return x!==id;});if(m.backup===id)delete m.backup;}pl.zones.forEach(function(z){if(z.subManager===id)delete z.subManager;});if(pl.joinAt)delete pl.joinAt[id];}
 function setRole(pl,id,val){var z=zoneOf(pl,id);if(!z)return;
@@ -603,7 +665,7 @@ function setCover(pl,sid,val){for(var m in pl.pairs){pl.pairs[m]=pl.pairs[m].fil
 function roleText(pl,id){var z=zoneOf(pl,id),out=[];if(z){var a=ownLeads(pl,id),c=ownCo(pl,id);out.push(a.length?'Lead · '+a.map(function(b){return BB(b).name;}).join(', '):c.length?'Co-Lead · '+c.map(function(b){return BB(b).name;}).join(', '):'Supporter');
   objectivesOf(pl,id).forEach(function(b){out.push('Holds '+bname(pl,b));});backupsOf(pl,id).forEach(function(b){out.push('Backup '+bname(pl,b));});}
  else if(pl.subs.indexOf(id)>=0){var cv=coverOf(pl,id);var sz0=subZone(pl,id);out.push(cv?'Sub for '+nm(cv.main)+' · '+cyc(cv.order):'Sub · standby'+(sz0?' · '+zname(pl,sz0)+' reserve':''));}
- movesOf(pl,id).forEach(function(mvr){out.push('Moves to '+zname(pl,mvr.z)+(mvr.at!=null?' at '+fmtOff(mvr.at):' from Phase '+mvr.ph));});managesOf(pl,id).forEach(function(mz){out.push('Manages '+zname(pl,mz)+' subs');});var j=joinOf(pl,id);if(j!=null)out.push('Joins '+fmtOff(j));return out.join(' · ');}
+ out=out.concat(stepNotesFor(pl,id));movesOf(pl,id).forEach(function(mvr){out.push('Moves to '+zname(pl,mvr.z)+(mvr.at!=null?' at '+fmtOff(mvr.at):' from Phase '+mvr.ph));});managesOf(pl,id).forEach(function(mz){out.push('Manages '+zname(pl,mz)+' subs');});var j=joinOf(pl,id);if(j!=null)out.push('Joins '+fmtOff(j));return out.join(' · ');}
 function bulkAdd(text,dest){var pl=P(),added=[],skipped=[];text.split(/\n/).forEach(function(line){line=line.trim();if(!line)return;
   var mt=/^(.*?)[\s,;\t]+([\d.,]+\s*[kK]?)$/.exec(line),name=line,pw=0;if(mt){name=mt[1].trim();var raw=mt[2].replace(/,/g,'').trim();pw=/k$/i.test(raw)?Math.round(parseFloat(raw)*1000):+raw;}
   name=name.replace(/^[-•*\d.)\s]+/,'').trim();if(!name)return;
@@ -806,7 +868,7 @@ function chip(id,badge){var pl=P();var z=zoneOf(pl,id)||(pl.subs.indexOf(id)>=0?
  return '<button type="button" class="chip'+(view.focus===id?' on':'')+'" data-player="'+esc(id)+'"'+(editing?' draggable="true"':'')+'>'+dot(z?zcol(pl,z):null)+'<span>'+(admin.ok&&attOf(id)?attIcon(attOf(id).status)+' ':'')+esc(nm(id))+'</span>'+(badge?'<em>'+esc(badge)+'</em>':'')+(pw(id)?'<small>'+fk(pw(id))+'</small>':'')+'</button>';}
 function badgeFor(pl,id){var b=objectivesOf(pl,id).map(function(x){return Tt(bname(pl,x));});if(managesOf(pl,id).length)b.push(Tt('Manager'));var j=joinOf(pl,id);if(j!=null)b.push(Tt('Joins {t}',{t:fmtOff(j)}));return b.join(' · ');}
 function bRow(pl,b,style){var l=blead(pl,b.id),e=eff(pl,b.id),co=coOf(pl,b.id),fc=fullCon(pl,b.id);
- return '<div class="leadrow'+(co.length?' stack':'')+'"'+(style?' style="'+style+'"':'')+'><span class="bn">'+esc(Tt(b.name))+(e>1&&!fc?' · P'+e:'')+'</span><div class="chips">'+(l?chip(l,co.length?Tt('Lead'):''):'<span class="empty">'+(fc?Th('Conceded'):Th('no lead'))+'</span>')+co.map(function(c){return chip(c,Tt('Co-Lead'));}).join('')+'</div></div>';}
+ return '<div class="leadrow'+(co.length?' stack':'')+'"'+(style?' style="'+style+'"':'')+'><span class="bn">'+esc(Tt(b.name))+(e>1&&!fc?' · P'+e:'')+'</span><div class="chips">'+(l?chip(l,co.length?Tt('Lead'):''):'<span class="empty">'+(fc?Th('Conceded'):Th('no lead'))+'</span>')+co.map(function(c){return chip(c,Tt('Co-Lead'));}).join('')+stepChips(pl,b.id)+'</div></div>';}
 function zoneCard(z){var pl=P(),mem=z.members,c=concedeOf(pl,z.id);
  var o='<div class="zcard dropzone" style="--zc:'+z.color+'" data-drop="'+z.id+'"><header><button type="button" data-zone="'+z.id+'">'+Th('{zone} Zone',{zone:esc(Tt(z.name))})+'</button><span class="meta">'+Th('{n} players',{n:mem.length})+(zoneSum(pl,z.id)?' · '+fk(zoneSum(pl,z.id)):'')+'</span></header>';
  o+=switchesHTML(pl,'zone',z.id);
@@ -860,7 +922,7 @@ function buildingPanel(bid){var pl=P(),b=BB(bid);if(!b)return overviewPanel();va
    pl.zones.forEach(function(z){if(!z.members.length)return;o+='<optgroup label="'+esc(z.name)+'">'+z.members.slice().sort(function(a,c){return nm(a).localeCompare(nm(c));}).map(function(i){var lb=leadsOf(pl,i).filter(function(x){return x!==bid;});return '<option value="'+esc(i)+'"'+(i===l?' selected':'')+'>'+esc(nm(i))+(lb.length?' (also '+lb.map(function(x){return bname(pl,x);}).join(', ')+')':'')+'</option>';}).join('')+'</optgroup>';});
    o+='</select><label>Co-Leads</label><div class="pairlist">'+coOf(pl,bid).map(function(c,i){return '<div>'+esc(nm(c))+' <button class="mini" data-act="codel" data-b="'+bid+'" data-i="'+i+'" aria-label="Remove">✕</button></div>';}).join('')+'</div>'+
    '<div class="row"><select id="ed-coadd" aria-label="Add co-lead"><option value="">Add a co-lead…</option>'+pl.zones.map(function(z){var c=z.members.filter(function(x){return x!==l&&coOf(pl,bid).indexOf(x)<0;});return c.length?'<optgroup label="'+esc(z.name)+'">'+c.map(function(x){return '<option value="'+esc(x)+'">'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'';}).join('')+'</select><button class="btn" data-act="coadd" data-b="'+bid+'">Add</button></div>'+
-   '<label for="ed-bk">Backup if the lead fails to report</label><select id="ed-bk" data-set="backup" data-b="'+bid+'"><option value="">None</option>'+pl.zones.map(function(z){return z.members.length?'<optgroup label="'+esc(z.name)+'">'+z.members.filter(function(x){return x!==l;}).map(function(x){return '<option value="'+esc(x)+'"'+(m.backup===x?' selected':'')+'>'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'';}).join('')+'</select>';
+   changesUI(pl,bid)+'<label for="ed-bk">Backup if the lead fails to report</label><select id="ed-bk" data-set="backup" data-b="'+bid+'"><option value="">None</option>'+pl.zones.map(function(z){return z.members.length?'<optgroup label="'+esc(z.name)+'">'+z.members.filter(function(x){return x!==l;}).map(function(x){return '<option value="'+esc(x)+'"'+(m.backup===x?' selected':'')+'>'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'';}).join('')+'</select>';
   o+='<label for="ed-unl">Unlocks at (minutes:seconds into the match)</label><input id="ed-unl" data-set="unlock" data-b="'+bid+'" value="'+esc(m.unlock!=null?fmtOff(m.unlock):'')+'" placeholder="'+esc(phStart(pl,eff(pl,bid))!=null?fmtOff(phStart(pl,eff(pl,bid)))+' (phase start)':'e.g. 15:00')+'">'+
    '<label for="ed-bph">Captured in</label><select id="ed-bph" data-set="bphase" data-b="'+bid+'">'+pl.phases.map(function(p,i){return '<option value="'+(i+1)+'"'+(bph(pl,bid)===i+1?' selected':'')+'>Phase '+(i+1)+' · '+esc(p.time)+'</option>';}).join('')+'</select>';
    if(concedeOf(pl,zid)>=bph(pl,bid))o+='<p class="note">'+esc(zname(pl,zid))+' is conceded through Phase '+concedeOf(pl,zid)+', so this building is taken in Phase '+e+'.</p>';}
@@ -912,7 +974,7 @@ function zonePanel(zid){var pl=P(),z=Z(pl,zid);if(!z)return overviewPanel();
 function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,st=z?'combatant':isS?'sub':'bench';
  var ZN2=function(zid){return esc(Tt(zname(pl,zid)));},BN=function(b){return esc(Tt(bname(pl,b)));},NM=function(x){return esc(nm(x));};
  var task=function(when,html){return '<div class="task"><span class="when">'+when+'</span><span>'+html+'</span></div>';};
- var o='<h3>'+esc(nm(id))+'</h3><p class="sub">'+(pw(id)?Th('Squad power {n}',{n:fmt(pw(id))})+' · ':'')+esc(pl.name)+' ('+esc(pl.label)+')</p>';
+ var o='<h3>'+esc(nm(id))+'</h3><p class="sub">'+(pw(id)?Th('Squad power {n}',{n:fmt(pw(id))})+' · ':'')+esc(pl.name)+' ('+esc(pl.label)+')</p>'+updatedLine()+(view.who===id?'':changedBanner(pl,id));
  o+='<span class="status st-'+st+'">'+(st==='combatant'?'⚔ '+Th('Combatant'):st==='sub'?Th('Substitute')+' S'+(pl.subs.indexOf(id)+1):Th('Not in this plan'))+'</span>';
  var rn=pl.roleNotes||{};
  if(z){var zo=Z(pl,z),own=ownLeads(pl,id),obj=objectivesOf(pl,id),oco=ownCo(pl,id),bks=backupsOf(pl,id),mgz=managesOf(pl,id),jn=joinOf(pl,id);
@@ -923,12 +985,15 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
   if(jn!=null)o+=task(esc((clockAt(pl,jn)?clockAt(pl,jn)+' · ':'')+fmtOff(jn)),Th('Enter the battle and join **{zone}**. You are not part of the opening deployment.',{zone:ZN2(z)}));
   if(zo.concede)o+=task(Th('Phase {n}',{n:'1'+(zo.concede>1?'–'+zo.concede:'')}),Th('**{zone}** is conceded. No deployment there until Phase {n}; follow leadership calls.',{zone:ZN2(z),n:zo.concede+1}));
   own.forEach(function(b){o+=task(esc(whenBT(pl,b)),Th('Capture and command **{building}**. Keep the garrison strong.',{building:BN(b)}));});
+
   oco.forEach(function(b){var ld=blead(pl,b);o+=task(esc(whenBT(pl,b)),ld?Th('Co-lead **{building}** with {lead}. Stay at the building and be ready for synchronized double rallies.',{building:BN(b),lead:NM(ld)}):Th('Co-lead **{building}**. Stay at the building and be ready for synchronized double rallies.',{building:BN(b)}));});
+
   var mv=moveOf(pl,id);
   if(!own.length&&!oco.length){var zb=zoneBuildings(pl,z).filter(function(b){return !fullCon(pl,b.id)&&(!mv||(unlockOf(pl,b.id)||0)<mv.t);});if(zb.length){var byP={};zb.forEach(function(b){var e=eff(pl,b.id);(byP[e]=byP[e]||[]).push(b);});
    Object.keys(byP).sort().forEach(function(e){o+=task(esc(phTimeT(pl,+e)),Th('Reinforce {list}.',{list:listFmt(byP[e].map(function(b){return Th('**{building}** ({lead})',{building:esc(Tt(b.name)),lead:blead(pl,b.id)?NM(blead(pl,b.id)):Th('no lead')});}))}));});}
    else if(!mv)o+='<p class="note">'+Th('Your zone has no buildings assigned yet.')+'</p>';}
   var mvs=movesOf(pl,id);mvs.forEach(function(mv,ix){var nx=mvs[ix+1];var dzb=zoneBuildings(pl,mv.z).filter(function(b){return !fullCon(pl,b.id)&&(!nx||(unlockOf(pl,b.id)||0)<nx.t);});o+=task(esc(mv.at!=null?moveWhen(pl,mv):phTimeT(pl,mv.ph)),dzb.length?Th('Move to **{zone}** and reinforce {list}.',{zone:ZN2(mv.z),list:listFmt(dzb.map(function(b){return Th('**{building}** ({lead})',{building:esc(Tt(b.name)),lead:blead(pl,b.id)?NM(blead(pl,b.id)):Th('no lead')});}))}):Th('Move to **{zone}**.',{zone:ZN2(mv.z)}));});
+  o+=stepTasksFor(pl,id,task,BN,NM);
   obj.forEach(function(b){o+=task(esc(whenBT(pl,b)),Th('Capture and hold **{building}** with your strongest march; keep supporting {zone} with the rest.',{building:BN(b),zone:ZN2(z)}));});
   bks.forEach(function(b){var ld=blead(pl,b);o+=task(Th('If needed'),Th('If {lead} fails to report, take command of **{building}**. Leadership will cover your other duties.',{lead:ld?NM(ld):Th('the lead'),building:BN(b)}));});
   var note=own.length?rn.lead:oco.length?(rn.colead||rn.lead):rn.supporter;o+='<p class="note">'+(note?Th(note):'')+(obj.length&&rn.objective?' '+Th(rn.objective):'')+'</p></section>';
@@ -1017,16 +1082,16 @@ function render(){var pl=P(),m=M(pl);try{document.documentElement.lang=LANG;docu
  '<div class="tools">'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live mode':'🔴 Live match')+'</button>':'')+'<button class="btn" data-act="copytext">Copy for Discord</button>'+(admin.ok&&!editing?'<button class="btn gold" data-act="edit">Edit plan</button>':'')+'</div></div>';
  if(editing)h+='<div class="editbar"><span class="msg"><b>Editing '+esc(pl.name)+'.</b> '+(dirty?'You have unsaved changes.':'No changes yet.')+'</span>'+
   (S.livePlan!==view.plan?'<button class="btn" data-act="makelive">Make live</button>':'')+
-  '<button class="btn" data-act="undo"'+(HIST.length>1?'':' disabled')+' title="Ctrl/Cmd+Z">↶ Undo</button><button class="btn" data-act="roster">Roster</button><button class="btn" data-act="i18n">🌐 Translations</button><button class="btn" data-act="autopair">Auto-pair subs</button><button class="btn" data-act="matchtime">Match time</button><button class="btn" data-act="plantext">Plan text</button><button class="btn" data-act="dupplan">Duplicate plan</button><button class="btn" data-act="newplan">New plan</button>'+
+  '<button class="btn" data-act="undo"'+(HIST.length>1?'':' disabled')+' title="Ctrl/Cmd+Z">↶ Undo</button><button class="btn" data-act="restore" title="Restore points">📌 Restore points</button><button class="btn" data-act="roster">Roster</button><button class="btn" data-act="i18n">🌐 Translations</button><button class="btn" data-act="autopair">Auto-pair subs</button><button class="btn" data-act="matchtime">Match time</button><button class="btn" data-act="plantext">Plan text</button><button class="btn" data-act="dupplan">Duplicate plan</button><button class="btn" data-act="newplan">New plan</button>'+
   (S.planOrder.length>1?'<button class="btn danger" data-act="delplan">'+(view.confirmDel==='plan'?'Tap again to delete plan':'Delete plan')+'</button>':'')+
-  '<button class="btn" data-act="data">Plan data</button><button class="btn ghost" data-act="discard">'+(dirty?'Discard changes':'Done')+'</button><button class="btn gold" data-act="save"'+(dirty?'':' disabled')+'>Save for everyone</button></div>';
+  '<button class="btn" data-act="data">Plan data</button>'+saveStatusHTML()+'<button class="btn ghost" data-act="discard">Done</button></div>';
  h+=activeBanner();
  if(view.me&&S.players[view.me]&&!editing)h+='<button class="myfab" data-act="itsme">👤 '+Th('My orders')+'</button>';
  h+=lookupHTML();
  '<p class="mission"><b>Mission</b>'+esc(pl.mission||'No mission written yet.')+'</p></section>';
  h+='<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">Phase '+(i+1)+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||p.time)+'</small></button>';}).join('')+'</div></div>'+
  (editing?mapTools():liveBar())+
- '<div class="mapbox'+(editing&&view.tool==='arrange'?' arrange':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+ '<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool==='arrange'?' arrange':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
  '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(z.name)+(z.concede?' (conceded'+(z.concede>1?' P1–'+z.concede:' P1')+')':'')+'</button>';}).join('')+'<span>Castle color = zone · Lead tag color = lead\'s own zone</span><span>Hatched = taken in a later phase</span></div></section>'+
  '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
  h+=briefingCard();
@@ -1082,6 +1147,7 @@ function discordText(){var pl=P(),m=M(pl),L=[];
 /* ---------- modals ---------- */
 function openModal(kind){var keepSc=null;if(view.modal===kind){var ob=document.querySelector('.modal-bg');if(ob){keepSc={bg:ob.scrollTop,inner:[].map.call(ob.querySelectorAll('.schedwrap,.modal'),function(e){return e.scrollTop;})};}}closeModal();view.modal=kind;var pl=P(),h='';
  if(kind==='i18n'){h=i18nModalHTML();}
+ else if(kind==='restore'){h=restoreModalHTML();}
  else if(kind==='tplfill'){h=tplFillHTML();}
  else if(kind==='plantext'){var m=M(pl);h='<h3>Plan text · '+esc(pl.name)+'</h3>'+
   '<div class="grid2"><div class="f"><label for="m-name">Plan name</label><input id="m-name" value="'+esc(pl.name)+'"></div><div class="f"><label for="m-label">Short label</label><input id="m-label" value="'+esc(pl.label)+'"></div></div>'+
@@ -1182,7 +1248,7 @@ function collectStrings(){var keep={lang:LANG,plan:view.plan,sel:view.sel,focus:
  var out=SEEN;SEEN={};LANG=keep.lang;view.plan=keep.plan;view.sel=keep.sel;view.focus=keep.focus;editing=keep.ed;return out;}
 function mergeLang(l){I18N[l]=Object.assign({},SEED[l]||{},FSI[l]||{});}
 function loadSeed(l){if(!l||l==='en'||SEED[l]||SEEDING[l])return;SEEDING[l]=1;fetch('i18n/'+l+'.json',{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(m){SEED[l]=m||{};mergeLang(l);softRender();if(view.modal==='i18n'&&!TR.busy)openModal('i18n');}).catch(function(){SEEDING[l]=0;});}
-function subLang(){loadSeed(LANG);if(admin.ok)LANGS.forEach(function(x){loadSeed(x[0]);});if(!FB.ok)return;if(FB.unsubLang){FB.unsubLang();FB.unsubLang=null;}
+function subLang(){loadSeed(LANG);if(admin.ok)LANGS.forEach(function(x){loadSeed(x[0]);});if(!FB.ok)return;if(admin.ok)rpSubscribe();else rpUnsub();if(FB.unsubLang){FB.unsubLang();FB.unsubLang=null;}
  if(admin.ok){FB.unsubLang=FB.db.collection('swordland_i18n').onSnapshot(function(qs){qs.forEach(function(d){var v=d.data()||{};FSI[d.id]=v.t||{};mergeLang(d.id);LOCK[d.id]=v.locked||{};});I18N_ALL_LOADED=true;softRender();if(view.modal==='i18n'&&!TR.busy)openModal('i18n');});return;}
  if(LANG==='en')return;FB.unsubLang=FB.db.doc('swordland_i18n/'+LANG).onSnapshot(function(s){var v=s.exists?s.data():{};FSI[LANG]=v.t||{};mergeLang(LANG);LOCK[LANG]=v.locked||{};softRender();});}
 function saveI18n(lang,map,lockMap){if(!FB.ok){I18N[lang]=Object.assign(I18N[lang]||{},map);if(lockMap)LOCK[lang]=Object.assign(LOCK[lang]||{},lockMap);return Promise.resolve();}
@@ -1350,7 +1416,10 @@ function fbInit(){
  FB.db.doc('swordland/state').onSnapshot(function(snap){
   FB.loaded=true;if(!snap.exists){FB.rev=0;FB.empty=true;autoSeed();softRender();return;}FB.empty=false;
   var d=snap.data(),inc;try{inc=JSON.parse(d.data);}catch(e){return;}
-  var newer=(d.rev||0)!==FB.rev;FB.rev=d.rev||0;FB.serverState=d.data;
+  var newer=(d.rev||0)!==FB.rev;FB.savedAt=d.savedAt||(d.updatedAt&&d.updatedAt.toMillis?d.updatedAt.toMillis():null)||FB.savedAt||null;
+  if(d.data===JSON.stringify(S)){FB.rev=d.rev||0;FB.serverState=d.data;if(!FB.savingNow&&AUTO.state!=='pending')dirty=false;softRender();return;}
+  if(FB.savingNow||AUTO.state==='pending'||AUTO.state==='conflict'){FB.remote={rev:d.rev||0,data:d.data};return;}
+  FB.rev=d.rev||0;FB.serverState=d.data;FB.remote=null;
   if(editing&&dirty){if(newer&&!FB.savingNow)toast((d.updatedBy||'Another admin')+' just saved. Discard your changes to load theirs, or saving will be blocked.');return;}
   S=inc;seedSetups();migrateFormats();HIST=[JSON.stringify(S)];dirty=false;
   if(!S.plans[view.plan]||!view.chosen)view.plan=(planFromHash()&&S.plans[planFromHash()])?planFromHash():S.livePlan;
@@ -1371,13 +1440,24 @@ function softRender(){if(FB.raf)return;FB.raf=(window.requestAnimationFrame||set
 function softRender2(){var a=document.activeElement;if(a&&a!==document.body&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&$('#app').contains(a)){FB.pending=true;return;}FB.pending=false;rerender();}
 document.addEventListener('focusout',function(){setTimeout(function(){if(FB.pending)softRender();},50);});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)softRender();});
-function save(){if(!FB.ok){toast('Firebase isn’t set up yet, so this preview can’t save. Use Plan data to copy your changes.');return;}
+var AUTO={t:null,state:'saved',again:false};
+function queueSave(){if(!FB.ok||!admin.ok)return;AUTO.state='pending';clearTimeout(AUTO.t);if(FB.savingNow){AUTO.again=true;}else AUTO.t=setTimeout(function(){save(true);},1200);saveStatusUpdate();}
+function saveStatusHTML(){var st=AUTO.state;if(!FB.ok)return '<span class="msg">Preview only · changes aren’t saved online</span>';
+ if(st==='conflict')return '<span class="msg" style="color:#ffb3b3">⚠ Another leader saved at the same time.</span><button class="btn" data-act="loadtheirs">Load theirs</button><button class="btn gold" data-act="keepmine">Keep mine</button>';
+ if(st==='error')return '<span class="msg" style="color:#ffb3b3">⚠ Not saved</span><button class="btn gold" data-act="save">Retry</button>';
+ return '<span class="msg" id="savestat">'+(st==='saved'?'✓ All changes saved':'Saving…')+'</span>';}
+function saveStatusUpdate(){var e=document.getElementById('savestat');if(e&&(AUTO.state==='saved'||AUTO.state==='pending'||AUTO.state==='saving'))e.textContent=AUTO.state==='saved'?'✓ All changes saved':'Saving…';else if(AUTO.state==='conflict'||AUTO.state==='error')render();}
+window.addEventListener('beforeunload',function(e){if(AUTO.state==='pending'||AUTO.state==='saving'){e.preventDefault();e.returnValue='';}});
+function save(quiet,force){if(!FB.ok){toast('Firebase isn’t set up yet, so this preview can’t save. Use Plan data to copy your changes.');return;}
  if(!admin.ok){toast('Only admins can save.');return;}
- var ref=FB.db.doc('swordland/state'),base=FB.rev,json=JSON.stringify(S);FB.savingNow=true;toast('Saving…');
- FB.db.runTransaction(function(tx){return tx.get(ref).then(function(sn){var cur=sn.exists?(sn.data().rev||0):0;if(cur!==base)throw {code:'conflict'};
-  tx.set(ref,{data:json,rev:cur+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:admin.name||''});});})
- .then(function(){FB.savingNow=false;FB.rev=base+1;FB.serverState=json;dirty=false;HIST=[json];toast('Saved. Everyone now sees this version.');render();setTimeout(autoTranslate,600);})
- .catch(function(e){FB.savingNow=false;if(e&&e.code==='conflict')toast('Another admin saved first. Copy your changes from Plan data, then Discard to load their version.');else toast('Save failed: '+(e&&e.message||e));});}
+ clearTimeout(AUTO.t);AUTO.again=false;AUTO.state='saving';saveStatusUpdate();
+ var ref=FB.db.doc('swordland/state'),base=FB.rev,json=JSON.stringify(S),newRev=null;FB.savingNow=true;if(!quiet)toast('Saving…');
+ FB.db.runTransaction(function(tx){return tx.get(ref).then(function(sn){var cur=sn.exists?(sn.data().rev||0):0;if(cur!==base&&!force)throw {code:'conflict'};newRev=cur+1;
+  tx.set(ref,{data:json,savedAt:Date.now(),rev:cur+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:admin.name||''});});})
+ .then(function(){FB.savingNow=false;FB.serverState=json;FB.savedAt=Date.now();if(newRev!=null)FB.rev=newRev;FB.remote=null;
+  if(AUTO.again||JSON.stringify(S)!==json){AUTO.state='pending';AUTO.again=false;AUTO.t=setTimeout(function(){save(true);},600);}else{AUTO.state='saved';dirty=false;}
+  saveStatusUpdate();if(!quiet)toast('Saved. Everyone now sees this version.');setTimeout(autoTranslate,600);})
+ .catch(function(e){FB.savingNow=false;if(e&&e.code==='conflict'){AUTO.state='conflict';toast('Another leader saved at the same time. Choose Load theirs or Keep mine.');}else{AUTO.state='error';toast('Save failed: '+(e&&e.message||e));}saveStatusUpdate();});}
 function doLogin(){var prov=new firebase.auth.GoogleAuthProvider();prov.setCustomParameters({prompt:'select_account'});
  FB.auth.signInWithPopup(prov).then(function(){closeModal();},function(e){var c=e&&e.code;
   if(c==='auth/popup-blocked'||c==='auth/operation-not-supported-in-this-environment'){FB.auth.signInWithRedirect(prov);return;}
@@ -1460,9 +1540,11 @@ document.addEventListener('click',function(e){var t=e.target;
  if(t.classList&&t.classList.contains('modal-bg'))closeModal();
 });
 function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
- if(k==='edit'){if(!admin.ok)return;editing=true;wantEdit=true;persist();render();}
- else if(k==='discard'){if(dirty){S=FB.serverState?JSON.parse(FB.serverState):clone(ORIGINAL);seedSetups();migrateFormats();HIST=[JSON.stringify(S)];dirty=false;if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;view.focus=null;}editing=false;wantEdit=false;view.tool='select';persist();render();}
- else if(k==='save')save();
+ if(k==='edit'){if(!admin.ok)return;rpSave('auto','Before editing');editing=true;wantEdit=true;persist();render();}
+ else if(k==='discard'){if(FB.ok&&admin.ok&&(AUTO.state==='pending'||dirty))save(true);else if(!FB.ok&&dirty){toast('This preview can’t save online. Use Plan data to copy your changes.');}editing=false;wantEdit=false;view.tool='select';persist();render();}
+ else if(k==='save')save(true);
+  else if(k==='keepmine'){rpSave('auto','Before Keep mine');save(true,true);}
+  else if(k==='loadtheirs'){rpSave('auto','Before Load theirs');if(FB.remote){FB.rev=FB.remote.rev;FB.serverState=FB.remote.data;FB.remote=null;}if(FB.serverState){S=JSON.parse(FB.serverState);seedSetups();migrateFormats();HIST=[JSON.stringify(S)];dirty=false;AUTO.state='saved';if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;render();toast('Loaded the latest saved version.');}}
  else if(k==='makelive'){S.livePlan=view.plan;touch();}
  else if(k==='autopair')autoPair();
  else if(k==='plantext'||k==='data')openModal(k);
@@ -1471,7 +1553,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='tool'){view.tool=el.getAttribute('data-t');render();}
  else if(k==='dupplan'){var c=clone(pl);c.name=pl.name+' copy';c.label=pl.label;addPlan(c);toast('Plan duplicated. Rename it under “Plan text”.');}
  else if(k==='newplan'){addPlan(blankPlan());toast('New plan made from the map. Everyone starts on the bench.');}
- else if(k==='delplan'){if(view.confirmDel!=='plan'){view.confirmDel='plan';render();return;}var gone=view.plan;delete S.plans[gone];S.planOrder=S.planOrder.filter(function(x){return x!==gone;});if(S.livePlan===gone)S.livePlan=S.planOrder[0];view.plan=S.livePlan;view.sel=null;view.confirmDel=null;persist();touch();}
+ else if(k==='delplan'){if(view.confirmDel!=='plan'){view.confirmDel='plan';render();return;}rpSave('auto','Before deleting “'+P().name+'”');var gone=view.plan;delete S.plans[gone];S.planOrder=S.planOrder.filter(function(x){return x!==gone;});if(S.livePlan===gone)S.livePlan=S.planOrder[0];view.plan=S.livePlan;view.sel=null;view.confirmDel=null;persist();touch();}
  else if(k==='addzone')addZone();
  else if(k==='setups')openModal('setups');
  else if(k==='cellarall'){var src0=cellarTimes(pl,el.getAttribute('data-c'));pl.cellars=pl.cellars||{};Object.keys(CELLARS).forEach(function(id){pl.cellars[id]=Object.assign({},pl.cellars[id]||{},{times:src0.slice()});});touch();toast('All six Undercellars now use these refresh times.');}
@@ -1543,6 +1625,13 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
    else{bids.forEach(function(i){if(bv==='subs')rosterSetRole(pl,i,'sub');else rosterSetZone(pl,i,'bench');bn++;});toast(bn+' players updated.');}
    view.rchk={};touch();}
   else if(k==='showpin'){var pm0=MK(P(),el.getAttribute('data-m')),pp0=el.getAttribute('data-p');if(pm0){view.pin=pm0.id;view.pinFor=pp0;view.focus=pp0;if(!view.who)view.who=pp0;if(pm0.phase)view.phase=pm0.phase;if(view.tab!=='map'&&view.tab!=='me')goTab('map');else render();setTimeout(function(){var mp=document.getElementById('map');if(mp)mp.scrollIntoView({behavior:'smooth',block:'center'});},60);}}
+  else if(k==='restore'){view.confirmDel=null;openModal('restore');}
+  else if(k==='rpsave'){var rn=val('m-rpname').trim()||('Restore point · '+new Date().toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}));rpSave('manual',rn).then(function(ok){if(ok)toast('📌 Saved restore point “'+rn+'”.');});}
+  else if(k==='rprestore'){var rid=el.getAttribute('data-id');if(view.confirmDel!=='r:'+rid){view.confirmDel='r:'+rid;openModal('restore');return;}view.confirmDel=null;rpRestore(rid);}
+  else if(k==='rpdel'){var did=el.getAttribute('data-id');if(view.confirmDel!=='rd:'+did){view.confirmDel='rd:'+did;openModal('restore');return;}view.confirmDel=null;FB.db.collection('swordland_versions').doc(did).delete();}
+  else if(k==='chadd'){var ab=el.getAttribute('data-b'),pl8=P(),ar=rawChanges(pl8,ab),last=ar.length?moveT(pl8,ar[ar.length-1]):0,nc=null;for(var q=2;q<=pl8.phases.length;q++){if(moveT(pl8,{ph:q})>last){nc={ph:q};break;}}if(!nc)nc={at:Math.max(last+300,300)};ar.push(nc);saveChanges(pl8,ab,ar);touch();}
+  else if(k==='chdel'){var db=el.getAttribute('data-b'),pl9=P(),dr=rawChanges(pl9,db);dr.splice(+el.getAttribute('data-k'),1);saveChanges(pl9,db,dr);touch();}
+  else if(k==='sigok'){sigAck(el.getAttribute('data-p'));render();}
   else if(k==='copylink'){var lp=el.getAttribute('data-p');if(lp&&S.players[lp])copyText(myLinkURL(lp,true),admin.ok?'Copied '+nm(lp)+'’s link. Send it to them.':Tt('Link copied. Open it any time to go straight to your orders.'));}
   else if(k==='copyalllinks'){copyText(allLinksText(),'Copied a personal link for every player in '+P().name+'. Paste it into Discord.');}
   else if(k==='exportplan'){exportPlan();}
@@ -1577,9 +1666,9 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
   var all=document.getElementById('m-mtall')&&document.getElementById('m-mtall').checked;
   (all?S.planOrder.map(function(k2){return S.plans[k2];}):[pl]).forEach(function(q){if(q)q.matchStart=iso;});closeModal();touch();}
  else if(k==='applysetup'){var st=findSetup(el.getAttribute('data-sid'));if(st){applySetup(st);openModal('setups');}}
- else if(k==='savesetup'){var sn=val('m-sname').trim();if(!sn){toast('Give the setup a name first.');return;}S.setups.push(setupFromPlan(pl,sn));dirty=true;render();openModal('setups');toast('Saved “'+sn+'”. Save for everyone to share it.');}
- else if(k==='updsetup'){var su=findSetup(el.getAttribute('data-sid'));if(su){var fresh=setupFromPlan(pl,su.name);su.zones=fresh.zones;su.bmap=fresh.bmap;su.note=fresh.note;dirty=true;render();openModal('setups');toast('Updated “'+su.name+'”.');}}
- else if(k==='delsetup'){var sid=el.getAttribute('data-sid');if(view.confirmDel!=='s:'+sid){view.confirmDel='s:'+sid;openModal('setups');return;}S.setups=S.setups.filter(function(x){return x.id!==sid;});view.confirmDel=null;dirty=true;render();openModal('setups');}
+ else if(k==='savesetup'){var sn=val('m-sname').trim();if(!sn){toast('Give the setup a name first.');return;}S.setups.push(setupFromPlan(pl,sn));dirty=true;queueSave();render();openModal('setups');toast('Saved “'+sn+'”.');}
+ else if(k==='updsetup'){var su=findSetup(el.getAttribute('data-sid'));if(su){var fresh=setupFromPlan(pl,su.name);su.zones=fresh.zones;su.bmap=fresh.bmap;su.note=fresh.note;dirty=true;queueSave();render();openModal('setups');toast('Updated “'+su.name+'”.');}}
+ else if(k==='delsetup'){var sid=el.getAttribute('data-sid');if(view.confirmDel!=='s:'+sid){view.confirmDel='s:'+sid;openModal('setups');return;}S.setups=S.setups.filter(function(x){return x.id!==sid;});view.confirmDel=null;dirty=true;queueSave();render();openModal('setups');}
  else if(k==='delzone'){if(view.confirmDel!=='z:'+id){view.confirmDel='z:'+id;render();return;}deleteZone(id);}
  else if(k==='zcolor'){var z=Z(pl,id);if(z){z.color=el.getAttribute('data-c');touch();}}
  else if(k==='addtozone'){var v=val('ed-addz');if(v)moveTo(pl,v,id);}
@@ -1589,10 +1678,10 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='dellandmark'){if(view.confirmDel!=='l:'+id){view.confirmDel='l:'+id;render();return;}S.map.landmarks=S.map.landmarks.filter(function(l){return l.id!==id;});view.sel=null;touch();}
  else if(k==='copytext'){var txt=discordText();try{navigator.clipboard.writeText(txt).then(function(){toast('Plan copied. Paste it into Discord.');},function(){openModal('text');});}catch(x){openModal('text');}}
  else if(k==='mcopy'){var ta=$('#m-json');try{navigator.clipboard.writeText(ta.value).then(function(){toast('Plan data copied.');},function(){ta.select();toast('Copying was blocked; the text is selected for you.');});}catch(x){ta.select();}}
- else if(k==='mapply-data'){try{var d=JSON.parse(val('m-json'));if(!d.players||!d.plans||!d.meta||!d.map||!d.planOrder)throw new Error('missing players, plans, map or meta');S=d;S.setups=S.setups||[];Object.keys(S.plans).forEach(function(k){S.plans[k].markers=S.plans[k].markers||[];});if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;view.focus=null;closeModal();touch();toast('Plan data applied. Save to share it.');}catch(x){toast('That isn’t valid plan data: '+x.message);}}
+ else if(k==='mapply-data'){rpSave('auto','Before applying pasted Plan data');try{var d=JSON.parse(val('m-json'));if(!d.players||!d.plans||!d.meta||!d.map||!d.planOrder)throw new Error('missing players, plans, map or meta');S=d;S.setups=S.setups||[];Object.keys(S.plans).forEach(function(k){S.plans[k].markers=S.plans[k].markers||[];});if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;view.focus=null;closeModal();touch();toast('Plan data applied. Save to share it.');}catch(x){toast('That isn’t valid plan data: '+x.message);}}
  else if(k==='mapply-text'){applyPlanText();closeModal();touch();}
- else if(k==='addphase'){applyPlanText();pl.phases.push({title:'Phase '+(pl.phases.length+1),time:'',lines:[]});dirty=true;render();openModal('plantext');}
- else if(k==='delphase'){applyPlanText();var n=pl.phases.length;pl.phases.pop();for(var b in pl.bmap)if(pl.bmap[b].phase>=n)pl.bmap[b].phase=n-1;pl.zones.forEach(function(z){if(z.concede>=n)z.concede=n-1;});if(view.phase>=n)view.phase=n-1;dirty=true;render();openModal('plantext');}
+ else if(k==='addphase'){applyPlanText();pl.phases.push({title:'Phase '+(pl.phases.length+1),time:'',lines:[]});dirty=true;queueSave();render();openModal('plantext');}
+ else if(k==='delphase'){applyPlanText();var n=pl.phases.length;pl.phases.pop();for(var b in pl.bmap)if(pl.bmap[b].phase>=n)pl.bmap[b].phase=n-1;pl.zones.forEach(function(z){if(z.concede>=n)z.concede=n-1;});if(view.phase>=n)view.phase=n-1;dirty=true;queueSave();render();openModal('plantext');}
  else if(k==='move'){moveTo(pl,id,el.getAttribute('data-to'));}
  else if(k==='addsub'){var s=val('ed-addsub');if(s){setPairs(pl,id,pairsOf(pl,id).concat([s]));touch();}}
  else if(k==='pup'){var i=+el.getAttribute('data-i'),ps=pairsOf(pl,id);var x=ps[i];ps[i]=ps[i-1];ps[i-1]=x;setPairs(pl,id,ps);touch();}
@@ -1628,6 +1717,13 @@ document.addEventListener('change',function(e){var asel=e.target&&e.target.getAt
  else if(k==='rplace'){moveTo(pl,t.getAttribute('data-pid'),t.value);}
  else if(k==='rrole'){setRole(pl,t.getAttribute('data-pid'),t.value);touch();}
   else if(k==='rcover'){setCover(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='chw'||k==='cht'||k==='chl'||k==='chcm'||k==='chco'){var cb=t.getAttribute('data-b'),ck=+t.getAttribute('data-k'),arr=rawChanges(pl,cb),cc=arr[ck];if(cc){
+   if(k==='chw'){if(t.value==='t'){if(cc.at==null){cc.at=moveT(pl,cc)+60;delete cc.ph;}}else{delete cc.at;cc.ph=+t.value;}}
+   else if(k==='cht'){var tv=parseOff(t.value);if(tv!=null&&tv>0){cc.at=tv;delete cc.ph;}else{toast('Type a time like 20:00 (minutes:seconds into the match).');return;}}
+   else if(k==='chl'){if(t.value)cc.lead=t.value;else delete cc.lead;}
+   else if(k==='chcm'){if(t.value==='set'){var bf=stateAt(pl,cb,(cc.at!=null?phaseAtT(pl,cc.at):cc.ph)-0.5,cc.at!=null?cc.at-1:null);cc.co=bf.co.slice();}else delete cc.co;}
+   else if(k==='chco'){cc.co=cc.co||[];var xv=t.value;if(t.checked){if(cc.co.indexOf(xv)<0)cc.co.push(xv);}else cc.co=cc.co.filter(function(x){return x!==xv;});}
+   saveChanges(pl,cb,arr);}touch();}
   else if(k==='rzone2'){rosterSetZone(pl,t.getAttribute('data-pid'),t.value);touch();}
   else if(k==='rrole2'){rosterSetRole(pl,t.getAttribute('data-pid'),t.value);touch();}
   else if(k==='rmz'||k==='rmp'||k==='rmt'){var mp=t.getAttribute('data-pid'),mk=+t.getAttribute('data-k'),arr=sortedMoves(pl,mp),tgt=arr[mk];
@@ -1680,11 +1776,11 @@ function svgPoint(e){var svg=$('#map svg');if(!svg)return null;var pt=svg.create
 document.addEventListener('pointerdown',function(e){if(!editing||view.tool.indexOf('paint:')===0)return;var t=e.target.closest&&e.target.closest(view.tool==='arrange'?'#map [data-building],#map [data-landmark],#map [data-marker]':'#map [data-marker]');if(!t)return;
  var p=svgPoint(e);if(!p)return;var kind=t.hasAttribute('data-marker')?'marker':t.hasAttribute('data-building')?'building':'landmark',oid=t.getAttribute('data-'+kind);
  var obj=kind==='building'?BB(oid):kind==='marker'?MK(P(),oid):S.map.landmarks.filter(function(l){return l.id===oid;})[0];if(!obj)return;
- drag={obj:obj,dx:obj.x-p.x,dy:obj.y-p.y,sx:p.x,sy:p.y,moved:false,kind:kind,id:oid};e.preventDefault();try{$('#map').setPointerCapture(e.pointerId);}catch(x){}});
+ drag={obj:obj,dx:obj.x-p.x,dy:obj.y-p.y,sx:p.x,sy:p.y,ox:obj.x,oy:obj.y,el:t,moved:false,kind:kind,id:oid};e.preventDefault();try{$('#map').setPointerCapture(e.pointerId);}catch(x){}});
 document.addEventListener('pointermove',function(e){if(!drag)return;var p=svgPoint(e);if(!p)return;if(!drag.moved&&Math.abs(p.x-drag.sx)+Math.abs(p.y-drag.sy)<6)return;var nx=Math.round(Math.max(40,Math.min(MAPW-40,p.x+drag.dx))),ny=Math.round(Math.max(40,Math.min(MAPH-50,p.y+drag.dy)));
- if(Math.abs(nx-drag.obj.x)+Math.abs(ny-drag.obj.y)<1)return;drag.obj.x=nx;drag.obj.y=ny;drag.moved=true;redrawMap();});
+ if(Math.abs(nx-drag.obj.x)+Math.abs(ny-drag.obj.y)<1)return;drag.obj.x=nx;drag.obj.y=ny;drag.moved=true;if(drag.el&&drag.el.isConnected)drag.el.setAttribute('transform','translate('+(nx-drag.ox)+','+(ny-drag.oy)+')');else redrawMap();});
 document.addEventListener('pointerup',function(){if(!drag)return;var d=drag;setTimeout(function(){drag=null;},0);
- if(d.moved){dirty=true;snap();view.sel={type:d.kind,id:d.id};render();}else{d.tapped=true;select({type:d.kind,id:d.id});}});
+ if(d.moved){dirty=true;queueSave();snap();view.sel={type:d.kind,id:d.id};render();}else{d.tapped=true;select({type:d.kind,id:d.id});}});
 document.addEventListener('mousemove',function(e){var tip=$('#tip');if(!tip)return;if(drag){tip.style.display='none';return;}var mt=e.target.closest&&e.target.closest('#map [data-marker]');if(mt){var pm=P(),mm2=MK(pm,mt.getAttribute('data-marker'));if(mm2){tip.innerHTML='<b>'+(mm2.type==='tp'?'📍 ':'🎁 ')+esc(mkTitle(pm,mm2))+'</b><br>'+esc(mkPhase(pm,mm2))+(mm2.type==='tp'?'<br>'+((mm2.players||[]).length?mm2.players.map(nm).map(esc).join(', '):'No players yet'):'')+(mm2.note?'<br>'+esc(mm2.note):'');tip.style.display='block';var tx=e.clientX+14;if(tx+270>window.innerWidth)tx=e.clientX-280;tip.style.left=tx+'px';tip.style.top=(e.clientY+14)+'px';return;}}
  var t=e.target.closest&&e.target.closest('#map [data-zone],#map [data-building],#map [data-cell]');
  if(!t){tip.style.display='none';return;}var pl=P(),h='';
@@ -1781,7 +1877,7 @@ function blocksToMD(pl,bl){var L=[];(bl||[]).forEach(function(b){var pre='';
 function migrateFormats(){if(!(S.map.buildings||[]).some(function(b){return b.id==='shrine';}))S.map.buildings.push({id:'shrine',name:'Swordshrine',x:500,y:340,big:1,home:''});Object.keys(S.plans).forEach(function(k){var pl=S.plans[k],keep=view.plan;view.plan=k;
  if(pl.briefingText==null&&pl.briefing)pl.briefingText=blocksToMD(pl,pl.briefing);if(pl.briefingText==null)pl.briefingText='';
  (pl.contingencies||[]).forEach(function(c){if(c.ifText==null){var t=c.trigger||{};c.ifText=t.t==='tpl'?tplPlainEN(pl,t):(t.text||'');}if(c.thenText==null)c.thenText=blocksToMD(pl,c.actions||[]);});
- (pl.markers||[]).forEach(function(m){});pl.bmap=pl.bmap||{};if(!pl.bmap.shrine)pl.bmap.shrine={zone:'',lead:null,phase:2};if(pl.phases&&pl.phases.length>1)['hall','merc','shrine'].forEach(function(bid){var mb=pl.bmap&&pl.bmap[bid];if(mb&&mb.phase==null)mb.phase=2;});view.plan=keep;});
+ (pl.markers||[]).forEach(function(m){});pl.bmap=pl.bmap||{};if(!pl.bmap.shrine)pl.bmap.shrine={zone:'',lead:null,phase:2};if(k==='c'&&!(S.meta&&S.meta.r3shrine)&&!pl.bmap.shrine.zone&&pl.bmap.green_sanctum&&pl.bmap.green_sanctum.lead==='duvy'&&Z(pl,'green')){pl.bmap.shrine={zone:'green',lead:'duvy',phase:2};pl.bmap.green_sanctum.changes=[{lead:'demadues',ph:2}];S.meta=S.meta||{};S.meta.r3shrine=1;}Object.keys(pl.bmap).forEach(function(bid){var mb=pl.bmap[bid];if(mb&&mb.hand&&!mb.changes){mb.changes=[mb.hand];delete mb.hand;}});if(pl.phases&&pl.phases.length>1)['hall','merc','shrine'].forEach(function(bid){var mb=pl.bmap&&pl.bmap[bid];if(mb&&mb.phase==null)mb.phase=2;});view.plan=keep;});
  // undercellars become per-plan markers; buildings fixed to Duvy's map
  S.map.landmarks=(S.map.landmarks||[]).filter(function(l){return l.type!=='cellar';});}
 /* --- overrides that read the text format --- */
@@ -1871,7 +1967,7 @@ function render(){var pl=P(),m=M(pl);try{document.documentElement.lang=LANG;docu
   '<span class="tz" role="group" aria-label="Time zone"><button data-act="tz" data-tz="utc" aria-pressed="'+(TZ==='utc')+'">UTC</button><button data-act="tz" data-tz="local" aria-pressed="'+(TZ==='local')+'">'+Th('Local')+'</button></span>'+
   (admin.ok&&!editing?'<button class="btn gold" data-act="edit">Edit plan</button>':'')+'</span></div>';
  if(S.livePlan!==view.plan&&S.plans[S.livePlan])h+='<div class="notlive">'+Th('You’re looking at {plan}, not the live plan.',{plan:'<b>'+esc(pl.name+' · '+pl.label)+'</b>'})+' <button class="mini" data-act="golive">'+Th('Show the live plan')+'</button></div>';
- if(editing)h+='<div class="editbar slim"><span class="msg"><b>Editing</b> · '+(dirty?'unsaved changes':'no changes yet')+'</span><button class="btn" data-act="undo"'+(HIST.length>1?'':' disabled')+' title="Ctrl/Cmd+Z">↶ Undo</button><button class="btn ghost" data-act="discard">'+(dirty?'Discard':'Done')+'</button><button class="btn gold" data-act="save"'+(dirty?'':' disabled')+'>Save for everyone</button></div>';
+ if(editing)h+='<div class="editbar slim"><span class="msg"><b>Editing</b></span>'+saveStatusHTML()+'<button class="btn" data-act="undo"'+(HIST.length>1?'':' disabled')+' title="Ctrl/Cmd+Z">↶ Undo</button><button class="btn" data-act="restore" title="Restore points">📌 Restore points</button><button class="btn ghost" data-act="discard">Done</button></div>';
  h+=activeBanner();
  h+='<nav class="tabbar" role="tablist">'+tabs.map(function(t){return '<button role="tab" class="tabbtn'+(t[3]?' ztab':'')+'" data-tab="'+esc(t[0])+'" aria-selected="'+(view.tab===t[0])+'">'+t[1]+' '+(t[3]?esc(Tt(t[2])):(t[0]==='admin'||(t[0]==='me'&&admin.ok)?esc(t[2]):Th(t[2])))+'</button>';}).join('')+'</nav>';
  h+='<div class="tabbody">'+tabBody(view.tab,pl)+'</div>';
@@ -1882,7 +1978,7 @@ function tabBody(t,pl){
   if(w)o+='<div class="card mecard panel"><div class="metools"><button class="mini" data-act="showmap" data-p="'+esc(w)+'">🗺️ '+Th('Show on map')+'</button></div>'+playerPanel(w)+'</div>';
   else o+='<div class="card hint"><p>'+Th('Type your in-game name above to see your zone, your building, your orders and your substitutes.')+'</p></div>';return o;}
  if(t==='map')return '<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
-  (editing?mapTools():liveBar())+'<div class="mapbox'+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+  (editing?mapTools():liveBar())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
   '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
   '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
  if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
@@ -1896,7 +1992,7 @@ function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zon
  var bs=zoneBuildings(pl,zid);
  if(bs.length)o+='<section><h4>'+Th('Buildings')+'</h4><div class="zbs">'+bs.map(function(b){var l=blead(pl,b.id),co=coOf(pl,b.id),bk=(pl.bmap[b.id]||{}).backup,fc=fullCon(pl,b.id),u=unlockOf(pl,b.id);
   return '<div class="zb'+(bStatus(b.id)?' st-'+bStatus(b.id):'')+'"><div class="zbh"><b>'+esc(Tt(b.name))+'</b>'+(u?'<span class="note">'+esc(whenBT(pl,b.id))+'</span>':'')+(bStatus(b.id)?'<span class="status" style="background:'+BSTAT[bStatus(b.id)][2]+';color:#fff">'+BSTAT[bStatus(b.id)][0]+' '+Th(BSTAT[bStatus(b.id)][1])+'</span>':'')+'</div>'+
-  (fc?'<span class="empty">'+Th('Conceded')+'</span>':'<div class="chips">'+(l?chip(l,Tt('Lead')):'<span class="empty">'+Th('no lead')+'</span>')+co.map(function(x){return chip(x,Tt('Co-Lead'));}).join('')+'</div>')+(bk?'<div class="note">'+Th('Backup: {player}',{player:esc(nm(bk))})+'</div>':'')+switchesHTML(pl,'building',b.id)+'</div>';}).join('')+'</div></section>';
+  (fc?'<span class="empty">'+Th('Conceded')+'</span>':'<div class="chips">'+(l?chip(l,Tt('Lead')):'<span class="empty">'+Th('no lead')+'</span>')+co.map(function(x){return chip(x,Tt('Co-Lead'));}).join('')+stepChips(pl,b.id)+'</div>')+(bk?'<div class="note">'+Th('Backup: {player}',{player:esc(nm(bk))})+'</div>':'')+switchesHTML(pl,'building',b.id)+'</div>';}).join('')+'</div></section>';
  var sup=supportersOf(pl,zid);if(sup.length)o+='<section><h4>'+Th('Supporters ({n})',{n:sup.length})+'</h4><div class="chips">'+sup.map(function(id){return chip(id,badgeFor(pl,id));}).join('')+'</div></section>';
  if(mg)o+='<section><h4>'+Th('Sub Manager')+'</h4>'+chip(mg)+'</section>';
  var rows=z.members.filter(function(m){return (pl.pairs[m]||[]).length;});
@@ -1914,8 +2010,8 @@ function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zon
  if(editing)o+='<div class="card">'+zonePanel(zid).replace(/^[\s\S]*?(<section class="ed">)/,'$1')+'</div>';
  return o;}
 function adminTab(pl){var o='';
- o+='<div class="card"><div class="sechead"><h2>🛠 Plan tools</h2><p>'+(editing?'You’re editing. Save for everyone when you’re done.':'Tap Edit plan to change the plan. Attendance and live mode work without editing.')+'</p></div><div class="admgrid">'+
-  [['matchup','⚔️ Matchup','Kingdoms, alliance tags, round'],['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Free copy-and-paste translation with any AI chat'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['exportplan','⬇️ Export plan','Save this plan as a file'],['importplan','⬆️ Import plan','Add a plan from an exported file'],['copyalllinks','🔗 Player links','Copy everyone’s personal link'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n','exportplan','copyalllinks','data'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
+ o+='<div class="card"><div class="sechead"><h2>🛠 Plan tools</h2><p>'+(editing?'You’re editing. Changes save automatically; tap Done when you’re finished.':'Tap Edit plan to change the plan. Attendance and live mode work without editing.')+'</p></div><div class="admgrid">'+
+  [['matchup','⚔️ Matchup','Kingdoms, alliance tags, round'],['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Free copy-and-paste translation with any AI chat'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['exportplan','⬇️ Export plan','Save this plan as a file'],['importplan','⬆️ Import plan','Add a plan from an exported file'],['copyalllinks','🔗 Player links','Copy everyone’s personal link'],['restore','🕘 Restore points','Save or go back to an earlier version'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n','exportplan','copyalllinks','data','restore'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
  o+=attendanceCard();
  o+='<div class="card">'+overviewPanel()+'</div>';
  o+='<section class="two">'+subsCard()+rotationCard()+'</section>';
@@ -1987,9 +2083,9 @@ function whoSummary(pl,w){var z=zoneOf(pl,w),bits=[];if(z){var own=ownLeads(pl,w
  else if(pl.subs.indexOf(w)>=0)bits.push(Tt('Substitute'));else bits.push(Tt('Not in this plan'));var mw=movePath(pl,w,true);if(mw)bits.push(mw);return bits.join(' · ');}
 function tabBody(t,pl){
  if(t==='map'||t==='me'){var w=view.who&&S.players[view.who]?view.who:null;
-  var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓ <button type="button" class="mini" data-act="copylink" data-p="'+esc(w)+'">🔗 '+Th('My link')+'</button></div>':'');
+  var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓ <button type="button" class="mini" data-act="copylink" data-p="'+esc(w)+'">🔗 '+Th('My link')+'</button></div>'+changedBanner(pl,w):'');
   o+='<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
-   (editing?mapTools():liveBar())+'<div class="mapbox'+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+   (editing?mapTools():liveBar())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
    '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
    '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
   if(w)o+='<div class="card mecard panel" id="mecard">'+playerPanel(w)+'</div>';
@@ -2015,7 +2111,7 @@ function applyMatchup(){var pl=P(),num=function(id){return +String(val(id)).repl
  pl.match.them={k:val('mu-tk').trim(),tag:val('mu-tt').trim().replace(/^\[|\]$/g,''),power:num('mu-tp')};
  pl.match.round=val('mu-rd').trim();if(val('mu-lg').trim())S.meta.league=val('mu-lg').trim();
  if(document.getElementById('mu-all')&&document.getElementById('mu-all').checked){S.planOrder.forEach(function(k){var q=S.plans[k];if(!q)return;q.match=q.match||{};q.match.us=Object.assign({},q.match.us||S.meta.us,{k:pl.match.us.k,tag:pl.match.us.tag});});S.meta.us=Object.assign({},S.meta.us,{k:pl.match.us.k,tag:pl.match.us.tag});}
- closeModal();touch();toast('Matchup updated. Save for everyone to share it.');}
+ closeModal();touch();toast('Matchup updated.');}
 /* automatic translation after saving */
 function autoTranslate(){if(!FB.ok||!admin.ok||TR.busy)return;if(!I18N_ALL_LOADED){setTimeout(autoTranslate,800);return;}translateMissing({quiet:true});}
 function translateMissing(opts){opts=opts||{};if(TR.busy)return;if(!FB.ok){if(!opts.quiet)toast('Translation runs on the live site (Firebase + Netlify).');return;}if(!FB.user||!admin.ok){if(!opts.quiet)toast('Log in as an admin to translate.');return;}
@@ -2063,8 +2159,10 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   var zc=zid?zcol(pl,zid):'#555';bg=shade(zc,.62);stroke=hl?'#ffd34d':shade(zc,.2);
   if(!zid){lines=[{t:Tt('Not in this plan'),c:'#cfd6e4'}];bg='#2a2f39';}
   else if(fc&&!lid){lines=[{t:Tt('Conceded').toUpperCase(),b:1,c:'#ffd0d0',fs:17}];bg='#6b1d1d';stroke='#ff9a9a';}
-  else{lines=[{t:(lid?Tt('Lead')+': '+nm(lid):Tt('no lead'))+(act?'':' · '+tag),b:1,c:lid?'#fff':'#ffb3b3'}];
+  else{var pt9=moveT(pl,{ph:ph}),st9=stateAt(pl,b.id,ph,pt9);lid=st9.lead;cos=st9.co;var nt9=ph<pl.phases.length?moveT(pl,{ph:ph+1}):1e9,hd=changeSteps(pl,b.id).filter(function(c){return c.t>pt9;})[0];
+   lines=[{t:(lid?Tt('Lead')+': '+nm(lid):Tt('no lead'))+(act?'':' · '+tag),b:1,c:lid?'#fff':'#ffb3b3'}];
    if(cos.length)lines.push({t:Tt('Co-Lead')+': '+cos.map(nm).join(', '),c:'#dfe6f5',fs:13});
+   if(hd)lines.push({t:'→ '+(hd.to!==hd.from?nm(hd.to):Tt('Co-Lead')+(hd.added.length?' '+hd.added.map(nm).join(', '):''))+' · '+chWhen(pl,hd,true),c:'#ffd34d',fs:12});
    var bk=(pl.bmap[b.id]||{}).backup;if(bk&&box[3]-box[1]>55)lines.push({t:'('+Tt('Backup: {player}',{player:nm(bk)})+')',c:'#ffd34d',fs:12});}
   o.push(cardSVG(box,lines,bg,stroke));
   if(zid&&!act&&!fc)o.push('<ellipse cx="'+x+'" cy="'+(y+2)+'" rx="40" ry="30" fill="#141821" fill-opacity=".35" pointer-events="none"/>');
@@ -2097,7 +2195,7 @@ function mapTools(){var pl=P(),t=view.tool;var cur=allSetups().filter(function(s
  var o='<div class="maptools" role="group"><span class="lbl">Place</span><button class="tool" data-act="tool" data-t="select" aria-pressed="'+(t==='select')+'">Select / drag</button><button class="tool" data-act="tool" data-t="place:tp" aria-pressed="'+(t==='place:tp')+'">📍 Town Center</button><button class="tool" data-act="tool" data-t="place:loot" aria-pressed="'+(t==='place:loot')+'">🎁 Loot</button>'+
  '<details class="more"><summary class="tool">Zones ▾</summary><div class="morebox"><span class="lbl">Tap buildings to move them into</span>'+pl.zones.map(function(z){return '<button class="tool" style="background:'+z.color+';color:'+inkOn(z.color)+'" data-act="tool" data-t="paint:'+esc(z.id)+'" aria-pressed="'+(t==='paint:'+z.id)+'">'+esc(z.name)+'</button>';}).join('')+'<button class="tool" data-act="tool" data-t="paint:" aria-pressed="'+(t==='paint:')+'">Not in plan</button><span class="lbl">Setup</span><select id="ed-setup" data-set="setup" style="background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px"><option value="">'+(cur?'':'Custom layout')+'</option>'+allSetups().map(function(st){return '<option value="'+esc(st.id)+'"'+(cur&&cur.id===st.id?' selected':'')+'>'+esc(st.name)+'</option>';}).join('')+'</select></div></details>';
  var hint=t==='select'?'Tap a building, an Undercellar (to set refresh times) or a marker. Drag markers to move them.':t==='place:tp'?'Tap the map where a Town Center should go, then add players to it.':t==='place:loot'?'Tap where loot drops. It shows only in the phase you’re viewing.':t==='paint:'?'Tap buildings to leave them out of this plan.':'Tap buildings to put them in the '+esc(zname(pl,t.slice(6)))+' zone.';
- return o+'<span class="maphint">'+hint+'</span></div>';}
+ return o+'<span class="maphint">'+hint+'<span class="touchonly"> On a phone, scroll by swiping outside the map while editing.</span></span></div>';}
 function cellarPanel(id){var pl=P(),c=CELLARS[id];if(!c)return overviewPanel();var ts=cellarTimes(pl,id),d=cellarData(pl,id),z=cellarZone(pl,id),nx=nextRefresh(pl,id);
  var o='<h3>⛏ '+esc(Tt('Undercellar'))+'</h3><p class="sub">'+(z?Th('{zone} Zone',{zone:esc(Tt(zname(pl,z)))})+' · ':'')+'('+esc(Tt(c.name.replace('Undercellar ','').replace(/[()]/g,'')))+')'+'</p>';
  o+='<section><h4>'+Th('Refresh times')+'</h4>'+(ts.length?'<ul>'+ts.map(function(t){var cl=clockAt(pl,t);return '<li'+(nx===t?' style="font-weight:700;color:var(--gold)"':'')+'>'+esc(fmtOff(t))+' '+Th('into the match')+(cl?' · <b>'+esc(cl)+'</b>':'')+(nx===t?' · '+Th('next'):'')+'</li>';}).join('')+'</ul>':'<p class="empty">'+Th('No refresh times set.')+'</p>')+(d.note?'<p>'+lineHTML(d.note)+'</p>':'')+'</section>';
@@ -2147,6 +2245,51 @@ function i18nModalHTML(){var all=collectStrings(),keys=Object.keys(all),cov=cove
  return h+'<div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';}
 
 
+/* ---------- "your orders changed" notices ---------- */
+function ordersSig(pl,id){var J=JSON.stringify,zb=function(b){return [b,unlockOf(pl,b)];},mine=[];
+ BL().forEach(function(b){changeSteps(pl,b.id).forEach(function(c){if(c.from===id&&c.to!==id||c.to===id&&c.from!==id||c.added.indexOf(id)>=0||c.removed.indexOf(id)>=0)mine.push([b.id,c.t,c.from===id,c.to===id]);});});
+ var z=zoneOf(pl,id),cv=coverOf(pl,id);
+ return {zone:J([z,pl.subs.indexOf(id)>=0,subZone(pl,id)]),
+  role:J([leadsOf(pl,id),coLeadsOf(pl,id),backupsOf(pl,id),managesOf(pl,id),cv?[cv.main,cv.order]:null]),
+  moves:J(movesOf(pl,id).map(function(m){return [m.z,m.t];})),
+  changes:J(mine),
+  tc:J(tpsOf(pl,id).map(function(m){return [Math.round(m.x/6),Math.round(m.y/6),m.phase||0];})),
+  subs:J([pairsOf(pl,id),rotAt(pl,id)]),
+  timing:J([joinOf(pl,id),pl.matchStart||null,pl.phases.map(function(p){return p.start;}),leadsOf(pl,id).concat(coLeadsOf(pl,id)).map(zb),z?zoneBuildings(pl,z).map(function(b){return zb(b.id);}):null,concedeOf(pl,z)])};}
+var SIG_LABELS={zone:'your zone',role:'your role',moves:'zone moves',changes:'building hand-overs',tc:'Town Center spot',subs:'your substitutes',timing:'timing'};
+function sigKey(id){return 'swp-sig-'+view.plan+'-'+id;}
+function sigChanges(pl,id){if(!S.players[id]||(!zoneOf(pl,id)&&pl.subs.indexOf(id)<0))return [];var cur=ordersSig(pl,id),old=null;try{old=JSON.parse(localStorage.getItem(sigKey(id))||'null');}catch(e){}
+ if(!old){try{localStorage.setItem(sigKey(id),JSON.stringify(cur));}catch(e){}return [];}
+ return Object.keys(cur).filter(function(k){return old[k]!==undefined&&old[k]!==cur[k];});}
+function sigAck(id){try{localStorage.setItem(sigKey(id),JSON.stringify(ordersSig(P(),id)));}catch(e){}}
+function changedBanner(pl,id){var ch=sigChanges(pl,id);if(!ch.length)return '';
+ return '<div class="chgbanner" role="status">⚠ <b>'+Th('Your orders changed since you last looked.')+'</b> '+Th('Changed: {list}',{list:esc(listFmt(ch.map(function(k){return Tt(SIG_LABELS[k]);})))})+' <button type="button" class="btn" data-act="sigok" data-p="'+esc(id)+'">'+Th('Got it')+'</button></div>';}
+function updatedLine(){var t=FB.savedAt;if(!t)return '';var s0;try{s0=new Date(t).toLocaleString(LANG==='zh-CN'?'zh-CN':LANG,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});}catch(e){s0=new Date(t).toLocaleString();}return '<p class="note" style="margin:2px 0 0">🕒 '+Th('Plan last updated: {time}',{time:esc(s0)})+'</p>';}
+
+/* ---------- restore points ---------- */
+var RP={list:[],sub:null,err:''};
+function rpSubscribe(){if(!FB.ok||!admin.ok||RP.sub)return;RP.sub=FB.db.collection('swordland_versions').onSnapshot(function(qs){var a=[];qs.forEach(function(d){var v=d.data()||{};a.push({id:d.id,name:v.name||'',at:v.at||0,by:v.by||'',kind:v.kind||'manual',data:v.data||''});});a.sort(function(x,y){return y.at-x.at;});RP.list=a;RP.err='';if(view.modal==='restore')openModal('restore');},function(e){RP.err=(e&&(e.code||e.message))||'error';if(view.modal==='restore')openModal('restore');});}
+function rpUnsub(){if(RP.sub){RP.sub();RP.sub=null;}RP.list=[];}
+function rpSave(kind,name){if(!FB.ok||!admin.ok)return Promise.resolve(false);var data=JSON.stringify(S);
+ if(kind==='auto'&&RP.list.some(function(x){return x.data===data;}))return Promise.resolve(false);
+ var id='v'+Date.now()+Math.random().toString(36).slice(2,6),col=FB.db.collection('swordland_versions');
+ return col.doc(id).set({name:String(name||'').slice(0,80),kind:kind,at:Date.now(),by:admin.name||admin.email||'',data:data}).then(function(){
+  if(kind==='auto')RP.list.filter(function(x){return x.kind==='auto';}).slice(9).forEach(function(x){col.doc(x.id).delete();});return true;},
+  function(e){var pd=e&&(e.code==='permission-denied'||/permission/i.test(e.message||''));if(kind==='manual'||pd)toast(pd?'Restore points need the updated Firestore rules. See 🛠 Admin → 🕘 Restore points.':'Couldn’t save the restore point: '+(e.message||e));return false;});}
+function rpWhen(at){if(!at)return '';var d=new Date(at);return d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' · '+ago(at);}
+function rpRestore(id){var v=RP.list.filter(function(x){return x.id===id;})[0];if(!v||!v.data)return;var nm0=v.name||rpWhen(v.at);
+ rpSave('auto','Before restoring “'+nm0+'”');var inc;try{inc=JSON.parse(v.data);}catch(e){toast('That restore point couldn’t be read.');return;}
+ S=inc;seedSetups();migrateFormats();if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;view.focus=null;editing=true;wantEdit=true;closeModal();touch();toast('Restored “'+nm0+'”. It’s saving now; Undo or restore again if needed.');}
+function restoreModalHTML(){var h='<h3>🕘 Restore points</h3><p class="note">Save a restore point before big changes. Restoring brings the whole planner back to that moment (every plan, the roster and the map). A point of how things are now is saved first, so you can always go back.</p>';
+ if(!FB.ok)return h+'<p class="empty">This preview isn’t connected to Firebase, so restore points aren’t available.</p><div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';
+ if(RP.err&&/permission/i.test(RP.err))return h+'<div class="trbox"><b>One-time setup needed.</b> Restore points need the updated Firestore rules:<ol><li>Open <b>firestore.rules</b> from the planner files.</li><li>Firebase console → <b>Firestore Database → Rules</b>.</li><li>Replace everything with the file’s contents and tap <b>Publish</b>.</li></ol>Then reload this page.</div><div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';
+ h+='<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><input id="m-rpname" placeholder="Name it, e.g. Round 3 final" maxlength="80" style="flex:1;min-width:180px"><button class="btn gold" data-act="rpsave">📌 Save restore point</button></div>';
+ var mine=RP.list.filter(function(x){return x.kind!=='auto';}),autos=RP.list.filter(function(x){return x.kind==='auto';});
+ var row=function(v){var cf=view.confirmDel==='r:'+v.id;return '<tr><td><b>'+(v.kind==='auto'?'⚙ ':'📌 ')+esc(v.name||'Untitled')+'</b><div class="note">'+esc(rpWhen(v.at))+(v.by?' · '+esc(v.by):'')+'</div></td><td style="white-space:nowrap;text-align:right"><button class="btn'+(cf?' gold':'')+'" data-act="rprestore" data-id="'+esc(v.id)+'">'+(cf?'Tap again to restore':'Restore')+'</button> <button class="mini" data-act="rpdel" data-id="'+esc(v.id)+'" style="color:var(--red)">'+(view.confirmDel==='rd:'+v.id?'Confirm':'Delete')+'</button></td></tr>';};
+ h+='<h4 style="margin-top:12px">Your restore points</h4>'+(mine.length?'<table class="sched"><tbody>'+mine.map(row).join('')+'</tbody></table>':'<p class="empty">None yet.</p>');
+ h+='<h4 style="margin-top:12px">Automatic safety points <span class="note">(saved when editing starts and before deleting, importing or restoring; the last 10 are kept)</span></h4>'+(autos.length?'<table class="sched"><tbody>'+autos.map(row).join('')+'</tbody></table>':'<p class="empty">None yet.</p>');
+ return h+'<div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';}
+
 /* ---------- personal links ---------- */
 function myLinkURL(id,withLang){return location.origin+location.pathname+'?p='+encodeURIComponent(nm(id))+(withLang&&LANG!=='en'?'&lang='+encodeURIComponent(LANG):'');}
 function copyText(txt,msg){try{navigator.clipboard.writeText(txt).then(function(){toast(msg);},function(){view.txtOverride=txt;openModal('text');});}catch(x){view.txtOverride=txt;openModal('text');}}
@@ -2171,13 +2314,14 @@ function importPlanText(txt){var obj;try{obj=JSON.parse(txt);}catch(e){toast('Th
  else if(obj&&obj.plans&&typeof obj.plans==='object')plans=(obj.planOrder||Object.keys(obj.plans)).map(function(k){return obj.plans[k];}).filter(Boolean);
  plans=plans.filter(function(p){return p&&Array.isArray(p.zones)&&Array.isArray(p.phases);});
  if(!plans.length){toast('That file doesn’t contain a Swordland plan.');return;}
+ rpSave('auto','Before importing a plan');
  var map={},added=0,src=obj.players||{};
  Object.keys(src).forEach(function(id){if(S.players[id])return;var nmn=normName(src[id]&&src[id].name);var same=Object.keys(S.players).filter(function(i){return normName(nm(i))===nmn;})[0];
   if(same)map[id]=same;else{S.players[id]=clone(src[id]);added++;}});
  var names=Object.keys(S.plans).map(function(k){return S.plans[k].name;}),done=[];
  plans.forEach(function(p){var c=Object.keys(map).length?remapIds(clone(p),map):clone(p);if(names.indexOf(c.name)>=0)c.name=c.name+' (imported)';done.push(c.name);addPlan(c);});
  migrateFormats();rerender();
- toast('Imported '+done.map(function(n){return '“'+n+'”';}).join(', ')+' as a new plan'+(done.length>1?'s':'')+(added?' and added '+added+' player'+(added>1?'s':'')+' to the roster':'')+'. Tap Save for everyone to share it.');}
+ toast('Imported '+done.map(function(n){return '“'+n+'”';}).join(', ')+' as a new plan'+(done.length>1?'s':'')+(added?' and added '+added+' player'+(added>1?'s':'')+' to the roster':'')+'. It saves automatically.');}
 seedSetups();migrateFormats();HIST=[JSON.stringify(S)];
 var LINKQ=null;try{var qs0=new URLSearchParams(location.search),lq0=qs0.get('lang'),pq0=qs0.get('p');if(lq0&&LANGS.some(function(l){return l[0]===lq0;})){LANG=lq0;try{localStorage.setItem('swp-lang',lq0);}catch(x){}}if(pq0)LINKQ=pq0;}catch(e){}
 try{var me0=localStorage.getItem('swp-me');if(me0&&S.players[me0]){view.me=me0;view.who=me0;view.focus=me0;}}catch(e){}

@@ -118,6 +118,37 @@ The **🔀 If → Then** tab works the same way: one IF line and free-written TH
 
 New wording appears in English until you translate it with **🛠 Admin → 🌐 Translations** (see **Translation** above). That panel also shows progress and lets you fix any line.
 
+## Saving
+
+Every change saves on its own about a second after you make it, including dragging map pins. The edit bar shows **✓ All changes saved** (or **Saving…**). Use **↶ Undo** to step back; undoing saves too. **Done** leaves edit mode.
+
+If another leader saves at the same moment, the bar asks you to **Load theirs** or **Keep mine**.
+
+### Restore points
+
+Autosave means mistakes are saved too, so keep restore points:
+- **📌 Restore points** (edit bar, or 🛠 Admin → 🕘 Restore points): name one and tap **📌 Save restore point** before big changes. Yours are kept until you delete them.
+- The planner also saves an automatic safety point when you start editing and before deleting a plan, importing, restoring, Load theirs / Keep mine, or applying pasted Plan data. The last 10 are kept; identical ones aren't saved twice.
+- **Restore** (tap twice) brings the whole planner back to that moment. A safety point of how things were is saved first, so a restore can be undone.
+
+**One-time setup:** restore points need the updated rules. Firebase console → Firestore Database → **Rules** → replace everything with the contents of `firestore.rules` → **Publish**.
+
+## Changing leads and co-leads mid-match
+
+Open a building in edit mode and use **+ Add a change**, as many times as you need. Each change has its own time (a phase or a set time) and can set a new lead, new co-leads, or both. Leave a box empty to keep whoever is there.
+
+The map card shows who is in charge at the phase you are viewing, plus the next change. The zone tab shows each change, and every affected player's orders say what to do and when (“15:00 · Hand Green Sanctum over to Demadues” / “15:00 · Take command of Green Sanctum from Duvy” / “25:00 · Join Green Sanctum as co-lead”).
+
+Round 3 is set up this way: Duvy takes the Swordshrine when it opens in Phase 2, and Demadues takes over the Green Sanctum.
+
+## When orders change
+
+When a leader changes something that affects a player, that player sees **“Your orders changed since you last looked”** at the top of their orders, with what changed, until they tap **Got it**. This is remembered per device. Every player's view also shows **🕒 Plan last updated** with the time of the last save.
+
+## Editing on a phone
+
+Editing works at phone width. The roster turns into one card per player, buttons are larger, and on the map you tap a pin to select it and drag it with one finger (the page doesn't scroll while you drag a pin in edit mode). A bigger screen is still easier for the first full setup.
+
 ## Roster: zone, role, subs and later moves
 
 Each row in **👥 Roster** reads left to right:
@@ -153,7 +184,7 @@ Every player has a link that opens straight to their own orders, with nothing to
 ## Saving and reusing plans
 
 - **🛠 Admin → ⬇️ Export plan** saves the plan you're viewing as a file on your device.
-- **🛠 Admin → ⬆️ Import plan** adds a plan from one of those files as a new plan. It never replaces an existing one. Players in the file who aren't on the roster are added; players already on the roster are matched by name. Tap **Save for everyone** afterwards.
+- **🛠 Admin → ⬆️ Import plan** adds a plan from one of those files as a new plan. It never replaces an existing one. Players in the file who aren't on the roster are added; players already on the roster are matched by name. It saves automatically.
 - **💾 Plan data** is still there for a backup of the whole planner at once.
 
 ## Attendance
@@ -186,7 +217,7 @@ Leaders tap **🔴 Live match** on the **🗺️ Map** tab, outside Edit mode:
 - **📣 Message:** sends a short message to the banner on every screen.
 - **Reset map** clears all building statuses.
 
-None of this needs **Save for everyone**. It's live the moment you tap it.
+It's live the moment you tap it.
 
 ## Speed and player experience
 

@@ -36,6 +36,11 @@ service cloud.firestore {
         && (request.resource.data.by == 'player' || (request.resource.data.by == 'admin' && isAdmin()));
     }
 
+    // Restore points: saved versions of the whole planner. Leaders only.
+    match /swordland_versions/{id} {
+      allow read, write: if isAdmin();
+    }
+
     // Translation memory, one document per language. Everyone reads; admins write.
     match /swordland_i18n/{lang} {
       allow read: if true;
