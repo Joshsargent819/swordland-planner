@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Leaders sign in with Google. Access is by email, managed on the site in ⚙️ Settings.
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null && request.auth.token.email_verified == true;
+    }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/swordland_admins/$(myEmail()));
+    }
+    function isOwner() {
+      return isAdmin() && get(/databases/$(database)/documents/swordland_admins/$(myEmail())).data.role == 'owner';
+    }
+
+    // The whole plan (map, roster, every plan). Everyone can read; only admins save.
+    match /swordland/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Attendance. Anyone can read and mark themselves in or out; admins can change or clear anything.
+    match /swordland_attendance/{id} {
+      allow read: if true;
+      allow delete: if isAdmin();
+      allow create, update: if
+        request.resource.data.keys().hasOnly(['plan', 'player', 'status', 'note', 'at', 'by'])
+        && id == request.resource.data.plan + '__' + request.resource.data.player
+        && request.resource.data.status in ['in', 'out']
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 140
+        && request.resource.data.at is number
+        && (request.resource.data.by == 'player' || (request.resource.data.by == 'admin' && isAdmin()));
+    }
+
+    // Translation memory, one document per language. Everyone reads; admins write.
+    match /swordland_i18n/{lang} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Live match state (building status, active If → Then, broadcast message). Everyone reads; admins write.
+    match /swordland_live/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Who owns the planner. The first person to sign in on a brand-new site claims it.
+    match /swordland_meta/owner {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.email == myEmail();
+      allow update, delete: if isOwner();
+    }
+
+    // Leaders with edit access, keyed by lowercase email.
+    match /swordland_admins/{email} {
+      allow read: if isAdmin() || (signedIn() && email == myEmail());
+      allow create: if isOwner()
+        || (signedIn() && email == myEmail()
+            && request.resource.data.role == 'owner'
+            && !exists(/databases/$(database)/documents/swordland_meta/owner)
+            && getAfter(/databases/$(database)/documents/swordland_meta/owner).data.email == myEmail());
+      allow update, delete: if isOwner();
+    }
+  }
+}
