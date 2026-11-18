@@ -536,16 +536,16 @@ function swapPlayers(pl,a,b){function w(x){return x===a?b:x===b?a:x;}function wk
  (pl.markers||[]).forEach(function(mk){if(mk.players)mk.players=mk.players.map(w);});}
 function placeOf(pl,id){return zoneOf(pl,id)||(pl.subs.indexOf(id)>=0?'subs':'bench');}
 function rawMoves(pl,id){var r=pl.moves&&pl.moves[id];return Array.isArray(r)?r:(r&&r.z?[r]:[]);}
-function moveBase(pl,id){var z=zoneOf(pl,id);if(z)return z;if(pl.subs.indexOf(id)>=0&&!coverOf(pl,id))return subZone(pl,id);return null;}
+function moveBase(pl,id){var z=zoneOf(pl,id);if(z)return z;if(pl.subs.indexOf(id)>=0){var cv=coverOf(pl,id);return (cv?zoneOf(pl,cv.main):subZone(pl,id))||'';}return null;}
 function moveT(pl,m){if(m.at!=null)return +m.at;var p=phStart(pl,m.ph);return p!=null?p:(m.ph-1)*900;}
 function phaseAtT(pl,t){var n=1;for(var k=2;k<=pl.phases.length;k++){var p=phStart(pl,k);if(p!=null&&p<=t)n=k;}return n;}
 function sortedMoves(pl,id){return rawMoves(pl,id).slice().sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});}
-function movesOf(pl,id){var z=moveBase(pl,id);if(!z)return [];var byT={};
+function movesOf(pl,id){var z=moveBase(pl,id);if(z==null)return [];var byT={};
  rawMoves(pl,id).forEach(function(m){if(!m||!Z(pl,m.z))return;if(m.at!=null){if(+m.at>0)byT[+m.at]={z:m.z,at:+m.at};}else if(m.ph>1&&m.ph<=pl.phases.length)byT[moveT(pl,m)]={z:m.z,ph:m.ph};});
  var out=[],cur=z;Object.keys(byT).map(Number).sort(function(a,b){return a-b;}).forEach(function(t){var m=byT[t];if(m.z!==cur){out.push({id:id,z:m.z,t:t,at:m.at,ph:m.at!=null?phaseAtT(pl,t):m.ph,from:cur});cur=m.z;}});return out;}
 function moveWhen(pl,m,T){if(m.at!=null){var c=clockAt(pl,m.at);return (c?c+' · ':'')+fmtOff(m.at);}return T?Tt('Phase {n}',{n:m.ph}):'Phase '+m.ph;}
 function moveOf(pl,id){return movesOf(pl,id)[0]||null;}
-function zoneAt(pl,id,ph){var cv=pl.subs.indexOf(id)>=0&&coverOf(pl,id);if(cv)return zoneAt(pl,cv.main,ph);var z=moveBase(pl,id);movesOf(pl,id).forEach(function(m){if(ph>=m.ph)z=m.z;});return z;}
+function zoneAt(pl,id,ph){var cv=pl.subs.indexOf(id)>=0&&coverOf(pl,id);if(cv&&!rawMoves(pl,id).length)return zoneAt(pl,cv.main,ph);var z=moveBase(pl,id);movesOf(pl,id).forEach(function(m){if(ph>=m.ph)z=m.z;});return z;}
 function saveMoves(pl,id,arr){pl.moves=pl.moves||{};var clean=arr.filter(function(m){return m&&m.z&&(m.ph||m.at!=null);}).map(function(m){return m.at!=null?{z:m.z,at:+m.at}:{z:m.z,ph:+m.ph};}).sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});if(clean.length)pl.moves[id]=clean;else delete pl.moves[id];}
 function setMove(pl,id,zid,ph,at){var nm0=at!=null?{z:zid,at:at}:{z:zid,ph:ph||Math.min(2,pl.phases.length)};var arr=rawMoves(pl,id).filter(function(m){return moveT(pl,m)!==moveT(pl,nm0);});if(zid)arr.push(nm0);saveMoves(pl,id,arr);}
 function moveEntries(pl){var out=[];combatants(pl).concat(pl.subs).forEach(function(i){out=out.concat(movesOf(pl,i));});return out;}
@@ -559,7 +559,7 @@ function rosterRoleSel(pl,i){var z=zoneOf(pl,i),isS=pl.subs.indexOf(i)>=0;if(!z&
  var zid=z||subZone(pl,i)||(pl.zones[0]&&pl.zones[0].id),cur=isS?'sub':roleValue(pl,i),o='<option value="sup"'+(cur==='sup'?' selected':'')+'>Supporter</option>';
  zoneBuildings(pl,zid).filter(function(b){return !fullCon(pl,b.id);}).forEach(function(b){var l=blead(pl,b.id);o+='<option value="lead:'+b.id+'"'+(cur==='lead:'+b.id?' selected':'')+'>Lead · '+esc(b.name)+(l&&l!==i?' (now '+esc(nm(l))+')':'')+'</option><option value="co:'+b.id+'"'+(cur==='co:'+b.id?' selected':'')+'>Co-Lead · '+esc(b.name)+'</option>';});
  o+='<option value="sub"'+(cur==='sub'?' selected':'')+'>Substitute</option>';return '<select data-set="rrole2" data-pid="'+esc(i)+'" aria-label="Role for '+esc(nm(i))+'">'+o+'</select>';}
-function rosterThird(pl,i){if(pl.subs.indexOf(i)>=0){var cv9=coverOf(pl,i);return subControls(pl,i,true)+(cv9?(movesOf(pl,cv9.main).length?'<div class="note" style="font-size:12px">Follows '+esc(nm(cv9.main))+' when they move</div>':''):(subZone(pl,i)?'<div style="margin-top:4px">'+movesUI(pl,i)+'</div>':''));}if(!zoneOf(pl,i))return '';return movesUI(pl,i);}
+function rosterThird(pl,i){if(pl.subs.indexOf(i)>=0){var cv9=coverOf(pl,i);return subControls(pl,i,true)+(cv9&&!rawMoves(pl,i).length&&movesOf(pl,cv9.main).length?'<div class="note" style="font-size:12px">Follows '+esc(nm(cv9.main))+' when they move, unless you give them their own move</div>':'')+'<div style="margin-top:4px">'+movesUI(pl,i)+'</div>';}if(!zoneOf(pl,i))return '';return movesUI(pl,i);}
 function movesUI(pl,i){var raw=sortedMoves(pl,i),o='';
  raw.forEach(function(m,k){o+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px"><select data-set="rmz" data-pid="'+esc(i)+'" data-k="'+k+'" aria-label="Move '+(k+1)+' zone">'+pl.zones.map(function(zz){return '<option value="'+esc(zz.id)+'"'+(m.z===zz.id?' selected':'')+'>Moves to '+esc(zz.name)+'</option>';}).join('')+'</select><select data-set="rmp" data-pid="'+esc(i)+'" data-k="'+k+'" aria-label="Move '+(k+1)+' when">'+phaseOpts(pl,m.at!=null?-1:m.ph)+'<option value="t"'+(m.at!=null?' selected':'')+'>At a set time…</option></select>'+(m.at!=null?'<input data-set="rmt" data-pid="'+esc(i)+'" data-k="'+k+'" value="'+esc(fmtOff(+m.at))+'" placeholder="22:00" inputmode="numeric" style="width:70px" aria-label="Minutes into the match">':'')+'<button class="mini" data-act="rmdel" data-pid="'+esc(i)+'" data-k="'+k+'" title="Remove this move">✕</button></div>';});
  return (raw.length?o:'<span class="note">Stays all match</span> ')+(raw.length<8?'<button class="mini" data-act="rmadd" data-pid="'+esc(i)+'">+ '+(raw.length?'Another move':'Move later')+'</button>':'');}
@@ -572,7 +572,7 @@ function rosterSetRole(pl,i,v){var isS=pl.subs.indexOf(i)>=0;
  if(v==='sub'){if(isS)return;var zz=zoneOf(pl,i);moveTo(pl,i,'subs',true);if(pl.moves)delete pl.moves[i];if(zz)setSubZone(pl,i,zz);return;}
  if(isS){var dz=subZone(pl,i)||(pl.zones[0]&&pl.zones[0].id);if(!dz)return;moveTo(pl,i,dz,true);}
  setRole(pl,i,v);}
-function bulkMove(pl,ids,zid,ph,at){var n=0;ids.forEach(function(i){if(!moveBase(pl,i))return;if(!zid){if(pl.moves&&pl.moves[i]){delete pl.moves[i];n++;}return;}setMove(pl,i,zid,ph,at);n++;});return n;}
+function bulkMove(pl,ids,zid,ph,at){var n=0;ids.forEach(function(i){if(moveBase(pl,i)==null)return;if(!zid){if(pl.moves&&pl.moves[i]){delete pl.moves[i];n++;}return;}setMove(pl,i,zid,ph,at);n++;});return n;}
 function bulkBar(pl){var ids=Object.keys(view.rchk||{}).filter(function(i){return view.rchk[i]&&S.players[i];});if(!ids.length)return '<p class="note" style="margin:6px 0">Tip: tick players to move them together, e.g. shift a group into Purple from Phase 2.</p>';
  var zs=pl.zones.map(function(z){return '<option value="z:'+esc(z.id)+'">Zone: '+esc(z.name)+' (from the start)</option>';}).join('');
  var ms=true?pl.zones.map(function(z){return '<option value="m:'+esc(z.id)+'">Later move to '+esc(z.name)+'</option>';}).join('')+'<option value="m:">Clear later moves</option>':'';
@@ -941,7 +941,7 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
   o+='<div class="zbanner" style="'+(sz?zoneStyle(zcol(pl,sz)):'background:#2a2f39')+'"><b>'+(sz?Th('{zone} Reserve',{zone:ZN2(sz)}):Th('Reserve'))+'</b><span>'+(c?Th('Paired with {player}',{player:NM(c.main)}):Th('Standby'))+'</span></div>';
   var mgr=sz?managerOf(pl,sz):null,chain=c?pairsOf(pl,c.main):[];
   var rl=c?(ownLeads(pl,c.main).length?Th('Building Lead'):Th('Supporter')):'';
-  o+='<section><h4>'+Th('Your orders')+'</h4>'+(c?task(Th('Cycle {n}',{n:c.order+1})+(c.order===0?' · '+esc(rotAt(pl,c.main)):''),c.order===0?Th('Rotate in for **{player}** ({zone} · {role}).',{player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl}):Th('Replace **{prev}** in **{player}**’s slot ({zone} · {role}).',{prev:NM(chain[c.order-1]),player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl})):'<p>'+Th('Stay on standby. {manager} will call you into an open slot.',{manager:mgr?NM(mgr):Th('Leadership')})+'</p>'+movesOf(pl,id).map(function(mv){return task(esc(mv.at!=null?moveWhen(pl,mv):phTimeT(pl,mv.ph)),Th('Move to **{zone}**.',{zone:ZN2(mv.z)}));}).join(''))+
+  o+='<section><h4>'+Th('Your orders')+'</h4>'+(c?task(Th('Cycle {n}',{n:c.order+1})+(c.order===0?' · '+esc(rotAt(pl,c.main)):''),c.order===0?Th('Rotate in for **{player}** ({zone} · {role}).',{player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl}):Th('Replace **{prev}** in **{player}**’s slot ({zone} · {role}).',{prev:NM(chain[c.order-1]),player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl})):'<p>'+Th('Stay on standby. {manager} will call you into an open slot.',{manager:mgr?NM(mgr):Th('Leadership')})+'</p>')+movesOf(pl,id).map(function(mv){return task(esc(mv.at!=null?moveWhen(pl,mv):phTimeT(pl,mv.ph)),Th('Move to **{zone}**.',{zone:ZN2(mv.z)}));}).join('')+
   (mgr?task(Th('Manager'),chip(mgr)):'')+(rn.sub?'<p class="note">'+Th(rn.sub)+'</p>':'')+'</section>'+playerContHTML(pl,id)+attPlayerSection(id);}
  else o+='<p class="note" style="margin-top:10px">'+Th('This player isn’t on the field or the reserve list for this plan.')+'</p>';
  var others=S.planOrder.filter(function(k){return k!==view.plan&&S.plans[k];});
@@ -1905,7 +1905,7 @@ function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zon
  if(cs.length)o+='<section><h4>🔀 '+Th('If → Then')+'</h4><div class="conts">'+cs.map(function(cn){return contHTML(pl,cn);}).join('')+'</div></section>';
  var lv=leaversOf(pl,zid),ar=arrivalsOf(pl,zid);
  if(lv.length)o+='<section><h4>'+Th('Moving out')+'</h4><div class="chips">'+lv.map(function(m){return chip(m.id,'→ '+Tt(zname(pl,m.z))+' · '+moveWhen(pl,m,true));}).join('')+'</div></section>';
- if(ar.length)o+='<section><h4>'+Th('Arriving')+'</h4><div class="chips">'+ar.map(function(m){return chip(m.id,moveWhen(pl,m,true)+' · '+Tt(zname(pl,m.from))+' →');}).join('')+'</div></section>';
+ if(ar.length)o+='<section><h4>'+Th('Arriving')+'</h4><div class="chips">'+ar.map(function(m){return chip(m.id,moveWhen(pl,m,true)+' · '+(m.from?Tt(zname(pl,m.from)):Tt('Reserve'))+' →');}).join('')+'</div></section>';
  o+=cellarZoneHTML(pl,zid);
  o+='</div>';
  if(editing)o+='<div class="card">'+zonePanel(zid).replace(/^[\s\S]*?(<section class="ed">)/,'$1')+'</div>';

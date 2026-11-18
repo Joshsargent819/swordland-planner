@@ -128,7 +128,7 @@ Each row in **👥 Roster** reads left to right:
 
 - **Substitutes** keep a zone too (that zone's reserve). Pull a Blue sub to Green by changing their Zone.
 - **Moving players between zones mid-match:** tap **+ Move later** on a row and pick the zone and when: the start of a phase, or **At a set time…** and type the time into the match (e.g. 22:00). Tap **+ Another move** to move them again later (e.g. Blue → Purple in Phase 2 → Yellow in Phase 3); ✕ removes a move. To move a group, tick them and use the bar above the list: **Later move to Purple**, pick a phase or a set time, **Apply**. Their orders change at each phase ("15:00 · Move to Purple and reinforce…"), the zone tabs list them under **Moving out** and **Arriving**, and the map follows them when you switch phases.
-- **Subs:** standby subs can be moved the same way. A sub paired with a player follows that player wherever they go, so you only move the player.
+- **Subs:** every sub has the same **+ Move later** button, whether paired, on standby in a zone, or in **Any zone**. A paired sub with no moves of their own follows the player they cover; give them their own move (e.g. Green at 20:00) and that takes over.
 - If players move into a zone that is still conceded at that phase, Plan check says so. Change that zone's concede setting to an earlier phase.
 
 ## Match phases
