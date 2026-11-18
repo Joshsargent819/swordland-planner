@@ -131,11 +131,15 @@ Each row in **👥 Roster** reads left to right:
 - **Subs:** every sub has the same **+ Move later** button, whether paired, on standby in a zone, or in **Any zone**. A paired sub with no moves of their own follows the player they cover; give them their own move (e.g. Green at 20:00) and that takes over.
 - If players move into a zone that is still conceded at that phase, Plan check says so. Change that zone's concede setting to an earlier phase.
 
+## Town Center spots
+
+Place 📍 Town Center spots on the map and add players to them. Each of those players then sees a **📍 Show my spot on the map** button at the top of their orders: it jumps to the map, switches to the right phase and marks their pin with **★ Your spot**.
+
 ## Match phases
 
 The game has three stages: buildings like the Stables, Bell Tower, Sanctums and Abbeys are open from 0:00; the Hall of Reformation, Mercenary Camp and Swordshrine unlock at 15:00; Undercellars spawn in waves at 15:00 and 20:00.
 - New plans start with three phases: Opening (0:00–15:00), Mid-game (15:00–20:00), Late game (20:00–End). Add or remove phases in **📝 Plan text**.
-- The Hall and Mercenary Camp unlock in Phase 2 by default.
+- The Hall, Mercenary Camp and Swordshrine unlock in Phase 2 by default. The Swordshrine starts outside every zone: in edit mode, use **Zones ▾** and tap it to put it in the zone that will take it, then pick its lead.
 - Undercellars use 15:00 and 20:00 refresh times unless you set others.
 
 ## Personal links

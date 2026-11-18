@@ -648,7 +648,7 @@ function deleteZone(zid){var pl=P(),z=Z(pl,zid);if(!z)return;z.members.slice().f
  pl.zones=pl.zones.filter(function(x){return x.id!==zid;});view.sel=null;touch();}
 /* ---------- setups ---------- */
 var STD=[['blue','Blue','#3f7ff2'],['green','Green','#2fb36a'],['yellow','Yellow','#e5b81f'],['purple','Purple','#a35cf0']];
-function builtinSetups(){var out=[];var bmapStd={};BL().forEach(function(b){bmapStd[b.id]={zone:b.home||'',phase:(b.id==='hall'||b.id==='merc')?2:1};});
+function builtinSetups(){var out=[];var bmapStd={};BL().forEach(function(b){bmapStd[b.id]={zone:b.home||'',phase:(b.id==='hall'||b.id==='merc'||b.id==='shrine')?2:1};});
  out.push({id:'std-all',builtin:1,name:'All 4 Zones',note:'Every zone fights from the start',zones:STD.map(function(a){return {id:a[0],name:a[1],color:a[2],concede:0};}),bmap:clone(bmapStd)});
  STD.forEach(function(c){out.push({id:'std-c-'+c[0],builtin:1,name:'Concede '+c[1],note:c[1]+' conceded in Phase 1',zones:STD.map(function(a){return {id:a[0],name:a[1],color:a[2],concede:a[0]===c[0]?1:0};}),bmap:clone(bmapStd)});});
  return out;}
@@ -684,7 +684,7 @@ function setupCard(st,pl){var cur=setupMatches(pl,st);
  (st.builtin?'':'<button class="btn" data-act="updsetup" data-sid="'+esc(st.id)+'">Overwrite with current</button><button class="btn danger" data-act="delsetup" data-sid="'+esc(st.id)+'">'+(view.confirmDel==='s:'+st.id?'Tap again to delete':'Delete')+'</button>')+'</div></div></div>';}
 
 function blankPlan(){var base=P();var zones=[['blue','Blue','#3f7ff2'],['green','Green','#2fb36a'],['yellow','Yellow','#e5b81f'],['purple','Purple','#a35cf0']].map(function(a){return {id:a[0],name:a[1],color:a[2],concede:0,members:[]};});
- var bmap={};BL().forEach(function(b){bmap[b.id]={zone:b.home||'',lead:null,phase:(b.id==='hall'||b.id==='merc')?2:1};});
+ var bmap={};BL().forEach(function(b){bmap[b.id]={zone:b.home||'',lead:null,phase:(b.id==='hall'||b.id==='merc'||b.id==='shrine')?2:1};});
  return {name:'New Plan',label:'Draft',blurb:'Blank plan from the map',mission:'',zones:zones,bmap:bmap,subs:[],subZone:{},pairs:{},rotateAt:{},markers:[],briefing:[],contingencies:[],defaultRotate:'15:00',
   phases:[{title:'Opening',time:'0:00–15:00',start:0,lines:[]},{title:'Mid-game',time:'15:00–20:00',start:900,lines:[]},{title:'Late game',time:'20:00–End',start:1200,lines:[]}],
   orders:base.orders.slice(),ordersTitle:base.ordersTitle||'Orders',roleNotes:clone(base.roleNotes)};}
@@ -919,7 +919,7 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
   var role=own.length?Th('Building Lead')+' · '+own.map(function(b){return esc(Tt(BB(b).name));}).join(' + '):oco.length?Th('Co-Lead')+' · '+oco.map(function(b){return esc(Tt(BB(b).name));}).join(' + '):Th('Zone Supporter');
   if(mgz.length)role+=' · '+Th('Sub Manager');
   var mp0=movePath(pl,id,true);if(mp0)role+=' · '+esc(mp0);o+='<div class="zbanner" style="'+zoneStyle(zo.color)+'"><b>'+Th('{zone} Zone',{zone:ZN2(z)})+'</b><span>'+role+'</span></div>';
-  var pz=pausedBy(pl,id);o+='<section'+(pz.length?' class="paused"':'')+'><h4>'+Th('Your orders')+'</h4>'+(pz.length?'<p class="pausednote">⏸ '+Th('Paused. Follow the active If → Then orders below.')+'</p>':'');
+  var pz=pausedBy(pl,id),tp0=tpsOf(pl,id),pin0=tp0.filter(function(m){return mkVisible(m,view.phase);})[0]||tp0[0];if(pin0)o+='<button class="btn gold" data-act="showpin" data-m="'+pin0.id+'" data-p="'+esc(id)+'" style="margin:8px 0;width:100%">📍 '+Th('Show my spot on the map')+'</button>';o+='<section'+(pz.length?' class="paused"':'')+'><h4>'+Th('Your orders')+'</h4>'+(pz.length?'<p class="pausednote">⏸ '+Th('Paused. Follow the active If → Then orders below.')+'</p>':'');
   if(jn!=null)o+=task(esc((clockAt(pl,jn)?clockAt(pl,jn)+' · ':'')+fmtOff(jn)),Th('Enter the battle and join **{zone}**. You are not part of the opening deployment.',{zone:ZN2(z)}));
   if(zo.concede)o+=task(Th('Phase {n}',{n:'1'+(zo.concede>1?'–'+zo.concede:'')}),Th('**{zone}** is conceded. No deployment there until Phase {n}; follow leadership calls.',{zone:ZN2(z),n:zo.concede+1}));
   own.forEach(function(b){o+=task(esc(whenBT(pl,b)),Th('Capture and command **{building}**. Keep the garrison strong.',{building:BN(b)}));});
@@ -935,7 +935,7 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
   mgz.forEach(function(mz){var sb=pl.subs.filter(function(s){return subZone(pl,s)===mz;});o+='<section><h4>'+Th('Substitute Manager · {zone}',{zone:ZN2(mz)})+'</h4><p style="margin:0 0 6px">'+Th('You run {count} rotating substitutes for {zone}.',{count:sb.length,zone:ZN2(mz)})+'</p><div class="chips">'+sb.map(function(s){return chip(s);}).join('')+'</div>'+(rn.manager?'<p class="note">'+Th(rn.manager)+'</p>':'')+'</section>';});
   o+=playerContHTML(pl,id);
   o+=attPlayerSection(id);
-  var tp=tpsOf(pl,id);if(tp.length)o+='<section><h4>'+Th('Town Center')+'</h4>'+tp.map(function(m){return task(m.phase?esc(phTimeT(pl,m.phase)):Th('Start'),Th('Place your Town Center at {marker}',{marker:'<button class="mini" data-marker="'+m.id+'">📍 '+esc(Tt(mkTitle(pl,m)))+'</button>'})+(m.note?' '+Th(m.note):''));}).join('')+'</section>';
+  var tp=tpsOf(pl,id);if(tp.length)o+='<section><h4>'+Th('Town Center')+'</h4>'+tp.map(function(m){return task(m.phase?esc(phTimeT(pl,m.phase)):Th('Start'),Th('Place your Town Center at {marker}',{marker:'<button class="mini" data-act="showpin" data-m="'+m.id+'" data-p="'+esc(id)+'">📍 '+esc(Tt(mkTitle(pl,m)))+'</button>'})+(m.note?' '+Th(m.note):''));}).join('')+'</section>';
   var ps=pairsOf(pl,id);o+='<section><h4>'+Th('Your substitutes')+'</h4>'+(ps.length?'<div class="pairlist">'+ps.map(function(s,i){return '<div><b>C'+(i+1)+'</b>'+chip(s)+'</div>';}).join('')+'</div><p class="note">'+ps.map(function(s,i){return i===0?Th('Cycle {n} ({time}): {player} takes your slot.',{n:1,time:esc(rotAt(pl,id)),player:NM(s)}):Th('Cycle {n}: {player} replaces {prev}.',{n:i+1,player:NM(s),prev:NM(ps[i-1])});}).join(' ')+'</p>':'<p class="empty">'+Th('No substitute assigned to you.')+'</p>')+'</section>';}
  else if(isS){var c=coverOf(pl,id),sz=subZone(pl,id);
   o+='<div class="zbanner" style="'+(sz?zoneStyle(zcol(pl,sz)):'background:#2a2f39')+'"><b>'+(sz?Th('{zone} Reserve',{zone:ZN2(sz)}):Th('Reserve'))+'</b><span>'+(c?Th('Paired with {player}',{player:NM(c.main)}):Th('Standby'))+'</span></div>';
@@ -1439,7 +1439,7 @@ function placeAt(kind,x,y){var pl=P();x=Math.max(20,Math.min(MAPW-20,x));y=Math.
 function paintAt(bid){var pl=P(),z=view.tool.slice(6),m=bm(pl,bid);if(m.zone===z)return;m.zone=z;
  if(!z){m.lead=null;}touch();}
 document.addEventListener('click',function(e){var t=e.target;
- if(drag&&drag.moved)return;
+ if(drag&&(drag.moved||drag.tapped))return;
  var cl0=t.closest('[data-cellar]');if(cl0&&!(editing&&view.tool.indexOf('place:')===0)){select({type:'cellar',id:cl0.getAttribute('data-cellar')});return;}
  var tb=t.closest('[data-tab]');if(tb){goTab(tb.getAttribute('data-tab'));return;}
  var a=t.closest('[data-act]');if(a){if(a.hasAttribute('data-needs-edit')&&!editing&&admin.ok){editing=true;wantEdit=true;persist();}act(a.getAttribute('data-act'),a,e);return;}
@@ -1480,7 +1480,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='trimport'){importTranslations(val('trpaste'),val('trai')||view.trai);}
  else if(k==='matchup'){openModal('matchup');}
  else if(k==='muapply'){applyMatchup();}
- else if(k==='clearwho'){view.who=null;view.focus=null;view.q='';view.qmsg='';render();}
+ else if(k==='clearwho'){view.pin=null;view.who=null;view.focus=null;view.q='';view.qmsg='';render();}
  else if(k==='golive'){view.plan=S.livePlan;view.chosen=true;persist();render();}
  else if(k==='showmap'){view.focus=el.getAttribute('data-p');view.sel=null;goTab('map');}
  else if(k==='copen'){var cc0=el.getAttribute('data-cid');view.copen=view.copen===cc0?null:cc0;render();}
@@ -1542,6 +1542,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
    else if(bv.indexOf('z:')===0){var bz3=bv.slice(2);bids.forEach(function(i){if(pl.subs.indexOf(i)>=0)setSubZone(pl,i,bz3);else if(zoneOf(pl,i)!==bz3){moveTo(pl,i,bz3,true);if(pl.moves&&pl.moves[i]&&pl.moves[i].z===bz3)delete pl.moves[i];}bn++;});toast(bn+' players set to '+zname(pl,bz3)+'.');}
    else{bids.forEach(function(i){if(bv==='subs')rosterSetRole(pl,i,'sub');else rosterSetZone(pl,i,'bench');bn++;});toast(bn+' players updated.');}
    view.rchk={};touch();}
+  else if(k==='showpin'){var pm0=MK(P(),el.getAttribute('data-m')),pp0=el.getAttribute('data-p');if(pm0){view.pin=pm0.id;view.pinFor=pp0;view.focus=pp0;if(!view.who)view.who=pp0;if(pm0.phase)view.phase=pm0.phase;if(view.tab!=='map'&&view.tab!=='me')goTab('map');else render();setTimeout(function(){var mp=document.getElementById('map');if(mp)mp.scrollIntoView({behavior:'smooth',block:'center'});},60);}}
   else if(k==='copylink'){var lp=el.getAttribute('data-p');if(lp&&S.players[lp])copyText(myLinkURL(lp,true),admin.ok?'Copied '+nm(lp)+'’s link. Send it to them.':Tt('Link copied. Open it any time to go straight to your orders.'));}
   else if(k==='copyalllinks'){copyText(allLinksText(),'Copied a personal link for every player in '+P().name+'. Paste it into Discord.');}
   else if(k==='exportplan'){exportPlan();}
@@ -1679,11 +1680,11 @@ function svgPoint(e){var svg=$('#map svg');if(!svg)return null;var pt=svg.create
 document.addEventListener('pointerdown',function(e){if(!editing||view.tool.indexOf('paint:')===0)return;var t=e.target.closest&&e.target.closest(view.tool==='arrange'?'#map [data-building],#map [data-landmark],#map [data-marker]':'#map [data-marker]');if(!t)return;
  var p=svgPoint(e);if(!p)return;var kind=t.hasAttribute('data-marker')?'marker':t.hasAttribute('data-building')?'building':'landmark',oid=t.getAttribute('data-'+kind);
  var obj=kind==='building'?BB(oid):kind==='marker'?MK(P(),oid):S.map.landmarks.filter(function(l){return l.id===oid;})[0];if(!obj)return;
- drag={obj:obj,dx:obj.x-p.x,dy:obj.y-p.y,moved:false,kind:kind,id:oid};e.preventDefault();try{$('#map').setPointerCapture(e.pointerId);}catch(x){}});
-document.addEventListener('pointermove',function(e){if(!drag)return;var p=svgPoint(e);if(!p)return;var nx=Math.round(Math.max(40,Math.min(MAPW-40,p.x+drag.dx))),ny=Math.round(Math.max(40,Math.min(MAPH-50,p.y+drag.dy)));
+ drag={obj:obj,dx:obj.x-p.x,dy:obj.y-p.y,sx:p.x,sy:p.y,moved:false,kind:kind,id:oid};e.preventDefault();try{$('#map').setPointerCapture(e.pointerId);}catch(x){}});
+document.addEventListener('pointermove',function(e){if(!drag)return;var p=svgPoint(e);if(!p)return;if(!drag.moved&&Math.abs(p.x-drag.sx)+Math.abs(p.y-drag.sy)<6)return;var nx=Math.round(Math.max(40,Math.min(MAPW-40,p.x+drag.dx))),ny=Math.round(Math.max(40,Math.min(MAPH-50,p.y+drag.dy)));
  if(Math.abs(nx-drag.obj.x)+Math.abs(ny-drag.obj.y)<1)return;drag.obj.x=nx;drag.obj.y=ny;drag.moved=true;redrawMap();});
 document.addEventListener('pointerup',function(){if(!drag)return;var d=drag;setTimeout(function(){drag=null;},0);
- if(d.moved){dirty=true;snap();view.sel={type:d.kind,id:d.id};render();}});
+ if(d.moved){dirty=true;snap();view.sel={type:d.kind,id:d.id};render();}else{d.tapped=true;select({type:d.kind,id:d.id});}});
 document.addEventListener('mousemove',function(e){var tip=$('#tip');if(!tip)return;if(drag){tip.style.display='none';return;}var mt=e.target.closest&&e.target.closest('#map [data-marker]');if(mt){var pm=P(),mm2=MK(pm,mt.getAttribute('data-marker'));if(mm2){tip.innerHTML='<b>'+(mm2.type==='tp'?'📍 ':'🎁 ')+esc(mkTitle(pm,mm2))+'</b><br>'+esc(mkPhase(pm,mm2))+(mm2.type==='tp'?'<br>'+((mm2.players||[]).length?mm2.players.map(nm).map(esc).join(', '):'No players yet'):'')+(mm2.note?'<br>'+esc(mm2.note):'');tip.style.display='block';var tx=e.clientX+14;if(tx+270>window.innerWidth)tx=e.clientX-280;tip.style.left=tx+'px';tip.style.top=(e.clientY+14)+'px';return;}}
  var t=e.target.closest&&e.target.closest('#map [data-zone],#map [data-building],#map [data-cell]');
  if(!t){tip.style.display='none';return;}var pl=P(),h='';
@@ -1777,10 +1778,10 @@ function blocksToMD(pl,bl){var L=[];(bl||[]).forEach(function(b){var pre='';
  if(b.t==='live'){L.push('[['+b.live+']]');return;}
  if(b.t==='h'){if(L.length)L.push('');L.push('# '+(b.text||''));return;}
  L.push((b.t==='li'?'- ':b.t==='call'?'> ':'')+(b.text||''));});return L.join('\n');}
-function migrateFormats(){Object.keys(S.plans).forEach(function(k){var pl=S.plans[k],keep=view.plan;view.plan=k;
+function migrateFormats(){if(!(S.map.buildings||[]).some(function(b){return b.id==='shrine';}))S.map.buildings.push({id:'shrine',name:'Swordshrine',x:500,y:340,big:1,home:''});Object.keys(S.plans).forEach(function(k){var pl=S.plans[k],keep=view.plan;view.plan=k;
  if(pl.briefingText==null&&pl.briefing)pl.briefingText=blocksToMD(pl,pl.briefing);if(pl.briefingText==null)pl.briefingText='';
  (pl.contingencies||[]).forEach(function(c){if(c.ifText==null){var t=c.trigger||{};c.ifText=t.t==='tpl'?tplPlainEN(pl,t):(t.text||'');}if(c.thenText==null)c.thenText=blocksToMD(pl,c.actions||[]);});
- (pl.markers||[]).forEach(function(m){});if(pl.phases&&pl.phases.length>1)['hall','merc'].forEach(function(bid){var mb=pl.bmap&&pl.bmap[bid];if(mb&&mb.phase==null)mb.phase=2;});view.plan=keep;});
+ (pl.markers||[]).forEach(function(m){});pl.bmap=pl.bmap||{};if(!pl.bmap.shrine)pl.bmap.shrine={zone:'',lead:null,phase:2};if(pl.phases&&pl.phases.length>1)['hall','merc','shrine'].forEach(function(bid){var mb=pl.bmap&&pl.bmap[bid];if(mb&&mb.phase==null)mb.phase=2;});view.plan=keep;});
  // undercellars become per-plan markers; buildings fixed to Duvy's map
  S.map.landmarks=(S.map.landmarks||[]).filter(function(l){return l.type!=='cellar';});}
 /* --- overrides that read the text format --- */
@@ -1921,7 +1922,7 @@ function adminTab(pl){var o='';
  if(editing)o+=benchCard();
  return o;}
 
-var BPOS={bell:[215,58,110],merc:[448,92,128],purple_abbey:[688,62,111],blue_sanctum:[145,213,247],blue_abbey:[135,350,384],green_abbey:[748,215,249],green_sanctum:[752,350,383],hall:[447,398,447],yellow_abbey:[192,478,508],yellow_stables:[722,478,508]};
+var BPOS={shrine:[450,268,333],bell:[215,58,110],merc:[448,92,128],purple_abbey:[688,62,111],blue_sanctum:[145,213,247],blue_abbey:[135,350,384],green_abbey:[748,215,249],green_sanctum:[752,350,383],hall:[447,398,447],yellow_abbey:[192,478,508],yellow_stables:[722,478,508]};
 var ZPOS={purple:[445,34],blue:[66,182],green:[820,182],yellow:[445,582]};
 function mapSVG(){var pl=P(),ph=view.phase,o=[];
  var focusZone=view.focus?(zoneAt(pl,view.focus,ph)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
@@ -1957,8 +1958,10 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
  (pl.markers||[]).forEach(function(m){var vis=mkVisible(m,ph);if(!vis&&!editing)return;var hl=selM===m.id||focusM.indexOf(m.id)>=0;
   o.push('<g data-marker="'+m.id+'" opacity="'+(vis?1:0.35)+'" style="cursor:pointer">');
   if(hl)o.push('<circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="30" fill="#ffd34d55" stroke="#ffd34d" stroke-width="5"/>');
+  var isPin=view.pin===m.id&&view.focus&&view.focus===view.pinFor;if(isPin)o.push('<circle cx="'+m.x+'" cy="'+(m.y-16)+'" r="44" fill="none" stroke="#111" stroke-width="9" stroke-opacity=".5"/><circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="44" fill="none" stroke="#ffd34d" stroke-width="6"/>');
   if(m.type==='tp'){var c=mkColor(pl,m),ps=m.players||[];
    o.push('<path transform="translate('+m.x+','+m.y+')" d="M0,0 C-6,-10 -13,-17 -13,-26 A13,13 0 1 1 13,-26 C13,-17 6,-10 0,0Z" fill="'+c+'" stroke="#111" stroke-width="2.5"/><circle cx="'+m.x+'" cy="'+(m.y-26)+'" r="8" fill="#fff"/><text x="'+m.x+'" y="'+(m.y-22.5)+'" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="11" fill="#111">'+(ps.length||'TC')+'</text>');
+   if(isPin)o.push(plate(m.x,m.y-64,'★ '+Tt('Your spot'),'#ffd34d','#1b1404','#111',false,15));
    o.push(plate(m.x,m.y+13,ps.length?ps.slice(0,2).map(nm).join(', ')+(ps.length>2?' +'+(ps.length-2):''):(m.label||Tt('Town Center spot')),shade(c,.35),'#fff','#111',false,12));}
   else if(m.type==='cellar'){o.push('<circle cx="'+m.x+'" cy="'+(m.y-14)+'" r="15" fill="#4b4436" stroke="#f3d79a" stroke-width="2.5"/><text x="'+m.x+'" y="'+(m.y-8)+'" text-anchor="middle" font-size="16">⛏</text>');
    o.push(plate(m.x,m.y+13,(m.label||Tt('Undercellar'))+(m.phase?' · '+(clockAt(pl,phStart(pl,m.phase))||'P'+m.phase).replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):''),'#fff3d6','#3b2208','#3b2208',false,12));}
@@ -2027,7 +2030,7 @@ function translateMissing(opts){opts=opts||{};if(TR.busy)return;if(!FB.ok){if(!o
   .then(function(){ok++;next();},function(e){if(e.status===500||e.status===404||e.status===401||e.status===403){stop=true;TR.busy=false;TR.msg='';toast(e.status===404||/not configured/i.test(e.message)?'Translation isn’t switched on yet (see README: Turn on translation). Everything else saved fine.':'Translation stopped: '+e.message);show();return;}fail.push(langName(j.lang));next();});})();},function(e){TR.busy=false;if(!opts.quiet)toast('Couldn’t get login token: '+e.message);});}
 
 /* ===================== v5: untouched map, lead cards over printed boxes, fixed Undercellars with refresh times ===================== */
-var BOX={bell:[126,125,310,166],purple_abbey:[594,123,776,166],merc:[366,145,526,176],blue_sanctum:[58,258,236,308],blue_abbey:[55,393,241,444],green_abbey:[664,258,838,313],green_sanctum:[668,393,846,446],hall:[354,459,534,498],yellow_abbey:[104,517,296,592],yellow_stables:[612,522,838,571]};
+var BOX={shrine:[372,352,528,380],bell:[126,125,310,166],purple_abbey:[594,123,776,166],merc:[366,145,526,176],blue_sanctum:[58,258,236,308],blue_abbey:[55,393,241,444],green_abbey:[664,258,838,313],green_sanctum:[668,393,846,446],hall:[354,459,534,498],yellow_abbey:[104,517,296,592],yellow_stables:[612,522,838,571]};
 var CELLARS={uc_pl:{x:300,y:190,zone:'purple',name:'Undercellar (northwest)'},uc_pr:{x:592,y:190,zone:'purple',name:'Undercellar (northeast)'},uc_bl:{x:282,y:339,zone:'blue',name:'Undercellar (west)'},uc_gr:{x:628,y:339,zone:'green',name:'Undercellar (east)'},uc_yl:{x:282,y:459,zone:'yellow',name:'Undercellar (southwest)'},uc_yr:{x:628,y:459,zone:'yellow',name:'Undercellar (southeast)'}};
 var BANNER={purple:[443,59],yellow:null};
 function cellarData(pl,id){pl.cellars=pl.cellars||{};return pl.cellars[id]||{};}
@@ -2081,8 +2084,10 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
  (pl.markers||[]).filter(function(m){return m.type!=='cellar';}).forEach(function(m){var vis=mkVisible(m,ph);if(!vis&&!editing)return;var hl=selM===m.id||focusM.indexOf(m.id)>=0;
   o.push('<g data-marker="'+m.id+'" opacity="'+(vis?1:0.35)+'" style="cursor:pointer">');
   if(hl)o.push('<circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="30" fill="#ffd34d55" stroke="#ffd34d" stroke-width="5"/>');
+  var isPin=view.pin===m.id&&view.focus&&view.focus===view.pinFor;if(isPin)o.push('<circle cx="'+m.x+'" cy="'+(m.y-16)+'" r="44" fill="none" stroke="#111" stroke-width="9" stroke-opacity=".5"/><circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="44" fill="none" stroke="#ffd34d" stroke-width="6"/>');
   if(m.type==='tp'){var c=mkColor(pl,m),ps=m.players||[];
    o.push('<path transform="translate('+m.x+','+m.y+')" d="M0,0 C-6,-10 -13,-17 -13,-26 A13,13 0 1 1 13,-26 C13,-17 6,-10 0,0Z" fill="'+c+'" stroke="#111" stroke-width="2.5"/><circle cx="'+m.x+'" cy="'+(m.y-26)+'" r="8" fill="#fff"/><text x="'+m.x+'" y="'+(m.y-22.5)+'" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="11" fill="#111">'+(ps.length||'TC')+'</text>');
+   if(isPin)o.push(plate(m.x,m.y-64,'★ '+Tt('Your spot'),'#ffd34d','#1b1404','#111',false,15));
    o.push(plate(m.x,m.y+13,ps.length?ps.slice(0,2).map(nm).join(', ')+(ps.length>2?' +'+(ps.length-2):''):(m.label||Tt('Town Center spot')),shade(c,.35),'#fff','#111',false,12));}
   else{o.push('<g transform="translate('+m.x+','+(m.y-12)+')"><path d="M-15,-2 h30 v13 h-30z" fill="#b8741a" stroke="#3b2208" stroke-width="2.2"/><path d="M-15,-2 v-6 a6,6 0 0 1 6,-6 h18 a6,6 0 0 1 6,6 v6z" fill="#d99a2b" stroke="#3b2208" stroke-width="2.2"/><path d="M-2,-6 h4 v8 h-4z" fill="#f4d35e" stroke="#3b2208" stroke-width="1.4"/></g>');
    if(m.label)o.push(plate(m.x,m.y+14,m.label,'#fff3d6','#3b2208','#3b2208',false,12));}
