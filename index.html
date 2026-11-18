@@ -532,9 +532,61 @@ function swapPlayers(pl,a,b){function w(x){return x===a?b:x===b?a:x;}function wk
  pl.zones.forEach(function(z){z.members=z.members.map(w);if(z.subManager)z.subManager=w(z.subManager);});pl.subs=pl.subs.map(w);
  for(var bid in pl.bmap){var m=pl.bmap[bid];if(m.lead)m.lead=w(m.lead);if(m.co)m.co=m.co.map(w);if(m.backup)m.backup=w(m.backup);}
  var np={};Object.keys(pl.pairs).forEach(function(k){np[w(k)]=pl.pairs[k].map(w);});pl.pairs=np;
- pl.rotateAt=wk(pl.rotateAt);pl.joinAt=wk(pl.joinAt);pl.subZone=wk(pl.subZone);
+ pl.rotateAt=wk(pl.rotateAt);pl.joinAt=wk(pl.joinAt);pl.subZone=wk(pl.subZone);if(pl.moves)pl.moves=wk(pl.moves);
  (pl.markers||[]).forEach(function(mk){if(mk.players)mk.players=mk.players.map(w);});}
 function placeOf(pl,id){return zoneOf(pl,id)||(pl.subs.indexOf(id)>=0?'subs':'bench');}
+function rawMoves(pl,id){var r=pl.moves&&pl.moves[id];return Array.isArray(r)?r:(r&&r.z?[r]:[]);}
+function moveBase(pl,id){var z=zoneOf(pl,id);if(z)return z;if(pl.subs.indexOf(id)>=0&&!coverOf(pl,id))return subZone(pl,id);return null;}
+function moveT(pl,m){if(m.at!=null)return +m.at;var p=phStart(pl,m.ph);return p!=null?p:(m.ph-1)*900;}
+function phaseAtT(pl,t){var n=1;for(var k=2;k<=pl.phases.length;k++){var p=phStart(pl,k);if(p!=null&&p<=t)n=k;}return n;}
+function sortedMoves(pl,id){return rawMoves(pl,id).slice().sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});}
+function movesOf(pl,id){var z=moveBase(pl,id);if(!z)return [];var byT={};
+ rawMoves(pl,id).forEach(function(m){if(!m||!Z(pl,m.z))return;if(m.at!=null){if(+m.at>0)byT[+m.at]={z:m.z,at:+m.at};}else if(m.ph>1&&m.ph<=pl.phases.length)byT[moveT(pl,m)]={z:m.z,ph:m.ph};});
+ var out=[],cur=z;Object.keys(byT).map(Number).sort(function(a,b){return a-b;}).forEach(function(t){var m=byT[t];if(m.z!==cur){out.push({id:id,z:m.z,t:t,at:m.at,ph:m.at!=null?phaseAtT(pl,t):m.ph,from:cur});cur=m.z;}});return out;}
+function moveWhen(pl,m,T){if(m.at!=null){var c=clockAt(pl,m.at);return (c?c+' · ':'')+fmtOff(m.at);}return T?Tt('Phase {n}',{n:m.ph}):'Phase '+m.ph;}
+function moveOf(pl,id){return movesOf(pl,id)[0]||null;}
+function zoneAt(pl,id,ph){var cv=pl.subs.indexOf(id)>=0&&coverOf(pl,id);if(cv)return zoneAt(pl,cv.main,ph);var z=moveBase(pl,id);movesOf(pl,id).forEach(function(m){if(ph>=m.ph)z=m.z;});return z;}
+function saveMoves(pl,id,arr){pl.moves=pl.moves||{};var clean=arr.filter(function(m){return m&&m.z&&(m.ph||m.at!=null);}).map(function(m){return m.at!=null?{z:m.z,at:+m.at}:{z:m.z,ph:+m.ph};}).sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});if(clean.length)pl.moves[id]=clean;else delete pl.moves[id];}
+function setMove(pl,id,zid,ph,at){var nm0=at!=null?{z:zid,at:at}:{z:zid,ph:ph||Math.min(2,pl.phases.length)};var arr=rawMoves(pl,id).filter(function(m){return moveT(pl,m)!==moveT(pl,nm0);});if(zid)arr.push(nm0);saveMoves(pl,id,arr);}
+function moveEntries(pl){var out=[];combatants(pl).concat(pl.subs).forEach(function(i){out=out.concat(movesOf(pl,i));});return out;}
+function arrivalsOf(pl,zid){return moveEntries(pl).filter(function(m){return m.z===zid;});}
+function leaversOf(pl,zid){return moveEntries(pl).filter(function(m){return m.from===zid;});}
+function movePath(pl,id,T){var ms=movesOf(pl,id);return ms.map(function(m){return '→ '+(T?Tt(zname(pl,m.z)):zname(pl,m.z))+' ('+moveWhen(pl,m,T)+')';}).join(' ');}
+function phaseOpts(pl,cur){var o='';for(var k=2;k<=pl.phases.length;k++){var c=clockAt(pl,phStart(pl,k)),tm=pl.phases[k-1]&&pl.phases[k-1].time;o+='<option value="'+k+'"'+(cur===k?' selected':'')+'>from Phase '+k+(tm?' ('+esc(String(tm).split(/[–-]/)[0].trim())+')':'')+'</option>';}return o;}
+function rosterZoneSel(pl,i){var z=zoneOf(pl,i),isS=pl.subs.indexOf(i)>=0,cur=z||(isS?(subZone(pl,i)||''):'bench');
+ return '<select data-set="rzone2" data-pid="'+esc(i)+'" aria-label="Zone for '+esc(nm(i))+'">'+pl.zones.map(function(zz){return '<option value="'+esc(zz.id)+'"'+(cur===zz.id?' selected':'')+'>'+esc(zz.name)+'</option>';}).join('')+(isS?'<option value=""'+(cur===''?' selected':'')+'>Any zone</option>':'')+'<option value="bench"'+(cur==='bench'?' selected':'')+'>Not in plan</option></select>';}
+function rosterRoleSel(pl,i){var z=zoneOf(pl,i),isS=pl.subs.indexOf(i)>=0;if(!z&&!isS)return '<span class="note">—</span>';
+ var zid=z||subZone(pl,i)||(pl.zones[0]&&pl.zones[0].id),cur=isS?'sub':roleValue(pl,i),o='<option value="sup"'+(cur==='sup'?' selected':'')+'>Supporter</option>';
+ zoneBuildings(pl,zid).filter(function(b){return !fullCon(pl,b.id);}).forEach(function(b){var l=blead(pl,b.id);o+='<option value="lead:'+b.id+'"'+(cur==='lead:'+b.id?' selected':'')+'>Lead · '+esc(b.name)+(l&&l!==i?' (now '+esc(nm(l))+')':'')+'</option><option value="co:'+b.id+'"'+(cur==='co:'+b.id?' selected':'')+'>Co-Lead · '+esc(b.name)+'</option>';});
+ o+='<option value="sub"'+(cur==='sub'?' selected':'')+'>Substitute</option>';return '<select data-set="rrole2" data-pid="'+esc(i)+'" aria-label="Role for '+esc(nm(i))+'">'+o+'</select>';}
+function rosterThird(pl,i){if(pl.subs.indexOf(i)>=0){var cv9=coverOf(pl,i);return subControls(pl,i,true)+(cv9?(movesOf(pl,cv9.main).length?'<div class="note" style="font-size:12px">Follows '+esc(nm(cv9.main))+' when they move</div>':''):(subZone(pl,i)?'<div style="margin-top:4px">'+movesUI(pl,i)+'</div>':''));}if(!zoneOf(pl,i))return '';return movesUI(pl,i);}
+function movesUI(pl,i){var raw=sortedMoves(pl,i),o='';
+ raw.forEach(function(m,k){o+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px"><select data-set="rmz" data-pid="'+esc(i)+'" data-k="'+k+'" aria-label="Move '+(k+1)+' zone">'+pl.zones.map(function(zz){return '<option value="'+esc(zz.id)+'"'+(m.z===zz.id?' selected':'')+'>Moves to '+esc(zz.name)+'</option>';}).join('')+'</select><select data-set="rmp" data-pid="'+esc(i)+'" data-k="'+k+'" aria-label="Move '+(k+1)+' when">'+phaseOpts(pl,m.at!=null?-1:m.ph)+'<option value="t"'+(m.at!=null?' selected':'')+'>At a set time…</option></select>'+(m.at!=null?'<input data-set="rmt" data-pid="'+esc(i)+'" data-k="'+k+'" value="'+esc(fmtOff(+m.at))+'" placeholder="22:00" inputmode="numeric" style="width:70px" aria-label="Minutes into the match">':'')+'<button class="mini" data-act="rmdel" data-pid="'+esc(i)+'" data-k="'+k+'" title="Remove this move">✕</button></div>';});
+ return (raw.length?o:'<span class="note">Stays all match</span> ')+(raw.length<8?'<button class="mini" data-act="rmadd" data-pid="'+esc(i)+'">+ '+(raw.length?'Another move':'Move later')+'</button>':'');}
+function addMoveRow(pl,i){var raw=sortedMoves(pl,i),ts={};raw.forEach(function(m){ts[moveT(pl,m)]=1;});var last=raw.length?moveT(pl,raw[raw.length-1]):0,nm1=null;
+ for(var k=2;k<=pl.phases.length;k++){var c={ph:k};if(moveT(pl,c)>last&&!ts[moveT(pl,c)]){nm1=c;break;}}
+ if(!nm1)nm1={at:Math.max(last+300,300)};var here=zoneAt(pl,i,nm1.ph||phaseAtT(pl,nm1.at)),z=(pl.zones.filter(function(zz){return zz.id!==here;})[0]||{}).id;if(!z)return;nm1.z=z;raw.push(nm1);saveMoves(pl,i,raw);}
+function rosterSetZone(pl,i,v){if(v==='bench'){moveTo(pl,i,'bench',true);if(pl.moves)delete pl.moves[i];return;}
+ if(pl.subs.indexOf(i)>=0){setSubZone(pl,i,v);return;}if(!v)return;if(zoneOf(pl,i)!==v){moveTo(pl,i,v,true);}if(pl.moves&&pl.moves[i]&&pl.moves[i].z===v)delete pl.moves[i];}
+function rosterSetRole(pl,i,v){var isS=pl.subs.indexOf(i)>=0;
+ if(v==='sub'){if(isS)return;var zz=zoneOf(pl,i);moveTo(pl,i,'subs',true);if(pl.moves)delete pl.moves[i];if(zz)setSubZone(pl,i,zz);return;}
+ if(isS){var dz=subZone(pl,i)||(pl.zones[0]&&pl.zones[0].id);if(!dz)return;moveTo(pl,i,dz,true);}
+ setRole(pl,i,v);}
+function bulkMove(pl,ids,zid,ph,at){var n=0;ids.forEach(function(i){if(!moveBase(pl,i))return;if(!zid){if(pl.moves&&pl.moves[i]){delete pl.moves[i];n++;}return;}setMove(pl,i,zid,ph,at);n++;});return n;}
+function bulkBar(pl){var ids=Object.keys(view.rchk||{}).filter(function(i){return view.rchk[i]&&S.players[i];});if(!ids.length)return '<p class="note" style="margin:6px 0">Tip: tick players to move them together, e.g. shift a group into Purple from Phase 2.</p>';
+ var zs=pl.zones.map(function(z){return '<option value="z:'+esc(z.id)+'">Zone: '+esc(z.name)+' (from the start)</option>';}).join('');
+ var ms=true?pl.zones.map(function(z){return '<option value="m:'+esc(z.id)+'">Later move to '+esc(z.name)+'</option>';}).join('')+'<option value="m:">Clear later moves</option>':'';
+ return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0;padding:8px;border:1px solid var(--gold);border-radius:8px"><b>'+ids.length+' ticked</b><select id="m-bk">'+zs+ms+'<option value="subs">Make substitutes</option><option value="bench">Not in plan</option></select>'+'<select id="m-bkp">'+phaseOpts(pl,2)+'<option value="t">At a set time…</option></select><input id="m-bkt" placeholder="22:00" inputmode="numeric" style="width:70px" aria-label="Time into the match">'+'<button class="btn gold" data-act="bulkapply">Apply</button><button class="btn ghost" data-act="rchknone">Untick all</button></div>';}
+function subControls(pl,sid,noZone){var cv=coverOf(pl,sid),zid=subZone(pl,sid)||'',st='style="max-width:150px"';
+ var zs='<select data-set="rszone" data-pid="'+esc(sid)+'" aria-label="Zone for '+esc(nm(sid))+'" '+st+'><option value="">Any zone</option>'+pl.zones.map(function(z){return '<option value="'+esc(z.id)+'"'+(zid===z.id?' selected':'')+'>'+esc(z.name)+'</option>';}).join('')+'</select>';
+ var pool=zid?(Z(pl,zid)||{members:[]}).members.slice():combatants(pl);pool.sort(function(a,b){return nm(a).localeCompare(nm(b));});
+ var cs='<select data-set="rscover" data-pid="'+esc(sid)+'" aria-label="Who '+esc(nm(sid))+' subs for" '+st+'><option value="">Standby</option>'+pool.map(function(m){return '<option value="'+esc(m)+'"'+(cv&&cv.main===m?' selected':'')+'>For '+esc(nm(m))+'</option>';}).join('')+'</select>';
+ var cy='';if(cv){var n=(pl.pairs[cv.main]||[]).length;cy='<select data-set="rscycle" data-pid="'+esc(sid)+'" aria-label="Cycle">';for(var k=0;k<Math.max(n,1);k++)cy+='<option value="'+k+'"'+(cv.order===k?' selected':'')+'>Cycle '+(k+1)+'</option>';cy+='</select>';}
+ return '<div style="display:flex;gap:6px;flex-wrap:wrap">'+(noZone?'':zs)+cs+cy+'</div>';}
+function unpairSub(pl,sid){for(var m in pl.pairs){pl.pairs[m]=pl.pairs[m].filter(function(x){return x!==sid;});if(!pl.pairs[m].length)delete pl.pairs[m];}}
+function setSubZone(pl,sid,zid){var cv=coverOf(pl,sid);if(cv&&zoneOf(pl,cv.main)!==zid)unpairSub(pl,sid);pl.subZone=pl.subZone||{};if(zid)pl.subZone[sid]=zid;else delete pl.subZone[sid];}
+function setSubCover(pl,sid,main){unpairSub(pl,sid);if(!main||!zoneOf(pl,main))return;pl.pairs[main]=(pl.pairs[main]||[]).concat([sid]);pl.subZone=pl.subZone||{};pl.subZone[sid]=zoneOf(pl,main);}
+function setSubCycle(pl,sid,k){var cv=coverOf(pl,sid);if(!cv)return;var arr=pl.pairs[cv.main].filter(function(x){return x!==sid;});arr.splice(Math.max(0,Math.min(k,arr.length)),0,sid);pl.pairs[cv.main]=arr;}
 function coverSelect(pl,sid){var cv=coverOf(pl,sid),cur=cv?'m:'+cv.main+':'+cv.order:'sb:'+((pl.subZone||{})[sid]||'');
  var o='<select data-set="rcover" data-pid="'+esc(sid)+'" aria-label="Who '+esc(nm(sid))+' subs for"><optgroup label="Not paired"><option value="sb:"'+(cur==='sb:'?' selected':'')+'>Standby (any zone)</option>'+
   pl.zones.map(function(z){return '<option value="sb:'+esc(z.id)+'"'+(cur==='sb:'+z.id?' selected':'')+'>Standby · '+esc(z.name)+' reserve</option>';}).join('')+'</optgroup>';
@@ -550,8 +602,8 @@ function setCover(pl,sid,val){for(var m in pl.pairs){pl.pairs[m]=pl.pairs[m].fil
  var arr=(pl.pairs[main]||[]).slice();arr.splice(Math.min(k,arr.length),0,sid);pl.pairs[main]=arr;}
 function roleText(pl,id){var z=zoneOf(pl,id),out=[];if(z){var a=ownLeads(pl,id),c=ownCo(pl,id);out.push(a.length?'Lead · '+a.map(function(b){return BB(b).name;}).join(', '):c.length?'Co-Lead · '+c.map(function(b){return BB(b).name;}).join(', '):'Supporter');
   objectivesOf(pl,id).forEach(function(b){out.push('Holds '+bname(pl,b));});backupsOf(pl,id).forEach(function(b){out.push('Backup '+bname(pl,b));});}
- else if(pl.subs.indexOf(id)>=0){var cv=coverOf(pl,id);out.push(cv?'Sub for '+nm(cv.main)+' · '+cyc(cv.order):'Sub · standby');}
- managesOf(pl,id).forEach(function(mz){out.push('Manages '+zname(pl,mz)+' subs');});var j=joinOf(pl,id);if(j!=null)out.push('Joins '+fmtOff(j));return out.join(' · ');}
+ else if(pl.subs.indexOf(id)>=0){var cv=coverOf(pl,id);var sz0=subZone(pl,id);out.push(cv?'Sub for '+nm(cv.main)+' · '+cyc(cv.order):'Sub · standby'+(sz0?' · '+zname(pl,sz0)+' reserve':''));}
+ movesOf(pl,id).forEach(function(mvr){out.push('Moves to '+zname(pl,mvr.z)+(mvr.at!=null?' at '+fmtOff(mvr.at):' from Phase '+mvr.ph));});managesOf(pl,id).forEach(function(mz){out.push('Manages '+zname(pl,mz)+' subs');});var j=joinOf(pl,id);if(j!=null)out.push('Joins '+fmtOff(j));return out.join(' · ');}
 function bulkAdd(text,dest){var pl=P(),added=[],skipped=[];text.split(/\n/).forEach(function(line){line=line.trim();if(!line)return;
   var mt=/^(.*?)[\s,;\t]+([\d.,]+\s*[kK]?)$/.exec(line),name=line,pw=0;if(mt){name=mt[1].trim();var raw=mt[2].replace(/,/g,'').trim();pw=/k$/i.test(raw)?Math.round(parseFloat(raw)*1000):+raw;}
   name=name.replace(/^[-•*\d.)\s]+/,'').trim();if(!name)return;
@@ -632,9 +684,9 @@ function setupCard(st,pl){var cur=setupMatches(pl,st);
  (st.builtin?'':'<button class="btn" data-act="updsetup" data-sid="'+esc(st.id)+'">Overwrite with current</button><button class="btn danger" data-act="delsetup" data-sid="'+esc(st.id)+'">'+(view.confirmDel==='s:'+st.id?'Tap again to delete':'Delete')+'</button>')+'</div></div></div>';}
 
 function blankPlan(){var base=P();var zones=[['blue','Blue','#3f7ff2'],['green','Green','#2fb36a'],['yellow','Yellow','#e5b81f'],['purple','Purple','#a35cf0']].map(function(a){return {id:a[0],name:a[1],color:a[2],concede:0,members:[]};});
- var bmap={};BL().forEach(function(b){bmap[b.id]={zone:b.home||'',lead:null};});
+ var bmap={};BL().forEach(function(b){bmap[b.id]={zone:b.home||'',lead:null,phase:(b.id==='hall'||b.id==='merc')?2:1};});
  return {name:'New Plan',label:'Draft',blurb:'Blank plan from the map',mission:'',zones:zones,bmap:bmap,subs:[],subZone:{},pairs:{},rotateAt:{},markers:[],briefing:[],contingencies:[],defaultRotate:'15:00',
-  phases:[{title:'Opening',time:'0:00–3:00',start:0,lines:[]},{title:'Hold',time:'3:00–15:00',start:180,lines:[]},{title:'Expansion',time:'15:00–End',start:900,lines:[]}],
+  phases:[{title:'Opening',time:'0:00–15:00',start:0,lines:[]},{title:'Mid-game',time:'15:00–20:00',start:900,lines:[]},{title:'Late game',time:'20:00–End',start:1200,lines:[]}],
   orders:base.orders.slice(),ordersTitle:base.ordersTitle||'Orders',roleNotes:clone(base.roleNotes)};}
 function addPlan(p){var id=uid('p');S.plans[id]=p;S.planOrder.push(id);view.plan=id;view.sel=null;view.focus=null;view.phase=1;persist();touch();}
 
@@ -666,7 +718,7 @@ function castle(b,col,dk){var s=b.big?1.25:1;
  '<path d="M-4,12 v-8 a4,4 0 0 1 8,0 v8" fill="'+dk+'"/>'+
  '<path d="M0,-30 v-12 l10,4 -10,4" fill="#e04848" stroke="'+dk+'" stroke-width="1.2"/></g>';}
 function mapSVG(){var pl=P(),ph=view.phase,o=[],bl=BL(),lm=S.map.landmarks;
- var focusZone=view.focus?(zoneOf(pl,view.focus)||subZone(pl,view.focus)):null;
+ var focusZone=view.focus?(zoneAt(pl,view.focus,ph)||subZone(pl,view.focus)):null;
  var focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
  var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null, selB=view.sel&&view.sel.type==='building'?view.sel.id:null;
  var shrines=lm.filter(function(l){return l.type==='shrine';});
@@ -766,6 +818,9 @@ function zoneCard(z){var pl=P(),mem=z.members,c=concedeOf(pl,z.id);
  var sup=supportersOf(pl,z.id);
  if(sup.length)o+='<div><h4>'+Th('Supporters ({n})',{n:sup.length})+'</h4><div class="chips">'+sup.map(function(id){return chip(id,badgeFor(pl,id));}).join('')+'</div></div>';
  else if(!mem.length)o+='<p class="empty">'+(c?Th('No initial deployments.'):Th('No players assigned.'))+'</p>';
+ var ar1=arrivalsOf(pl,z.id),lv1=leaversOf(pl,z.id);
+ if(ar1.length)o+='<div><h4>'+Th('Arriving')+'</h4><div class="chips">'+ar1.map(function(m){return chip(m.id,moveWhen(pl,m,true));}).join('')+'</div></div>';
+ if(lv1.length)o+='<div><h4>'+Th('Moving out')+'</h4><div class="chips">'+lv1.map(function(m){return chip(m.id,'→ '+Tt(zname(pl,m.z))+' · '+moveWhen(pl,m,true));}).join('')+'</div></div>';
  return o+'</div>';}
 
 function overviewPanel(){var pl=P(),o='<h3>'+esc(pl.name)+' · '+esc(pl.label)+'</h3><p class="sub">'+(pl.blurb?esc(Tt(pl.blurb))+'. ':'')+Th('Hover or tap a zone or building on the map, or tap any player.')+'</p>';
@@ -780,6 +835,8 @@ function checks(){var pl=P(),out=[],n=combatants(pl).length,mm=M(pl),fs=mm.field
  out.push(n===fs?['ok',nt+'.']:['bad',nt+'; the plan calls for '+fs+'.']);
  out.push(pl.subs.length===sz?['ok',pl.subs.length+' substitutes in reserve.']:['bad',pl.subs.length+' substitutes; the plan calls for '+sz+'.']);
  var nol=BL().filter(function(b){return bz(pl,b.id)&&!blead(pl,b.id)&&concedeOf(pl,bz(pl,b.id))<pl.phases.length;});if(nol.length)out.push(['bad','No lead for: '+nol.map(function(b){return esc(bname(pl,b.id));}).join(', ')+'.']);
+ BL().forEach(function(b){var l=blead(pl,b.id),mm=l&&moveOf(pl,l);if(mm&&bz(pl,b.id)===zoneOf(pl,l))out.push(['info',esc(nm(l))+' leads '+esc(bname(pl,b.id))+' but moves to '+esc(zname(pl,mm.z))+' from Phase '+mm.ph+'. Pick who takes over, or leave it if that’s the plan.']);});
+ pl.zones.forEach(function(zq){var arq=arrivalsOf(pl,zq.id).filter(function(m){return m.ph<=concedeOf(pl,zq.id);});if(arq.length)out.push(['info',arq.length+' player'+(arq.length>1?'s':'')+' move into '+esc(zq.name)+', but '+esc(zq.name)+' is still conceded then ('+esc(concedeText(pl,zq.id))+'). If they should fight there, set '+esc(zq.name)+' to conceded through an earlier phase in its zone settings.']);});
  var stray=BL().filter(function(b){var l=blead(pl,b.id);return l&&!zoneOf(pl,l);});if(stray.length)out.push(['bad',stray.map(function(b){return esc(nm(blead(pl,b.id)))+' leads '+esc(bname(pl,b.id))+' but is not on the field';}).join('; ')+'.']);
  var ex=BL().filter(function(b){return !bz(pl,b.id);});if(ex.length)out.push(['info','Not in this plan: '+ex.map(function(b){return esc(b.name);}).join(', ')+'.']);
  pl.zones.forEach(function(z){if(z.concede&&z.members.length&&false)out.push(['info',esc(z.name)+' is conceded through Phase '+z.concede+' but has '+z.members.length+' players assigned.']);
@@ -861,15 +918,17 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
  if(z){var zo=Z(pl,z),own=ownLeads(pl,id),obj=objectivesOf(pl,id),oco=ownCo(pl,id),bks=backupsOf(pl,id),mgz=managesOf(pl,id),jn=joinOf(pl,id);
   var role=own.length?Th('Building Lead')+' · '+own.map(function(b){return esc(Tt(BB(b).name));}).join(' + '):oco.length?Th('Co-Lead')+' · '+oco.map(function(b){return esc(Tt(BB(b).name));}).join(' + '):Th('Zone Supporter');
   if(mgz.length)role+=' · '+Th('Sub Manager');
-  o+='<div class="zbanner" style="'+zoneStyle(zo.color)+'"><b>'+Th('{zone} Zone',{zone:ZN2(z)})+'</b><span>'+role+'</span></div>';
+  var mp0=movePath(pl,id,true);if(mp0)role+=' · '+esc(mp0);o+='<div class="zbanner" style="'+zoneStyle(zo.color)+'"><b>'+Th('{zone} Zone',{zone:ZN2(z)})+'</b><span>'+role+'</span></div>';
   var pz=pausedBy(pl,id);o+='<section'+(pz.length?' class="paused"':'')+'><h4>'+Th('Your orders')+'</h4>'+(pz.length?'<p class="pausednote">⏸ '+Th('Paused. Follow the active If → Then orders below.')+'</p>':'');
   if(jn!=null)o+=task(esc((clockAt(pl,jn)?clockAt(pl,jn)+' · ':'')+fmtOff(jn)),Th('Enter the battle and join **{zone}**. You are not part of the opening deployment.',{zone:ZN2(z)}));
   if(zo.concede)o+=task(Th('Phase {n}',{n:'1'+(zo.concede>1?'–'+zo.concede:'')}),Th('**{zone}** is conceded. No deployment there until Phase {n}; follow leadership calls.',{zone:ZN2(z),n:zo.concede+1}));
   own.forEach(function(b){o+=task(esc(whenBT(pl,b)),Th('Capture and command **{building}**. Keep the garrison strong.',{building:BN(b)}));});
   oco.forEach(function(b){var ld=blead(pl,b);o+=task(esc(whenBT(pl,b)),ld?Th('Co-lead **{building}** with {lead}. Stay at the building and be ready for synchronized double rallies.',{building:BN(b),lead:NM(ld)}):Th('Co-lead **{building}**. Stay at the building and be ready for synchronized double rallies.',{building:BN(b)}));});
-  if(!own.length&&!oco.length){var zb=zoneBuildings(pl,z).filter(function(b){return !fullCon(pl,b.id);});if(zb.length){var byP={};zb.forEach(function(b){var e=eff(pl,b.id);(byP[e]=byP[e]||[]).push(b);});
+  var mv=moveOf(pl,id);
+  if(!own.length&&!oco.length){var zb=zoneBuildings(pl,z).filter(function(b){return !fullCon(pl,b.id)&&(!mv||(unlockOf(pl,b.id)||0)<mv.t);});if(zb.length){var byP={};zb.forEach(function(b){var e=eff(pl,b.id);(byP[e]=byP[e]||[]).push(b);});
    Object.keys(byP).sort().forEach(function(e){o+=task(esc(phTimeT(pl,+e)),Th('Reinforce {list}.',{list:listFmt(byP[e].map(function(b){return Th('**{building}** ({lead})',{building:esc(Tt(b.name)),lead:blead(pl,b.id)?NM(blead(pl,b.id)):Th('no lead')});}))}));});}
-   else o+='<p class="note">'+Th('Your zone has no buildings assigned yet.')+'</p>';}
+   else if(!mv)o+='<p class="note">'+Th('Your zone has no buildings assigned yet.')+'</p>';}
+  var mvs=movesOf(pl,id);mvs.forEach(function(mv,ix){var nx=mvs[ix+1];var dzb=zoneBuildings(pl,mv.z).filter(function(b){return !fullCon(pl,b.id)&&(!nx||(unlockOf(pl,b.id)||0)<nx.t);});o+=task(esc(mv.at!=null?moveWhen(pl,mv):phTimeT(pl,mv.ph)),dzb.length?Th('Move to **{zone}** and reinforce {list}.',{zone:ZN2(mv.z),list:listFmt(dzb.map(function(b){return Th('**{building}** ({lead})',{building:esc(Tt(b.name)),lead:blead(pl,b.id)?NM(blead(pl,b.id)):Th('no lead')});}))}):Th('Move to **{zone}**.',{zone:ZN2(mv.z)}));});
   obj.forEach(function(b){o+=task(esc(whenBT(pl,b)),Th('Capture and hold **{building}** with your strongest march; keep supporting {zone} with the rest.',{building:BN(b),zone:ZN2(z)}));});
   bks.forEach(function(b){var ld=blead(pl,b);o+=task(Th('If needed'),Th('If {lead} fails to report, take command of **{building}**. Leadership will cover your other duties.',{lead:ld?NM(ld):Th('the lead'),building:BN(b)}));});
   var note=own.length?rn.lead:oco.length?(rn.colead||rn.lead):rn.supporter;o+='<p class="note">'+(note?Th(note):'')+(obj.length&&rn.objective?' '+Th(rn.objective):'')+'</p></section>';
@@ -882,7 +941,7 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
   o+='<div class="zbanner" style="'+(sz?zoneStyle(zcol(pl,sz)):'background:#2a2f39')+'"><b>'+(sz?Th('{zone} Reserve',{zone:ZN2(sz)}):Th('Reserve'))+'</b><span>'+(c?Th('Paired with {player}',{player:NM(c.main)}):Th('Standby'))+'</span></div>';
   var mgr=sz?managerOf(pl,sz):null,chain=c?pairsOf(pl,c.main):[];
   var rl=c?(ownLeads(pl,c.main).length?Th('Building Lead'):Th('Supporter')):'';
-  o+='<section><h4>'+Th('Your orders')+'</h4>'+(c?task(Th('Cycle {n}',{n:c.order+1})+(c.order===0?' · '+esc(rotAt(pl,c.main)):''),c.order===0?Th('Rotate in for **{player}** ({zone} · {role}).',{player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl}):Th('Replace **{prev}** in **{player}**’s slot ({zone} · {role}).',{prev:NM(chain[c.order-1]),player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl})):'<p>'+Th('Stay on standby. {manager} will call you into an open slot.',{manager:mgr?NM(mgr):Th('Leadership')})+'</p>')+
+  o+='<section><h4>'+Th('Your orders')+'</h4>'+(c?task(Th('Cycle {n}',{n:c.order+1})+(c.order===0?' · '+esc(rotAt(pl,c.main)):''),c.order===0?Th('Rotate in for **{player}** ({zone} · {role}).',{player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl}):Th('Replace **{prev}** in **{player}**’s slot ({zone} · {role}).',{prev:NM(chain[c.order-1]),player:NM(c.main),zone:ZN2(zoneOf(pl,c.main)),role:rl})):'<p>'+Th('Stay on standby. {manager} will call you into an open slot.',{manager:mgr?NM(mgr):Th('Leadership')})+'</p>'+movesOf(pl,id).map(function(mv){return task(esc(mv.at!=null?moveWhen(pl,mv):phTimeT(pl,mv.ph)),Th('Move to **{zone}**.',{zone:ZN2(mv.z)}));}).join(''))+
   (mgr?task(Th('Manager'),chip(mgr)):'')+(rn.sub?'<p class="note">'+Th(rn.sub)+'</p>':'')+'</section>'+playerContHTML(pl,id)+attPlayerSection(id);}
  else o+='<p class="note" style="margin-top:10px">'+Th('This player isn’t on the field or the reserve list for this plan.')+'</p>';
  var others=S.planOrder.filter(function(k){return k!==view.plan&&S.plans[k];});
@@ -1047,10 +1106,10 @@ function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
   var q=(view.rq||'').toLowerCase();var shown=ids.filter(function(i){return !q||nm(i).toLowerCase().indexOf(q)>=0;});
   var placeSel=function(i){var c=placeOf(pl,i);return '<select data-set="rplace" data-pid="'+esc(i)+'" aria-label="Placement for '+esc(nm(i))+'">'+pl.zones.map(function(z){return '<option value="'+esc(z.id)+'"'+(c===z.id?' selected':'')+'>'+esc(z.name)+'</option>';}).join('')+'<option value="subs"'+(c==='subs'?' selected':'')+'>Substitute</option><option value="bench"'+(c==='bench'?' selected':'')+'>Not in plan</option></select>';};
   h='<h3>Roster · '+esc(pl.name)+'</h3><p class="note">Everyone on the alliance roster. Placement and role apply to '+esc(pl.name)+' only; name and power apply to every plan. “Not in plan” keeps a player on the roster; Delete removes them everywhere.</p>'+
-  '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="m-rq" placeholder="Filter by name" value="'+esc(view.rq||'')+'" style="flex:1;min-width:160px"><span class="note">'+combatants(pl).length+' on the field · '+pl.subs.length+' subs · '+benchOf(pl).length+' not in plan</span><button class="btn" data-act="copyalllinks">🔗 Copy all links</button></div>'+
-  '<div class="schedwrap" style="max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:8px"><table class="sched roster"><thead><tr><th>Name</th><th>Power</th><th>Placement</th><th>Role</th><th></th></tr></thead><tbody>'+
-  shown.map(function(i){var z=zoneOf(pl,i);return '<tr><td><input data-set="rname" data-pid="'+esc(i)+'" value="'+esc(nm(i))+'" aria-label="Name" style="width:150px"></td><td><input data-set="rpower" data-pid="'+esc(i)+'" value="'+esc(pw(i)||'')+'" inputmode="numeric" aria-label="Power" style="width:80px"></td><td>'+placeSel(i)+'</td>'+
-   '<td>'+(z?'<select data-set="rrole" data-pid="'+esc(i)+'" aria-label="Role">'+roleOptions(pl,i)+'</select>':pl.subs.indexOf(i)>=0?coverSelect(pl,i):'')+'<div class="note" style="font-size:12px">'+esc(roleText(pl,i))+'</div></td>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="m-rq" placeholder="Filter by name" value="'+esc(view.rq||'')+'" style="flex:1;min-width:160px"><span class="note">'+combatants(pl).length+' on the field · '+pl.subs.length+' subs · '+benchOf(pl).length+' not in plan</span><button class="btn" data-act="copyalllinks">🔗 Copy all links</button></div>'+bulkBar(pl)+
+  '<div class="schedwrap" style="max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:8px"><table class="sched roster"><thead><tr><th><input type="checkbox" data-act="rchkall" aria-label="Tick all shown"'+(shown.length&&shown.every(function(i){return view.rchk&&view.rchk[i];})?' checked':'')+'></th><th>Name</th><th>Power</th><th>Zone</th><th>Role</th><th>Sub for · Later move</th><th></th></tr></thead><tbody>'+
+  shown.map(function(i){var z=zoneOf(pl,i);return '<tr><td><input type="checkbox" data-act="rchk" data-pid="'+esc(i)+'"'+(view.rchk&&view.rchk[i]?' checked':'')+' aria-label="Tick '+esc(nm(i))+'"></td><td><input data-set="rname" data-pid="'+esc(i)+'" value="'+esc(nm(i))+'" aria-label="Name" style="width:150px"></td><td><input data-set="rpower" data-pid="'+esc(i)+'" value="'+esc(pw(i)||'')+'" inputmode="numeric" aria-label="Power" style="width:80px"></td><td>'+rosterZoneSel(pl,i)+'</td><td>'+rosterRoleSel(pl,i)+'</td>'+
+   '<td>'+rosterThird(pl,i)+'<div class="note" style="font-size:12px">'+esc(roleText(pl,i))+'</div></td>'+
    '<td style="white-space:nowrap"><button class="mini" data-act="copylink" data-p="'+esc(i)+'" title="Copy '+esc(nm(i))+'’s personal link">🔗 Link</button> <button class="mini" data-act="ropen" data-pid="'+esc(i)+'">Open</button> <button class="mini" data-act="rdel" data-pid="'+esc(i)+'" style="color:var(--red)">'+(view.confirmDel==='p:'+i?'Confirm':'Delete')+'</button></td></tr>';}).join('')+
   '</tbody></table></div>'+
   '<div class="f"><label for="m-bulk">Add players: one per line, power optional (e.g. “NewGuy 5,200” or “NewGuy, 5.2k”)</label><textarea id="m-bulk" placeholder="NewGuy 5200&#10;Another Player, 4.8k"></textarea></div>'+
@@ -1471,6 +1530,16 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='logout'){if(dirty&&!window.confirm){}FB.auth&&FB.auth.signOut();editing=false;wantEdit=false;persist();render();}
  else if(k==='tfins'){tplFillInsert(true);}
   else if(k==='tfskip'){tplFillInsert(false);}
+  else if(k==='rmadd'){addMoveRow(P(),el.getAttribute('data-pid'));touch();}
+  else if(k==='rmdel'){var dp=el.getAttribute('data-pid'),dk=+el.getAttribute('data-k'),dr=sortedMoves(P(),dp);dr.splice(dk,1);saveMoves(P(),dp,dr);touch();}
+  else if(k==='rchk'){view.rchk=view.rchk||{};var ck=el.getAttribute('data-pid');view.rchk[ck]=!view.rchk[ck];openModal('roster');}
+  else if(k==='rchkall'){view.rchk=view.rchk||{};var q9=(view.rq||'').toLowerCase(),sh9=Object.keys(S.players).filter(function(i){return !q9||nm(i).toLowerCase().indexOf(q9)>=0;}),all9=sh9.every(function(i){return view.rchk[i];});sh9.forEach(function(i){view.rchk[i]=!all9;});openModal('roster');}
+  else if(k==='rchknone'){view.rchk={};openModal('roster');}
+  else if(k==='bulkapply'){var bv=val('m-bk'),bpv=val('m-bkp'),bt=bpv==='t'?parseOff(val('m-bkt')):null,bp=+bpv||2;if(bpv==='t'&&!(bt>0)){toast('Type a time like 22:00 for the move.');return;}var bids=Object.keys(view.rchk||{}).filter(function(i){return view.rchk[i]&&S.players[i];}),bn=0;
+   if(bv.indexOf('m:')===0){bn=bulkMove(pl,bids,bv.slice(2),bp,bt);toast(bv==='m:'?'Cleared later moves for '+bn+' players.':bn+' players now move to '+zname(pl,bv.slice(2))+(bt!=null?' at '+fmtOff(bt):' from Phase '+bp)+'.');}
+   else if(bv.indexOf('z:')===0){var bz3=bv.slice(2);bids.forEach(function(i){if(pl.subs.indexOf(i)>=0)setSubZone(pl,i,bz3);else if(zoneOf(pl,i)!==bz3){moveTo(pl,i,bz3,true);if(pl.moves&&pl.moves[i]&&pl.moves[i].z===bz3)delete pl.moves[i];}bn++;});toast(bn+' players set to '+zname(pl,bz3)+'.');}
+   else{bids.forEach(function(i){if(bv==='subs')rosterSetRole(pl,i,'sub');else rosterSetZone(pl,i,'bench');bn++;});toast(bn+' players updated.');}
+   view.rchk={};touch();}
   else if(k==='copylink'){var lp=el.getAttribute('data-p');if(lp&&S.players[lp])copyText(myLinkURL(lp,true),admin.ok?'Copied '+nm(lp)+'’s link. Send it to them.':Tt('Link copied. Open it any time to go straight to your orders.'));}
   else if(k==='copyalllinks'){copyText(allLinksText(),'Copied a personal link for every player in '+P().name+'. Paste it into Discord.');}
   else if(k==='exportplan'){exportPlan();}
@@ -1556,6 +1625,16 @@ document.addEventListener('change',function(e){var asel=e.target&&e.target.getAt
  else if(k==='rplace'){moveTo(pl,t.getAttribute('data-pid'),t.value);}
  else if(k==='rrole'){setRole(pl,t.getAttribute('data-pid'),t.value);touch();}
   else if(k==='rcover'){setCover(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='rzone2'){rosterSetZone(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='rrole2'){rosterSetRole(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='rmz'||k==='rmp'||k==='rmt'){var mp=t.getAttribute('data-pid'),mk=+t.getAttribute('data-k'),arr=sortedMoves(pl,mp),tgt=arr[mk];
+   if(tgt){if(k==='rmz')tgt.z=t.value;
+    else if(k==='rmp'){if(t.value==='t'){if(tgt.at==null){tgt.at=moveT(pl,tgt)+300;delete tgt.ph;}}else{var np=+t.value;delete tgt.at;tgt.ph=np;arr=arr.filter(function(x){return x===tgt||x.at!=null||x.ph!==np;});}}
+    else{var nt=parseOff(t.value);if(nt!=null&&nt>0){tgt.at=nt;delete tgt.ph;}else{toast('Type a time like 22:00 (minutes:seconds into the match).');}}
+    saveMoves(pl,mp,arr);}touch();}
+  else if(k==='rszone'){setSubZone(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='rscover'){setSubCover(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='rscycle'){setSubCycle(pl,t.getAttribute('data-pid'),+t.value);touch();}
  else if(k==='rname'){var rv=t.value.trim(),rp=t.getAttribute('data-pid');if(rv&&S.players[rp]){S.players[rp].name=rv;touch();}}
  else if(k==='rpower'){var rp2=t.getAttribute('data-pid'),rn2=+String(t.value).replace(/\D/g,'');if(S.players[rp2]){if(rn2)S.players[rp2].power=rn2;else delete S.players[rp2].power;touch();}}
  else if(k==='btext'){blk(t).text=t.value;touch();}
@@ -1699,7 +1778,7 @@ function blocksToMD(pl,bl){var L=[];(bl||[]).forEach(function(b){var pre='';
 function migrateFormats(){Object.keys(S.plans).forEach(function(k){var pl=S.plans[k],keep=view.plan;view.plan=k;
  if(pl.briefingText==null&&pl.briefing)pl.briefingText=blocksToMD(pl,pl.briefing);if(pl.briefingText==null)pl.briefingText='';
  (pl.contingencies||[]).forEach(function(c){if(c.ifText==null){var t=c.trigger||{};c.ifText=t.t==='tpl'?tplPlainEN(pl,t):(t.text||'');}if(c.thenText==null)c.thenText=blocksToMD(pl,c.actions||[]);});
- (pl.markers||[]).forEach(function(m){});view.plan=keep;});
+ (pl.markers||[]).forEach(function(m){});if(pl.phases&&pl.phases.length>1)['hall','merc'].forEach(function(bid){var mb=pl.bmap&&pl.bmap[bid];if(mb&&mb.phase==null)mb.phase=2;});view.plan=keep;});
  // undercellars become per-plan markers; buildings fixed to Duvy's map
  S.map.landmarks=(S.map.landmarks||[]).filter(function(l){return l.type!=='cellar';});}
 /* --- overrides that read the text format --- */
@@ -1824,6 +1903,9 @@ function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zon
  if(tcs.length)o+='<section><h4>📍 '+Th('Town Center spots')+'</h4><div class="chips">'+tcs.map(function(m){return '<button class="chip" data-marker="'+m.id+'"><span>📍 '+esc(Tt(mkTitle(pl,m)))+'</span><small>'+(m.players||[]).length+'</small></button>';}).join('')+'</div></section>';
  var cs=contOf(pl).filter(function(cn){var sc=cn.scope||{};return (cn.anchor&&((cn.anchor.type==='zone'&&cn.anchor.id===zid)||(cn.anchor.type==='building'&&bz(pl,cn.anchor.id)===zid)))||(sc.zones||[]).indexOf(zid)>=0;});
  if(cs.length)o+='<section><h4>🔀 '+Th('If → Then')+'</h4><div class="conts">'+cs.map(function(cn){return contHTML(pl,cn);}).join('')+'</div></section>';
+ var lv=leaversOf(pl,zid),ar=arrivalsOf(pl,zid);
+ if(lv.length)o+='<section><h4>'+Th('Moving out')+'</h4><div class="chips">'+lv.map(function(m){return chip(m.id,'→ '+Tt(zname(pl,m.z))+' · '+moveWhen(pl,m,true));}).join('')+'</div></section>';
+ if(ar.length)o+='<section><h4>'+Th('Arriving')+'</h4><div class="chips">'+ar.map(function(m){return chip(m.id,moveWhen(pl,m,true)+' · '+Tt(zname(pl,m.from))+' →');}).join('')+'</div></section>';
  o+=cellarZoneHTML(pl,zid);
  o+='</div>';
  if(editing)o+='<div class="card">'+zonePanel(zid).replace(/^[\s\S]*?(<section class="ed">)/,'$1')+'</div>';
@@ -1840,7 +1922,7 @@ function adminTab(pl){var o='';
 var BPOS={bell:[215,58,110],merc:[448,92,128],purple_abbey:[688,62,111],blue_sanctum:[145,213,247],blue_abbey:[135,350,384],green_abbey:[748,215,249],green_sanctum:[752,350,383],hall:[447,398,447],yellow_abbey:[192,478,508],yellow_stables:[722,478,508]};
 var ZPOS={purple:[445,34],blue:[66,182],green:[820,182],yellow:[445,582]};
 function mapSVG(){var pl=P(),ph=view.phase,o=[];
- var focusZone=view.focus?(zoneOf(pl,view.focus)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
+ var focusZone=view.focus?(zoneAt(pl,view.focus,ph)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
  var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null,selB=view.sel&&view.sel.type==='building'?view.sel.id:null;
  o.push('<svg viewBox="0 0 '+MAPW+' '+MAPH+'" role="img" aria-label="Battle map for '+esc(pl.name)+'"><image href="map.jpg" x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" preserveAspectRatio="none"/>');
  // zone labels
@@ -1897,7 +1979,7 @@ function lookupHTML(){var pl=P();return '<section class="lookup2"><form id="look
  (view.me&&S.players[view.me]&&view.who!==view.me?'<button type="button" class="btn" data-act="itsme">👤 '+esc(nm(view.me))+'</button>':'')+(view.who?'<button type="button" class="btn ghost" data-act="clearwho">'+Th('Clear')+'</button>':'')+
  '<datalist id="names">'+Object.keys(S.players).map(function(i){return '<option value="'+esc(nm(i))+'">';}).join('')+'</datalist></form>'+(view.qmsg?'<div id="qmsg" class="note">'+view.qmsg+'</div>':'')+'</section>';}
 function whoSummary(pl,w){var z=zoneOf(pl,w),bits=[];if(z){var own=ownLeads(pl,w),co=ownCo(pl,w);bits.push(Tt('{zone} Zone',{zone:Tt(zname(pl,z))}));bits.push(own.length?Tt('Building Lead')+' · '+own.map(function(b){return Tt(BB(b).name);}).join(' + '):co.length?Tt('Co-Lead')+' · '+co.map(function(b){return Tt(BB(b).name);}).join(' + '):Tt('Zone Supporter'));}
- else if(pl.subs.indexOf(w)>=0)bits.push(Tt('Substitute'));else bits.push(Tt('Not in this plan'));return bits.join(' · ');}
+ else if(pl.subs.indexOf(w)>=0)bits.push(Tt('Substitute'));else bits.push(Tt('Not in this plan'));var mw=movePath(pl,w,true);if(mw)bits.push(mw);return bits.join(' · ');}
 function tabBody(t,pl){
  if(t==='map'||t==='me'){var w=view.who&&S.players[view.who]?view.who:null;
   var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓ <button type="button" class="mini" data-act="copylink" data-p="'+esc(w)+'">🔗 '+Th('My link')+'</button></div>':'');
@@ -1947,7 +2029,7 @@ var BOX={bell:[126,125,310,166],purple_abbey:[594,123,776,166],merc:[366,145,526
 var CELLARS={uc_pl:{x:300,y:190,zone:'purple',name:'Undercellar (northwest)'},uc_pr:{x:592,y:190,zone:'purple',name:'Undercellar (northeast)'},uc_bl:{x:282,y:339,zone:'blue',name:'Undercellar (west)'},uc_gr:{x:628,y:339,zone:'green',name:'Undercellar (east)'},uc_yl:{x:282,y:459,zone:'yellow',name:'Undercellar (southwest)'},uc_yr:{x:628,y:459,zone:'yellow',name:'Undercellar (southeast)'}};
 var BANNER={purple:[443,59],yellow:null};
 function cellarData(pl,id){pl.cellars=pl.cellars||{};return pl.cellars[id]||{};}
-function cellarTimes(pl,id){var d=cellarData(pl,id);return (d.times||[]).slice().sort(function(a,b){return a-b;});}
+var CELLAR_WAVES=[900,1200];function cellarTimes(pl,id){var d=cellarData(pl,id);return (d.times||CELLAR_WAVES).slice().sort(function(a,b){return a-b;});}
 function cellarZone(pl,id){var c=CELLARS[id];return Z(pl,c.zone)?c.zone:null;}
 function cellarLabel(pl,id){var ts=cellarTimes(pl,id);if(!ts.length)return '';return ts.map(function(t){var c=clockAt(pl,t);return c?c.replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):fmtOff(t);}).join(' · ');}
 function nextRefresh(pl,id){var ts=cellarTimes(pl,id),st=startMs(pl);if(!ts.length||st==null)return null;var now=(Date.now()-st)/1000;for(var i=0;i<ts.length;i++)if(ts[i]>now)return ts[i];return null;}
@@ -1956,7 +2038,7 @@ function fitFs(t,w,max){var fs=max;while(fs>9&&textW(t,fs)>w-12)fs--;return fs;}
 function cardSVG(box,lines,bg,stroke){var x1=box[0],y1=box[1],x2=box[2],y2=box[3],w=x2-x1,h=y2-y1,o='<rect x="'+x1+'" y="'+y1+'" width="'+w+'" height="'+h+'" rx="8" fill="'+bg+'" stroke="'+stroke+'" stroke-width="2"/>';
  var n=lines.length,lh=h/n;lines.forEach(function(l,i){var fs=fitFs(l.t,w,l.fs||15);o+='<text x="'+(x1+w/2)+'" y="'+(y1+lh*i+lh/2+fs*0.36)+'" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="'+(l.b?700:600)+'" font-size="'+fs+'" fill="'+(l.c||'#fff')+'">'+esc(l.t)+'</text>';});return o;}
 function mapSVG(){var pl=P(),ph=view.phase,o=[];
- var focusZone=view.focus?(zoneOf(pl,view.focus)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
+ var focusZone=view.focus?(zoneAt(pl,view.focus,ph)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
  var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null,selB=view.sel&&view.sel.type==='building'?view.sel.id:null,selC=view.sel&&view.sel.type==='cellar'?view.sel.id:null;
  o.push('<svg viewBox="0 0 '+MAPW+' '+MAPH+'" role="img" aria-label="Battle map for '+esc(pl.name)+'"><image href="map.jpg" x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" preserveAspectRatio="none"/>');
  // zone status: printed banners for Purple and Yellow stay; Purple's second line follows the plan

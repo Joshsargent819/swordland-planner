@@ -118,13 +118,25 @@ The **🔀 If → Then** tab works the same way: one IF line and free-written TH
 
 New wording appears in English until you translate it with **🛠 Admin → 🌐 Translations** (see **Translation** above). That panel also shows progress and lets you fix any line.
 
-## Pairing substitutes by hand
+## Roster: zone, role, subs and later moves
 
-In **👥 Roster**, every substitute has a dropdown in the Role column:
-- **Standby** (or **Standby · Blue reserve** etc.) means not paired yet.
-- **Andy · Cycle 1** makes them Andy's first rotation sub; **Andy · Cycle 2** is the next one after that. The list is grouped by zone.
+Each row in **👥 Roster** reads left to right:
 
-**🔁 Auto-pair subs** still fills in any unpaired subs for you; you can then adjust individual pairings here.
+| Zone | Role | Sub for · Later move |
+|---|---|---|
+| Blue, Green, Yellow, Purple, or Not in plan | Supporter, Lead · building, Co-Lead · building, or Substitute | For a sub: who they cover and which cycle. For everyone else: **Moves to Purple from Phase 2**, or Stays all match. |
+
+- **Substitutes** keep a zone too (that zone's reserve). Pull a Blue sub to Green by changing their Zone.
+- **Moving players between zones mid-match:** tap **+ Move later** on a row and pick the zone and when: the start of a phase, or **At a set time…** and type the time into the match (e.g. 22:00). Tap **+ Another move** to move them again later (e.g. Blue → Purple in Phase 2 → Yellow in Phase 3); ✕ removes a move. To move a group, tick them and use the bar above the list: **Later move to Purple**, pick a phase or a set time, **Apply**. Their orders change at each phase ("15:00 · Move to Purple and reinforce…"), the zone tabs list them under **Moving out** and **Arriving**, and the map follows them when you switch phases.
+- **Subs:** standby subs can be moved the same way. A sub paired with a player follows that player wherever they go, so you only move the player.
+- If players move into a zone that is still conceded at that phase, Plan check says so. Change that zone's concede setting to an earlier phase.
+
+## Match phases
+
+The game has three stages: buildings like the Stables, Bell Tower, Sanctums and Abbeys are open from 0:00; the Hall of Reformation, Mercenary Camp and Swordshrine unlock at 15:00; Undercellars spawn in waves at 15:00 and 20:00.
+- New plans start with three phases: Opening (0:00–15:00), Mid-game (15:00–20:00), Late game (20:00–End). Add or remove phases in **📝 Plan text**.
+- The Hall and Mercenary Camp unlock in Phase 2 by default.
+- Undercellars use 15:00 and 20:00 refresh times unless you set others.
 
 ## Personal links
 
