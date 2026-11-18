@@ -11,7 +11,8 @@ Players open the site, look up their assignment and check in without logging in.
 | `firebase-config.js` | Your Firebase connection (already filled in). |
 | `firestore.rules` | Who can read and write what (setup step 3). |
 | `map.jpg` | The battle map (Duvy's Round 3 map). |
-| `netlify/functions/translate.js` | The server step that sends new text to Google Translate (step 7). |
+| `i18n/` | Ready-made translations of everything on the site, one file per language (22 files). |
+| `netlify/functions/translate.js` | Optional. Only used if you ever switch on paid Google Translate. |
 
 
 ---
@@ -49,24 +50,20 @@ No passwords and no Firebase console needed:
 - To take access away, tap **Remove**.
 - The site won't let the last owner remove themselves.
 
-## Turn on translation (23 languages, optional)
+## Translation (23 languages, free)
 
-Translation is optional; the site works in English without it. Players pick their language from the 🌐 menu at the top.
+Players pick their language from the 🌐 menu at the top. Everything on the site today is already translated into all 22 other languages, so there's nothing to set up: just upload the `i18n` folder along with the other files.
 
-1. **Upgrade Firebase to Blaze** (pay as you go): Firebase console → bottom-left **Upgrade**. Google requires this to enable the Translation API.
-   - Google Translate's first 500,000 characters each month are free.
-   - Translating everything the first time (all three plans plus every on-screen label, into 22 languages) is about 240,000 characters.
-   - After that, each week only new wording is sent, usually a few thousand characters.
-   - Set a budget alert: Google Cloud console → **Billing → Budgets & alerts → Create budget**, e.g. $1.
-2. **Enable the API:** Google Cloud console (console.cloud.google.com), pick the same project → **APIs & Services → Library** → search **Cloud Translation API** → **Enable**.
-3. **Create a key:** go to **APIs & Services → Credentials → Create credentials → API key**. Then **Edit API key → API restrictions → Restrict key → Cloud Translation API** → Save, and copy the key.
-4. **Netlify → Site configuration → Environment variables → Add variable**. Add three:
-   - `GOOGLE_TRANSLATE_KEY` = the key from step 3
-   - `FIREBASE_API_KEY` = the `apiKey` from `firebase-config.js`
-   - `FIREBASE_PROJECT_ID` = the `projectId` from `firebase-config.js`
-5. **Netlify → Deploys → Trigger deploy → Deploy site**, so the function picks up the variables.
+**When you change the plan** (new orders, new briefing lines, a new matchup), the new wording shows in English until you translate it:
 
-The translation key lives only on Netlify, never in the page. Only signed-in leaders on the ⚙️ Settings list can run translation.
+1. Sign in, then go to **🛠 Admin → 🌐 Translations**. It shows how many lines each language still needs.
+2. Pick a language and tap **Copy request**.
+3. Paste it into any AI chat (Claude, ChatGPT, Gemini…) and copy its whole reply.
+4. Paste the reply into the box and tap **Save translations**. The next language is picked for you.
+
+Only new lines are included, so this is usually a few lines per language. Fixes you make by hand in the Translations panel always win over the ready-made files.
+
+Paid Google Translate is still built in as an option (`netlify/functions/translate.js`) but is switched off; you don't need it.
 
 ## Changing the matchup
 
@@ -117,7 +114,7 @@ Translation stays cheap without any templates: player names, times and numbers i
 
 The **🔀 If → Then** tab works the same way: one IF line and free-written THEN orders. **Who & where ▾** holds the zone, role and player options, the zone or building switch, and the phase.
 
-Translation runs by itself every time a leader taps **Save for everyone**, including the very first save, and only for text that's new. **🛠 Admin → 🌐 Translations** shows progress and lets you fix any line. Until translation is switched on (below), the site simply stays in English.
+New wording appears in English until you translate it with **🛠 Admin → 🌐 Translations** (see **Translation** above). That panel also shows progress and lets you fix any line.
 
 ## Attendance
 
