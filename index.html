@@ -124,6 +124,47 @@ table.sched tr.done td{opacity:.55}
 .livebar{background:#2a1414;border-color:#7a2e2e}
 .myfab{position:fixed;inset-inline-end:16px;bottom:16px;z-index:40;background:var(--gold);color:#1b1404;border:0;border-radius:999px;padding:10px 16px;font-family:var(--cond);font-weight:700;font-size:16px;box-shadow:0 6px 20px #0008;display:none}
 @media (max-width:900px){.myfab{display:block}}
+.top2{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:10px}
+.top2 h1{font-size:clamp(22px,3vw,32px)}
+.vsline{font-family:var(--cond);font-weight:600;font-size:16px;color:var(--muted);margin-top:2px}.vsline .vs{font-size:14px;margin:0 4px}
+.bar2{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.bar2r{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-inline-start:auto}
+.pick{display:inline-flex;align-items:center;gap:6px;font-family:var(--cond);font-weight:600;color:var(--muted)}
+.pick select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-family:var(--cond);font-weight:600;font-size:15px;color:var(--text);max-width:70vw}
+.mt{font-family:var(--cond);font-size:15px}.mt b{font-size:16px}
+.notlive{background:#2a2312;border:1px solid #5d4b1d;border-radius:10px;padding:6px 12px;font-size:14px}
+.editbar.slim{padding:6px 10px}
+.tabbar{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;background:var(--ink);padding-top:6px}
+.tabbtn{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-family:var(--cond);font-weight:700;font-size:16px;color:var(--muted);white-space:nowrap}
+.tabbtn[aria-selected="true"]{color:var(--text);border-bottom-color:var(--gold)}
+.tabbtn:hover{color:var(--text)}
+.tabbody{display:flex;flex-direction:column;gap:14px}
+.mecard{max-width:760px}.mecard.panel{position:static;max-height:none;overflow:visible}.metools{display:flex;justify-content:flex-end}
+.hint p{margin:0;color:var(--muted)}
+.maptop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.more{position:relative;display:inline-block}.more>summary{list-style:none;cursor:pointer}.more>summary::-webkit-details-marker{display:none}
+.morebox{position:absolute;z-index:35;top:calc(100% + 6px);inset-inline-start:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;min-width:260px;box-shadow:0 10px 30px #000a}
+.zt .zbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.zb{background:var(--panel2);border:1px solid var(--line);border-inline-start:4px solid var(--zc);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.zb.st-enemy{border-color:#e5484d}.zb.st-contested{border-color:#f08a24}
+.zbh{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}.zbh b{font-family:var(--cond);font-size:17px}
+.zt section{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.zt h4{margin:0 0 6px;font-family:var(--cond);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.rotl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.rotl li{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.admgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.admbtn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.admbtn b{font-family:var(--cond);font-size:16px}.admbtn span{font-size:12.5px;color:var(--muted)}.admbtn:hover{border-color:var(--gold)}.admbtn.danger b{color:var(--red)}
+.bwrite{display:flex;flex-direction:column;gap:8px}
+.bw-tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.bw-tools select{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:3px 6px;font-size:13px}
+.bw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.bw-grid textarea{width:100%;min-height:420px;background:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.55;resize:vertical}
+.bw-prev{border:1px dashed var(--line);border-radius:10px;padding:4px 14px;max-height:640px;overflow:auto}
+.cedit textarea{width:100%;min-height:70px}
+.ifin{flex:1;min-width:220px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:15px}
+.cfoot{border-top:1px solid var(--line);padding-top:6px}
+.copts{border-top:1px dashed var(--line);padding-top:6px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:900px){.bw-grid{grid-template-columns:minmax(0,1fr)}.bw-grid textarea{min-height:260px}.bar2r{margin-inline-start:0}}
 .editbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#2a2312;border:1px solid #5d4b1d;border-radius:10px;padding:8px 12px}
 .editbar .msg{flex:1 1 220px;font-size:14px;color:#f3dfae}
 .editbar .msg b{color:var(--gold)}
@@ -468,7 +509,7 @@ function uid(p){return p+Math.random().toString(36).slice(2,7);}
 /* ---------- mutations ---------- */
 var HIST=[];function snap(){HIST.push(JSON.stringify(S));if(HIST.length>60)HIST.shift();}
 function touch(){dirty=true;snap();rerender();}
-function rerender(){var mod=view.modal,sc=0;var mb=document.querySelector('.modal-bg');if(mb)sc=mb.scrollTop;render();if(mod==='roster'||mod==='setups'||mod==='tpls'||mod==='i18n'){openModal(mod);var nb=document.querySelector('.modal-bg');if(nb)nb.scrollTop=sc;}}
+function rerender(){PHC={};var mod=view.modal,sc=0;var mb=document.querySelector('.modal-bg');if(mb)sc=mb.scrollTop;render();if(mod==='roster'||mod==='setups'||mod==='tpls'||mod==='i18n'){openModal(mod);var nb=document.querySelector('.modal-bg');if(nb)nb.scrollTop=sc;}}
 function undo(){if(HIST.length<2){toast('Nothing to undo.');return;}HIST.pop();S=JSON.parse(HIST[HIST.length-1]);dirty=HIST.length>1;if(!S.plans[view.plan])view.plan=S.livePlan;if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;rerender();toast('Undone.');}
 function detach(pl,id){pl.zones.forEach(function(z){z.members=z.members.filter(function(x){return x!==id;});});pl.subs=pl.subs.filter(function(x){return x!==id;});}
 function clearLeads(pl,id){for(var b in pl.bmap){var m=pl.bmap[b];if(m.lead===id)m.lead=null;if(m.co)m.co=m.co.filter(function(x){return x!==id;});if(m.backup===id)delete m.backup;}pl.zones.forEach(function(z){if(z.subManager===id)delete z.subManager;});if(pl.joinAt)delete pl.joinAt[id];}
@@ -817,7 +858,7 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
   mgz.forEach(function(mz){var sb=pl.subs.filter(function(s){return subZone(pl,s)===mz;});o+='<section><h4>'+Th('Substitute Manager · {zone}',{zone:ZN2(mz)})+'</h4><p style="margin:0 0 6px">'+Th('You run {count} rotating substitutes for {zone}.',{count:sb.length,zone:ZN2(mz)})+'</p><div class="chips">'+sb.map(function(s){return chip(s);}).join('')+'</div>'+(rn.manager?'<p class="note">'+Th(rn.manager)+'</p>':'')+'</section>';});
   o+=playerContHTML(pl,id);
   o+=attPlayerSection(id);
-  var tp=tpsOf(pl,id);if(tp.length)o+='<section><h4>'+Th('Teleport')+'</h4>'+tp.map(function(m){return task(m.phase?esc(phTimeT(pl,m.phase)):Th('Start'),Th('Teleport to {marker}',{marker:'<button class="mini" data-marker="'+m.id+'">📍 '+esc(Tt(mkTitle(pl,m)))+'</button>'})+(m.note?' '+Th(m.note):''));}).join('')+'</section>';
+  var tp=tpsOf(pl,id);if(tp.length)o+='<section><h4>'+Th('Town Center')+'</h4>'+tp.map(function(m){return task(m.phase?esc(phTimeT(pl,m.phase)):Th('Start'),Th('Place your Town Center at {marker}',{marker:'<button class="mini" data-marker="'+m.id+'">📍 '+esc(Tt(mkTitle(pl,m)))+'</button>'})+(m.note?' '+Th(m.note):''));}).join('')+'</section>';
   var ps=pairsOf(pl,id);o+='<section><h4>'+Th('Your substitutes')+'</h4>'+(ps.length?'<div class="pairlist">'+ps.map(function(s,i){return '<div><b>C'+(i+1)+'</b>'+chip(s)+'</div>';}).join('')+'</div><p class="note">'+ps.map(function(s,i){return i===0?Th('Cycle {n} ({time}): {player} takes your slot.',{n:1,time:esc(rotAt(pl,id)),player:NM(s)}):Th('Cycle {n}: {player} replaces {prev}.',{n:i+1,player:NM(s),prev:NM(ps[i-1])});}).join(' ')+'</p>':'<p class="empty">'+Th('No substitute assigned to you.')+'</p>')+'</section>';}
  else if(isS){var c=coverOf(pl,id),sz=subZone(pl,id);
   o+='<div class="zbanner" style="'+(sz?zoneStyle(zcol(pl,sz)):'background:#2a2f39')+'"><b>'+(sz?Th('{zone} Reserve',{zone:ZN2(sz)}):Th('Reserve'))+'</b><span>'+(c?Th('Paired with {player}',{player:NM(c.main)}):Th('Standby'))+'</span></div>';
@@ -1226,7 +1267,7 @@ function fbInit(){
   var d=snap.data(),inc;try{inc=JSON.parse(d.data);}catch(e){return;}
   var newer=(d.rev||0)!==FB.rev;FB.rev=d.rev||0;FB.serverState=d.data;
   if(editing&&dirty){if(newer&&!FB.savingNow)toast((d.updatedBy||'Another admin')+' just saved. Discard your changes to load theirs, or saving will be blocked.');return;}
-  S=inc;seedSetups();HIST=[JSON.stringify(S)];dirty=false;
+  S=inc;seedSetups();migrateFormats();HIST=[JSON.stringify(S)];dirty=false;
   if(!S.plans[view.plan]||!view.chosen)view.plan=(planFromHash()&&S.plans[planFromHash()])?planFromHash():S.livePlan;
   if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;softRender();
  },function(err){toast('Couldn’t load the shared plan: '+err.message);});
@@ -1314,7 +1355,8 @@ function paintAt(bid){var pl=P(),z=view.tool.slice(6),m=bm(pl,bid);if(m.zone===z
  if(!z){m.lead=null;}touch();}
 document.addEventListener('click',function(e){var t=e.target;
  if(drag&&drag.moved)return;
- var a=t.closest('[data-act]');if(a){act(a.getAttribute('data-act'),a,e);return;}
+ var tb=t.closest('[data-tab]');if(tb){goTab(tb.getAttribute('data-tab'));return;}
+ var a=t.closest('[data-act]');if(a){if(a.hasAttribute('data-needs-edit')&&!editing&&admin.ok){editing=true;wantEdit=true;persist();}act(a.getAttribute('data-act'),a,e);return;}
  var ab=t.closest('[data-att]');if(ab){if(!admin.ok)return;var aid=ab.getAttribute('data-att'),cur=attOf(aid),nx=!cur?'in':cur.status==='in'?'out':null;setAtt(aid,nx,'admin',cur&&cur.note).catch(function(e){toast('Couldn’t update: '+e.message);});return;}
  var pb=t.closest('[data-plan]');if(pb){view.chosen=true;if(pb.getAttribute('data-plan')!==view.plan){view.plan=pb.getAttribute('data-plan');view.phase=1;view.confirmDel=null;if(view.sel&&view.sel.type!=='player'&&view.sel.type!=='building'&&view.sel.type!=='landmark')view.sel=null;if(view.tool.indexOf('paint:')===0)view.tool='select';try{history.replaceState(null,'','#plan-'+view.plan);}catch(x){}persist();render();}return;}
  var ph=t.closest('[data-phase]');if(ph){view.phase=+ph.getAttribute('data-phase');render();return;}
@@ -1333,7 +1375,7 @@ document.addEventListener('click',function(e){var t=e.target;
 });
 function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  if(k==='edit'){if(!admin.ok)return;editing=true;wantEdit=true;persist();render();}
- else if(k==='discard'){if(dirty){S=FB.serverState?JSON.parse(FB.serverState):clone(ORIGINAL);seedSetups();HIST=[JSON.stringify(S)];dirty=false;if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;view.focus=null;}editing=false;wantEdit=false;view.tool='select';persist();render();}
+ else if(k==='discard'){if(dirty){S=FB.serverState?JSON.parse(FB.serverState):clone(ORIGINAL);seedSetups();migrateFormats();HIST=[JSON.stringify(S)];dirty=false;if(!S.plans[view.plan])view.plan=S.livePlan;view.sel=null;view.focus=null;}editing=false;wantEdit=false;view.tool='select';persist();render();}
  else if(k==='save')save();
  else if(k==='makelive'){S.livePlan=view.plan;touch();}
  else if(k==='autopair')autoPair();
@@ -1346,7 +1388,16 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='delplan'){if(view.confirmDel!=='plan'){view.confirmDel='plan';render();return;}var gone=view.plan;delete S.plans[gone];S.planOrder=S.planOrder.filter(function(x){return x!==gone;});if(S.livePlan===gone)S.livePlan=S.planOrder[0];view.plan=S.livePlan;view.sel=null;view.confirmDel=null;persist();touch();}
  else if(k==='addzone')addZone();
  else if(k==='setups')openModal('setups');
- else if(k==='gobrief'){var bc=document.getElementById('briefing-card');if(bc)bc.scrollIntoView({behavior:'smooth',block:'start'});}
+ else if(k==='golive'){view.plan=S.livePlan;view.chosen=true;persist();render();}
+ else if(k==='showmap'){view.focus=el.getAttribute('data-p');view.sel=null;goTab('map');}
+ else if(k==='copen'){var cc0=el.getAttribute('data-cid');view.copen=view.copen===cc0?null:cc0;render();}
+ else if(k==='ins'||k==='insb'){var ta=document.getElementById(el.getAttribute('data-w'));if(!ta)return;var s0=ta.selectionStart,e0=ta.selectionEnd,v=ta.value;
+  if(k==='insb'){var sel=v.slice(s0,e0)||'bold text';ta.value=v.slice(0,s0)+'**'+sel+'**'+v.slice(e0);}
+  else{var ls=v.lastIndexOf('\n',s0-1)+1,pre=el.getAttribute('data-s');ta.value=v.slice(0,ls)+pre+v.slice(ls).replace(/^(#+ |[-*•] |\d+[.)] |> )/,'');}
+  ta.dispatchEvent(new Event('change',{bubbles:true}));}
+ else if(k==='bcopytxt'){var srcp=val('b-copy2');if(srcp&&S.plans[srcp]){pl.briefingText=S.plans[srcp].briefingText||'';touch();toast('Briefing copied in. Sentences reused from before keep their translations.');}}
+
+ else if(k==='gobrief'){goTab('brief');}
  else if(k==='copybrief'){var bt=briefingText();try{navigator.clipboard.writeText(bt).then(function(){toast(Tt('Briefing copied. Paste it into Discord.'));},function(){view.txtOverride=bt;openModal('text');});}catch(x){view.txtOverride=bt;openModal('text');}}
  else if(k==='bprev'){view.bprev=!view.bprev;render();}
  else if(k==='badd'){getArr(el.getAttribute('data-path')).push({t:el.getAttribute('data-t'),text:''});touch();}
@@ -1360,7 +1411,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='tpladd'){var tx=val('m-tplnew').trim();if(!tx){toast('Write the template first.');return;}S.templates.push({id:uid('t'),text:tx,cat:val('m-tplcat')||undefined});touch();}
  else if(k==='tpldel'){var tid=el.getAttribute('data-id');if(view.confirmDel!=='t:'+tid){view.confirmDel='t:'+tid;openModal('tpls');return;}S.templates=S.templates.filter(function(x){return x.id!==tid;});view.confirmDel=null;touch();}
  else if(k==='i18n'){openModal('i18n');}
- else if(k==='cadd'){contOf(pl).push({id:uid('c'),trigger:{t:'p',text:''},actions:[],scope:{},phase:0});touch();}
+ else if(k==='cadd'){var nc={id:uid('c'),ifText:'',thenText:'',scope:{},phase:0};contOf(pl).push(nc);view.copen=null;touch();}
  else if(k==='cup'||k==='cdown'){var ca=contOf(pl),ci=+el.getAttribute('data-i'),cj=k==='cup'?ci-1:ci+1,tc=ca[ci];ca[ci]=ca[cj];ca[cj]=tc;touch();}
  else if(k==='cdup'){var co0=contOf(pl)[+el.getAttribute('data-i')],cc=clone(co0);cc.id=uid('c');contOf(pl).splice(+el.getAttribute('data-i')+1,0,cc);touch();}
  else if(k==='cdel'){var cd=contOf(pl)[+el.getAttribute('data-i')];if(view.confirmDel!=='c:'+cd.id){view.confirmDel='c:'+cd.id;render();return;}pl.contingencies=contOf(pl).filter(function(x){return x!==cd;});view.confirmDel=null;touch();}
@@ -1369,7 +1420,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='cpdel'){var cpd=CN(pl,el.getAttribute('data-cid'));if(cpd){cpd.scope.players.splice(+el.getAttribute('data-i'),1);touch();}}
  else if(k==='pbmine'){view.pbMine=!view.pbMine;render();}
  else if(k==='pbprev'){view.pbprev=!view.pbprev;render();}
- else if(k==='gocont'){var tgt=document.querySelector('#playbook-card [data-cid="'+el.getAttribute('data-cid')+'"]')||document.getElementById('playbook-card');if(tgt)tgt.scrollIntoView({behavior:'smooth',block:'center'});}
+ else if(k==='gocont'){if(view.tab!=='ifthen'){view.tab='ifthen';render();}var tgt=document.querySelector('#playbook-card [data-cid="'+el.getAttribute('data-cid')+'"]')||document.getElementById('playbook-card');if(tgt)tgt.scrollIntoView({behavior:'smooth',block:'center'});}
  else if(k==='live'){view.live=!view.live;if(view.live)view.ltool=view.ltool||'enemy';render();}
  else if(k==='ltool'){view.ltool=el.getAttribute('data-t');render();}
  else if(k==='lreset'){if(view.confirmDel!=='lreset'){view.confirmDel='lreset';toast('Tap Reset map again to clear every building status.');return;}view.confirmDel=null;LIVE.bstat=LIVE.bstat||{};LIVE.bstat[view.plan]={};writeLive();}
@@ -1440,7 +1491,11 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='delplayer'){if(view.confirmDel!=='p:'+id){view.confirmDel='p:'+id;render();return;}var nn=nm(id);removePlayer(id);view.sel=null;view.focus=null;view.confirmDel=null;touch();toast(nn+' removed from the roster.');}
  else if(k==='newplayer'){var name=val('np-name').trim();if(!name){toast('Type a name first.');return;}var nid=newPlayerId(name);S.players[nid]={name:name};var pp=+String(val('np-pw')).replace(/\D/g,'');if(pp)S.players[nid].power=pp;view.sel={type:'player',id:nid};view.focus=nid;touch();}
 }
-document.addEventListener('change',function(e){if(e.target&&e.target.id==='langsel'){LANG=e.target.value;try{localStorage.setItem('swp-lang',LANG);}catch(x){}subLang();render();return;}if(e.target&&e.target.id==='trlang'){view.trlang=e.target.value;openModal('i18n');return;}if(e.target&&e.target.id==='trfilter'){view.trfilter=e.target.value;openModal('i18n');return;}
+document.addEventListener('change',function(e){var asel=e.target&&e.target.getAttribute&&e.target.getAttribute('data-act-sel');
+ if(asel&&e.target.value){var ta2=document.getElementById(e.target.getAttribute('data-w'));if(ta2){var tp2=tplById(e.target.value);var ins=asel==='inslive'?'[['+e.target.value+']]':(tp2?'- '+tp2.text.replace(/\{\w+\}/g,'___'):'');var p0=ta2.selectionStart,v2=ta2.value,le2=v2.indexOf('\n',p0);if(le2<0)le2=v2.length;ta2.value=v2.slice(0,le2)+(v2.slice(0,le2).trim()?'\n':'')+ins+v2.slice(le2);ta2.dispatchEvent(new Event('change',{bubbles:true}));}e.target.value='';return;}
+ if(e.target&&e.target.id==='plansel'){view.plan=e.target.value;view.chosen=true;view.phase=1;try{history.replaceState(null,'','#plan-'+view.plan);}catch(x){}persist();render();return;}
+
+ if(e.target&&e.target.id==='langsel'){LANG=e.target.value;try{localStorage.setItem('swp-lang',LANG);}catch(x){}subLang();render();return;}if(e.target&&e.target.id==='trlang'){view.trlang=e.target.value;openModal('i18n');return;}if(e.target&&e.target.id==='trfilter'){view.trfilter=e.target.value;openModal('i18n');return;}
  var t=e.target,k=t.getAttribute&&t.getAttribute('data-set');if(!k)return;var pl=P(),id=view.sel&&view.sel.id,b=t.getAttribute('data-b');
  if(k==='lead'){var ml=bm(pl,b);ml.lead=t.value||null;if(ml.co)ml.co=ml.co.filter(function(x){return x!==ml.lead;});touch();}
  else if(k==='bzone'){var m=bm(pl,b);m.zone=t.value;if(!t.value)m.lead=null;touch();}
@@ -1478,6 +1533,9 @@ document.addEventListener('change',function(e){if(e.target&&e.target.id==='langs
  else if(k==='canchor'){var can=CN(pl,t.getAttribute('data-cid'));if(can){if(t.value){var pp=t.value.split(':');can.anchor={type:pp[0],id:pp.slice(1).join(':')};}else delete can.anchor;touch();}}
  else if(k==='creplace'){var crp=CN(pl,t.getAttribute('data-cid'));if(crp){crp.replace=t.checked;touch();}}
  else if(k==='tplcat'){var tc2=tplById(t.getAttribute('data-id'));if(tc2){if(t.value)tc2.cat=t.value;else delete tc2.cat;touch();}}
+ else if(k==='btxt'){pl.briefingText=t.value;touch();}
+ else if(k==='cif'){var ci1=CN(pl,t.getAttribute('data-cid'));if(ci1){ci1.ifText=t.value;touch();}}
+ else if(k==='cthen'){var ci2=CN(pl,t.getAttribute('data-cid'));if(ci2){ci2.thenText=t.value;touch();}}
  else if(k==='zbuild'){var m3=bm(pl,b);if(t.checked)m3.zone=id;else{m3.zone='';m3.lead=null;}touch();}
  else if(k==='rot'){pl.rotateAt=pl.rotateAt||{};if(t.value.trim())pl.rotateAt[id]=t.value.trim();else delete pl.rotateAt[id];touch();}
  else if(k==='cover'){var c=coverOf(pl,id);if(c)setPairs(pl,c.main,pairsOf(pl,c.main).filter(function(x){return x!==id;}));if(t.value)setPairs(pl,t.value,pairsOf(pl,t.value).concat([id]));touch();}
@@ -1485,7 +1543,8 @@ document.addEventListener('change',function(e){if(e.target&&e.target.id==='langs
  else if(k==='name'){var v=t.value.trim();if(v){S.players[id].name=v;touch();}}
  else if(k==='power'){var n=+String(t.value).replace(/\D/g,'');if(n)S.players[id].power=n;else delete S.players[id].power;touch();}
 });
-document.addEventListener('input',function(e){if(e.target&&e.target.id==='m-rq'){view.rq=e.target.value;var pos=e.target.selectionStart;openModal('roster');var n=document.getElementById('m-rq');if(n){n.focus();try{n.setSelectionRange(pos,pos);}catch(x){}}}});
+document.addEventListener('input',function(e){var pv=e.target&&e.target.id&&document.querySelector('[data-prev="'+e.target.id+'"]');if(pv){clearTimeout(pv._t);var tv2=e.target.value;pv._t=setTimeout(function(){PHC={};pv.innerHTML=tv2.trim()?mdHTML(P(),tv2):'<p class="empty">Preview appears here.</p>';},150);}
+ if(e.target&&e.target.id==='m-rq'){view.rq=e.target.value;var pos=e.target.selectionStart;openModal('roster');var n=document.getElementById('m-rq');if(n){n.focus();try{n.setSelectionRange(pos,pos);}catch(x){}}}});
 document.addEventListener('submit',function(e){if(e.target.id!=='lookup')return;e.preventDefault();var q=val('q');view.q=q;var r=findByName(q);
  if(!q.trim()){view.qmsg='Type your in-game name.';render();return;}
  if(typeof r==='string'){view.qmsg='';if(!admin.ok){view.me=r;try{localStorage.setItem('swp-me',r);}catch(x){}}select({type:'player',id:r});return;}
@@ -1522,7 +1581,233 @@ window.addEventListener('hashchange',function(){var p=planFromHash();if(p&&S.pla
 window.addEventListener('beforeunload',function(e){if(dirty&&editing){e.preventDefault();e.returnValue='';}});
 function seedSetups(){S.templates=S.templates||[];S.glossary=S.glossary||[];Object.keys(S.plans).forEach(function(k){S.plans[k].markers=S.plans[k].markers||[];});S.setups=S.setups||[];if(S.setupsSeeded)return;S.setupsSeeded=1;
  [['a','Concede Purple · Round 2 Plan A'],['b','All 4 Zones · Round 2 Plan B'],['c','Concede Purple all match · Round 3']].forEach(function(x){var pl=S.plans[x[0]];if(!pl)return;var st=setupFromPlan(pl,x[1]);st.id='seed-'+x[0];st.note='Layout from '+pl.name+' ('+pl.label+')';S.setups.push(st);});}
-seedSetups();HIST=[JSON.stringify(S)];
+/* ===================== v3: tabs, free-text writing, image map ===================== */
+MAPW=885;MAPH=605;
+try{if(!localStorage.getItem('swp-tz'))TZ='utc';}catch(e){TZ='utc';}
+function escRe(x){return String(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+/* --- auto blanks: player names, times and numbers become placeholders so a line is translated once --- */
+var PHC={};
+function autoPH(line){if(PHC[line])return PHC[line];var vals={},n=0,out=String(line);
+ var names=Object.keys(S.players).map(function(i){return nm(i);}).filter(function(x){return x&&x.length>1;}).sort(function(a,b){return b.length-a.length;});
+ names.forEach(function(nmx){var re=new RegExp('(^|[^\\w~{])('+escRe(nmx)+')(?![\\w}])',nmx.length<=4?'g':'gi');out=out.replace(re,function(m,pre,hit){var k='p'+(n++);vals[k]=hit;return pre+'{'+k+'}';});});
+ out=out.replace(/(^|[^\w{])(\d{1,2}:\d{2}(?::\d{2})?)(?![\w}])/g,function(m,pre,t){var k='t'+(n++);vals[k]=t;return pre+'{'+k+'}';});
+ out=out.replace(/(^|[^\w{])(\d+(?:[.,]\d+)?)(?![\w}])/g,function(m,pre,d){var k='n'+(n++);vals[k]=d;return pre+'{'+k+'}';});
+ return (PHC[line]={pat:out,vals:vals});}
+function lineHTML(t){t=String(t||'');if(!t.trim())return '';var a=autoPH(t),v={};Object.keys(a.vals).forEach(function(k){v[k]=esc(a.vals[k]);});return Th(a.pat,v);}
+function lineText(t){t=String(t||'');if(!t.trim())return '';var a=autoPH(t);return Tt(a.pat,a.vals);}
+/* --- light markup: # heading, ## subheading, - bullet, 1. numbered, > callout, [[live]] --- */
+function parseMD(text){var out=[];String(text||'').split('\n').forEach(function(raw){var l=raw.replace(/\s+$/,'');var m;
+ if(!l.trim()){out.push({k:'gap'});return;}
+ if((m=/^\s*\[\[(\w+)\]\]\s*$/.exec(l))){out.push({k:'live',v:m[1]});return;}
+ if((m=/^##\s+(.*)$/.exec(l))){out.push({k:'h2',v:m[1]});return;}
+ if((m=/^#\s+(.*)$/.exec(l))){out.push({k:'h',v:m[1]});return;}
+ if((m=/^\s*[-*•]\s+(.*)$/.exec(l))){out.push({k:'li',v:m[1]});return;}
+ if((m=/^\s*\d+[.)]\s+(.*)$/.exec(l))){out.push({k:'ol',v:m[1]});return;}
+ if((m=/^>\s?(.*)$/.exec(l))){out.push({k:'call',v:m[1]});return;}
+ out.push({k:'p',v:l});});return out;}
+function mdHTML(pl,text){var o='',list=null;parseMD(text).forEach(function(b){var lk=b.k==='li'?'ul':b.k==='ol'?'ol':null;
+ if(list&&lk!==list){o+='</'+list+'>';list=null;}if(lk&&!list){o+='<'+lk+(lk==='ol'?' class="orders"':'')+'>';list=lk;}
+ if(b.k==='li'||b.k==='ol')o+='<li>'+lineHTML(b.v)+'</li>';else if(b.k==='h')o+='<h3 class="bh">'+lineHTML(b.v)+'</h3>';else if(b.k==='h2')o+='<h4 class="bh4">'+lineHTML(b.v)+'</h4>';
+ else if(b.k==='call')o+='<div class="callout">'+lineHTML(b.v)+'</div>';else if(b.k==='live')o+=liveHTML(pl,b.v);else if(b.k==='p')o+='<p>'+lineHTML(b.v)+'</p>';});
+ if(list)o+='</'+list+'>';return o;}
+function mdText(pl,text){var L=[],num=0;parseMD(text).forEach(function(b){if(b.k!=='ol')num=0;
+ if(b.k==='gap')L.push('');else if(b.k==='h')L.push('**'+lineText(b.v)+'**');else if(b.k==='h2')L.push('__'+lineText(b.v)+'__');else if(b.k==='li')L.push('• '+lineText(b.v));else if(b.k==='ol')L.push((++num)+'. '+lineText(b.v));else if(b.k==='call')L.push('🔥 '+lineText(b.v));
+ else if(b.k==='live'){var tmp=document.createElement('div');tmp.innerHTML=liveHTML(pl,b.v).replace(/<h4[^>]*>/g,'\n**').replace(/<\/h4>/g,'**\n').replace(/<li>/g,'• ').replace(/<\/li>/g,'\n').replace(/<b>|<\/b>/g,'**').replace(/<span class="ck[^"]*">/g,'\n').replace(/<div class="cmeta">/g,'\n_');L.push(tmp.textContent.replace(/\n{3,}/g,'\n\n').trim());}
+ else L.push(lineText(b.v));});return L.join('\n').replace(/\n{3,}/g,'\n\n').trim();}
+function mdMissing(text){if(!admin.ok||!I18N_ALL_LOADED)return 0;var n=0;parseMD(text).forEach(function(b){if(!b.v||b.k==='live')return;var k=hsh(autoPH(b.v).pat);if(LANGS.some(function(l){return l[0]!=='en'&&!(I18N[l[0]]||{})[k];}))n++;});return n;}
+/* --- convert the older block format into text, once --- */
+function tplPlainEN(pl,b){var tp=tplById(b.tpl);if(!tp)return '';var keep=LANG;LANG='en';var t=Tt(tp.text,tplVars(pl,b,tp,true));LANG=keep;return t;}
+function blocksToMD(pl,bl){var L=[];(bl||[]).forEach(function(b){var pre='';
+ if(b.t==='tpl'){pre=b.as==='p'?'':b.as==='call'?'> ':'- ';L.push(pre+tplPlainEN(pl,b));return;}
+ if(b.t==='live'){L.push('[['+b.live+']]');return;}
+ if(b.t==='h'){if(L.length)L.push('');L.push('# '+(b.text||''));return;}
+ L.push((b.t==='li'?'- ':b.t==='call'?'> ':'')+(b.text||''));});return L.join('\n');}
+function migrateFormats(){Object.keys(S.plans).forEach(function(k){var pl=S.plans[k],keep=view.plan;view.plan=k;
+ if(pl.briefingText==null&&pl.briefing)pl.briefingText=blocksToMD(pl,pl.briefing);if(pl.briefingText==null)pl.briefingText='';
+ (pl.contingencies||[]).forEach(function(c){if(c.ifText==null){var t=c.trigger||{};c.ifText=t.t==='tpl'?tplPlainEN(pl,t):(t.text||'');}if(c.thenText==null)c.thenText=blocksToMD(pl,c.actions||[]);});
+ (pl.markers||[]).forEach(function(m){});view.plan=keep;});
+ // undercellars become per-plan markers; buildings fixed to Duvy's map
+ S.map.landmarks=(S.map.landmarks||[]).filter(function(l){return l.type!=='cellar';});}
+/* --- overrides that read the text format --- */
+function briefingHTML(){var pl=P();return mdHTML(pl,pl.briefingText||'');}
+function briefingText(){var pl=P(),m=M(pl),L=['⚔️ '+m.us.k+' ['+m.us.tag+'] — '+Tt('Mega Legion Battle Plan').toUpperCase(),m.league.toUpperCase()+' | '+m.round.toUpperCase(),Tt('Opponent')+': '+m.them.k+' ['+m.them.tag+']'];
+ var st=startMs(pl);if(st!=null)L.push('🕒 <t:'+Math.floor(st/1000)+':F> (<t:'+Math.floor(st/1000)+':R>)');L.push('');L.push(mdText(pl,pl.briefingText||''));return L.join('\n');}
+function trigHTML(pl,c){return lineHTML(c.ifText)||'<span class="blank">___</span>';}
+function trigText(pl,c){return lineText(c.ifText).replace(/\*\*/g,'');}
+function contHTML(pl,c,opts){opts=opts||{};var act=isActiveC(c.id);
+ return '<div class="cont'+(act?' active':'')+'" data-cid="'+esc(c.id)+'"><div class="cif"><span class="ck">'+Th('IF')+'</span><span>'+trigHTML(pl,c)+(act?' <span class="live">'+Th('ACTIVE NOW')+'</span>':'')+'</span></div>'+
+ '<div class="cthen"><span class="ck then">'+Th('THEN')+'</span><div>'+(c.thenText&&c.thenText.trim()?mdHTML(pl,c.thenText):'<span class="empty">'+Th('No orders written yet.')+'</span>')+'</div></div>'+
+ '<div class="cmeta">'+(c.anchor&&c.anchor.id?'📍 '+esc(anchorText(pl,c))+' · ':'')+Th('Applies to: {who}',{who:esc(scopeText(pl,c))})+(c.replace?' · '+Th('Replaces normal orders'):'')+(c.phase?' · '+esc(Tt('Phase {n}',{n:c.phase}))+' · '+esc(phTimeT(pl,c.phase)):'')+
+ (admin.ok&&!opts.noToggle?' <button class="mini" data-act="ctoggle" data-cid="'+esc(c.id)+'">'+(act?'⏹ Mark resolved':'⚡ Activate for everyone')+'</button>':'')+'</div></div>';}
+function setBStatus(bid,st){LIVE.bstat=LIVE.bstat||{};var m=LIVE.bstat[view.plan]=Object.assign({},LIVE.bstat[view.plan]||{});if(st)m[bid]=st;else delete m[bid];writeLive();
+ if(st==='enemy'||st==='contested'){var pl=P(),b=BB(bid),keys=[bname(pl,bid).toLowerCase()];if(BL().filter(function(o){return o.name===b.name;}).length===1)keys.push(b.name.toLowerCase());
+  var hits=contOf(pl).filter(function(c){if(isActiveC(c.id))return false;var t=String(c.ifText||'').toLowerCase();return keys.some(function(k){return t.indexOf(k)>=0;})||(c.anchor&&c.anchor.type==='building'&&c.anchor.id===bid);});
+  if(hits.length){view.suggest={bid:bid,ids:hits.map(function(c){return c.id;})};openModal('suggest');}}}
+/* --- writing UI --- */
+var LIVE_TOKENS={zones:'Zone rosters',rotations:'Rotation plan',playbook:'If → Then list',orders:'Orders list',timeline:'Phase timeline',subs:'Substitute list'};
+function writer(id,text,setKey,attrs,rows){var pl=P();
+ return '<div class="bwrite"><div class="bw-tools"><button class="mini" data-act="ins" data-w="'+id+'" data-s="# ">Heading</button><button class="mini" data-act="ins" data-w="'+id+'" data-s="- ">• Bullet</button><button class="mini" data-act="ins" data-w="'+id+'" data-s="1. ">1. Numbered</button><button class="mini" data-act="ins" data-w="'+id+'" data-s="> ">Callout</button><button class="mini" data-act="insb" data-w="'+id+'"><b>B</b></button>'+
+ '<select data-act-sel="inslive" data-w="'+id+'" aria-label="Insert live section"><option value="">+ Live section…</option>'+Object.keys(LIVE_TOKENS).map(function(k){return '<option value="'+k+'">'+LIVE_TOKENS[k]+'</option>';}).join('')+'</select>'+
+ '<select data-act-sel="inssnip" data-w="'+id+'" aria-label="Insert saved line"><option value="">+ Saved line…</option>'+(S.templates||[]).map(function(t){return '<option value="'+esc(t.id)+'">'+esc(t.text.replace(/\*\*/g,'').replace(/\{\w+\}/g,'___').slice(0,80))+'</option>';}).join('')+'</select>'+
+ (mdMissing(text)?'<span class="trb">🌐 '+mdMissing(text)+' new line'+(mdMissing(text)>1?'s':'')+' to translate</span>':'')+'</div>'+
+ '<div class="bw-grid"><textarea id="'+id+'" data-set="'+setKey+'"'+(attrs||'')+' rows="'+(rows||18)+'" spellcheck="true">'+esc(text||'')+'</textarea><div class="bw-prev btext" data-prev="'+id+'">'+(String(text||'').trim()?mdHTML(pl,text):'<p class="empty">Preview appears here.</p>')+'</div></div></div>';}
+var WRITE_HELP='<p class="note"><b># Heading</b> · <b>## Subheading</b> · <b>- bullet</b> · <b>1. numbered</b> · <b>&gt; callout</b> · <b>**bold**</b> · <b>[[zones]]</b>, <b>[[rotations]]</b>, <b>[[playbook]]</b>, <b>[[orders]]</b>, <b>[[timeline]]</b> drop in live sections. Player names, times and numbers are filled in automatically, so a reused sentence never needs translating again.</p>';
+function briefingCard(){var pl=P(),txt=pl.briefingText||'';if(!txt.trim()&&!editing)return '';
+ return '<div class="card briefing" id="briefing-card"><div class="sechead"><h2>📜 '+Th('Briefing')+'</h2><div class="tools">'+(txt.trim()?'<button class="btn" data-act="copybrief">'+Th('Copy briefing')+'</button>':'')+(editing?'<select id="b-copy2" aria-label="Start from another plan"><option value="">Start from another plan…</option>'+S.planOrder.filter(function(k){return k!==view.plan&&S.plans[k]&&(S.plans[k].briefingText||'').trim();}).map(function(k){return '<option value="'+k+'">'+esc(S.plans[k].name+' · '+S.plans[k].label)+'</option>';}).join('')+'</select><button class="btn" data-act="bcopytxt">Copy in</button>':'')+'</div></div>'+
+ (editing?writer('btxt',txt,'btxt','',22)+WRITE_HELP:'<div class="btext">'+briefingHTML()+'</div>')+'</div>';}
+function playbookEditor(){var pl=P(),cs=contOf(pl),o='<div class="bedit">';
+ cs.forEach(function(c,ci){var sc=c.scope||{},open=view.copen===c.id;
+  o+='<div class="cedit"><div class="row"><span class="ck">IF</span><input class="ifin" data-set="cif" data-cid="'+esc(c.id)+'" list="ifsnips" value="'+esc(c.ifText||'')+'" placeholder="e.g. The enemy captures Blue Sanctum">'+(isActiveC(c.id)?'<span class="live">ACTIVE</span>':'')+'</div>'+
+  '<div class="row" style="align-items:flex-start"><span class="ck then">THEN</span><textarea data-set="cthen" data-cid="'+esc(c.id)+'" rows="3" placeholder="- Blue supporters reinforce Abbey&#10;- MidgeMarine rallies to retake Sanctum">'+esc(c.thenText||'')+'</textarea></div>'+
+  '<div class="row cfoot"><span class="note">📍 '+esc(anchorText(pl,c)||'Not attached')+' · '+esc(scopeText(pl,c))+(c.replace?' · replaces orders':'')+(c.phase?' · Phase '+c.phase:'')+'</span><button class="mini" data-act="copen" data-cid="'+esc(c.id)+'">'+(open?'Hide options':'Who & where ▾')+'</button><button class="mini" data-act="cup" data-i="'+ci+'"'+(ci?'':' disabled')+'>↑</button><button class="mini" data-act="cdown" data-i="'+ci+'"'+(ci<cs.length-1?'':' disabled')+'>↓</button><button class="mini" data-act="cdup" data-i="'+ci+'">Duplicate</button><button class="mini" data-act="cdel" data-i="'+ci+'" style="color:var(--red)">'+(view.confirmDel==='c:'+c.id?'Confirm':'Delete')+'</button><button class="mini" data-act="ctoggle" data-cid="'+esc(c.id)+'">'+(isActiveC(c.id)?'⏹ Resolve':'⚡ Activate')+'</button></div>';
+  if(open)o+='<div class="copts"><div class="row"><span class="fl">Zones</span>'+pl.zones.map(function(z){return '<label class="bcheck"><input type="checkbox" data-set="cscz" data-cid="'+esc(c.id)+'" data-v="'+esc(z.id)+'"'+((sc.zones||[]).indexOf(z.id)>=0?' checked':'')+'>'+esc(z.name)+'</label>';}).join('')+'</div>'+
+   '<div class="row"><span class="fl">Roles</span>'+Object.keys(ROLES).map(function(r){return '<label class="bcheck"><input type="checkbox" data-set="cscr" data-cid="'+esc(c.id)+'" data-v="'+r+'"'+((sc.roles||[]).indexOf(r)>=0?' checked':'')+'>'+ROLES[r]+'</label>';}).join('')+'</div>'+
+   '<div class="row"><span class="fl">Players</span>'+(sc.players||[]).map(function(p,pi){return '<span class="chip" style="cursor:default"><span>'+esc(nm(p))+'</span><button class="mini" data-act="cpdel" data-cid="'+esc(c.id)+'" data-i="'+pi+'" aria-label="Remove">✕</button></span>';}).join('')+'<select id="cp-'+esc(c.id)+'">'+playerOptions(pl,'')+'</select><button class="mini" data-act="cpadd" data-cid="'+esc(c.id)+'">Add</button></div>'+
+   '<div class="row"><span class="fl">Switch on</span><select data-set="canchor" data-cid="'+esc(c.id)+'"><option value="">Nothing (general)</option><optgroup label="Zones">'+pl.zones.map(function(z){return '<option value="zone:'+esc(z.id)+'"'+(c.anchor&&c.anchor.type==='zone'&&c.anchor.id===z.id?' selected':'')+'>'+esc(z.name)+' Zone</option>';}).join('')+'</optgroup><optgroup label="Buildings">'+BL().filter(function(b){return bz(pl,b.id);}).map(function(b){return '<option value="building:'+b.id+'"'+(c.anchor&&c.anchor.type==='building'&&c.anchor.id===b.id?' selected':'')+'>'+esc(bname(pl,b.id))+'</option>';}).join('')+'</optgroup></select>'+
+   '<label class="bcheck"><input type="checkbox" data-set="creplace" data-cid="'+esc(c.id)+'"'+(c.replace?' checked':'')+'> Replaces their normal orders</label>'+
+   '<select data-set="cphase" data-cid="'+esc(c.id)+'"><option value="0">Any time</option>'+pl.phases.map(function(p,i){return '<option value="'+(i+1)+'"'+(c.phase===i+1?' selected':'')+'>Phase '+(i+1)+' · '+esc(p.time)+'</option>';}).join('')+'</select></div><p class="note" style="margin:0">Nothing ticked = everyone'+(c.anchor?' in the attached zone':'')+'.</p></div>';
+  o+='</div>';});
+ return o+'</div><datalist id="ifsnips">'+(S.templates||[]).filter(function(t){return t.cat==='if';}).map(function(t){return '<option value="'+esc(t.text.replace(/\*\*/g,'').replace(/\{\w+\}/g,'___'))+'">';}).join('')+'</datalist><div class="addbar"><button class="btn gold" data-act="cadd">+ Add If → Then</button><span class="note">Write freely. Use the same markup as the briefing in THEN.</span></div>';}
+/* --- map tools: buildings are fixed to Duvy's map --- */
+function mapTools(){var pl=P(),t=view.tool;var cur=allSetups().filter(function(st){return setupMatches(pl,st);})[0];
+ var o='<div class="maptools" role="group"><span class="lbl">Place</span><button class="tool" data-act="tool" data-t="select" aria-pressed="'+(t==='select')+'">Select / drag</button><button class="tool" data-act="tool" data-t="place:tp" aria-pressed="'+(t==='place:tp')+'">📍 Town Center</button><button class="tool" data-act="tool" data-t="place:loot" aria-pressed="'+(t==='place:loot')+'">🎁 Loot</button><button class="tool" data-act="tool" data-t="place:cellar" aria-pressed="'+(t==='place:cellar')+'">⛏ Undercellar</button>'+
+ '<details class="more"><summary class="tool">Zones ▾</summary><div class="morebox"><span class="lbl">Tap buildings to move them into</span>'+pl.zones.map(function(z){return '<button class="tool" style="background:'+z.color+';color:'+inkOn(z.color)+'" data-act="tool" data-t="paint:'+esc(z.id)+'" aria-pressed="'+(t==='paint:'+z.id)+'">'+esc(z.name)+'</button>';}).join('')+'<button class="tool" data-act="tool" data-t="paint:" aria-pressed="'+(t==='paint:')+'">Not in plan</button><span class="lbl">Setup</span><select id="ed-setup" data-set="setup" style="background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px"><option value="">'+(cur?'':'Custom layout')+'</option>'+allSetups().map(function(st){return '<option value="'+esc(st.id)+'"'+(cur&&cur.id===st.id?' selected':'')+'>'+esc(st.name)+'</option>';}).join('')+'</select></div></details>';
+ var hint=t==='select'?'Tap a building or marker to edit it. Drag markers to move them.':t==='place:tp'?'Tap the map where a Town Center should go, then add players to it.':t==='place:loot'?'Tap the map where loot drops. It shows only in the phase you’re viewing.':t==='place:cellar'?'Tap the map where an Undercellar spawns. It shows only in the phase you’re viewing.':t==='paint:'?'Tap buildings to leave them out of this plan.':'Tap buildings to put them in the '+esc(zname(pl,t.slice(6)))+' zone.';
+ return o+'<span class="maphint">'+hint+'</span></div>';}
+function placeAt(kind,x,y){var pl=P();x=Math.max(16,Math.min(MAPW-16,x));y=Math.max(40,Math.min(MAPH-8,y));
+ var m={id:uid('m'),type:kind,x:x,y:y,label:'',phase:kind==='tp'?0:view.phase};if(kind==='tp')m.players=[];
+ pl.markers.push(m);view.sel={type:'marker',id:m.id};view.focus=null;touch();
+ toast(kind==='tp'?'Town Center spot added. Add the players who go there.':kind==='cellar'?'Undercellar added for '+phaseLabel(pl,m.phase)+'.':'Loot marked for '+phaseLabel(pl,m.phase)+'.');}
+function mkTitle(pl,m){return m.label||(m.type==='tp'?'Town Center spot':m.type==='cellar'?'Undercellar':'Loot crate');}
+function mkIcon(m){return m.type==='tp'?'📍':m.type==='cellar'?'⛏':'🎁';}
+function markerPanel(mid){var pl=P(),m=MK(pl,mid);if(!m)return overviewPanel();
+ var o='<h3>'+mkIcon(m)+' '+esc(Tt(mkTitle(pl,m)))+'</h3><p class="sub">'+esc(Tt(m.phase?phaseLabel(pl,m.phase):'All phases'))+(m.phase&&clockAt(pl,phStart(pl,m.phase))?' · '+esc(clockAt(pl,phStart(pl,m.phase))):'')+'</p>';
+ if(m.note)o+='<p>'+lineHTML(m.note)+'</p>';
+ if(m.type==='tp'){var ps=m.players||[];o+='<section><h4>'+Th('Town Center here')+' ('+ps.length+')</h4>'+(ps.length?'<div class="chips">'+ps.map(function(p){return chip(p);}).join('')+'</div>':'<p class="empty">No players assigned yet.</p>')+'</section>';}
+ if(editing){o+='<section class="ed"><label for="ed-ml">Label</label><input id="ed-ml" data-set="mlabel" value="'+esc(m.label||'')+'"><label for="ed-mn">Note</label><input id="ed-mn" data-set="mnote" value="'+esc(m.note||'')+'" placeholder="Optional instructions">'+
+  '<label for="ed-mp">Show during</label><select id="ed-mp" data-set="mphase"><option value="0">All phases</option>'+pl.phases.map(function(p,i){return '<option value="'+(i+1)+'"'+(m.phase===i+1?' selected':'')+'>Phase '+(i+1)+' only · '+esc(p.time)+'</option>';}).join('')+'</select>';
+  if(m.type==='tp'){var ps2=m.players||[];o+='<label>Players</label><div class="pairlist">'+ps2.map(function(p,i){return '<div>'+esc(nm(p))+' <button class="mini" data-act="mpdel" data-i="'+i+'">✕</button></div>';}).join('')+'</div><div class="row"><select id="ed-mpadd"><option value="">Add a player…</option>'+playerOptions(pl,'').replace('<option value="">— player —</option>','')+'</select><button class="btn" data-act="mpadd">Add</button></div><div class="row"><select id="ed-mpz">'+pl.zones.map(function(z){return '<option value="'+esc(z.id)+'">'+esc(z.name)+'</option>';}).join('')+'</select><button class="btn" data-act="mpzone">Add whole zone</button></div>';}
+  o+='<div class="row"><button class="btn" data-act="mdup">Duplicate</button><button class="btn danger" data-act="mdel">'+(view.confirmDel==='m:'+mid?'Tap again to remove':'Remove')+'</button></div></section>';}
+ return o;}
+function markersCard(){var pl=P(),ms=pl.markers||[];if(!ms.length)return '';
+ var row=function(m){return '<tr><td><button class="mini" data-marker="'+m.id+'" style="border:0;background:none;padding:0;font-size:14px;color:var(--text);text-decoration:underline dotted">'+mkIcon(m)+' '+esc(Tt(mkTitle(pl,m)))+'</button>'+(m.note?'<div class="note">'+lineHTML(m.note)+'</div>':'')+'</td><td class="t">'+esc(m.phase?Tt('Phase {n}',{n:m.phase})+(clockAt(pl,phStart(pl,m.phase))?' · '+clockAt(pl,phStart(pl,m.phase)):''):Tt('All phases'))+'</td><td>'+(m.type==='tp'?((m.players||[]).length?'<div class="chips">'+m.players.map(function(p){return chip(p);}).join('')+'</div>':''):'')+'</td></tr>';};
+ var order={tp:0,cellar:1,loot:2};return '<div class="card"><div class="sechead"><h2>'+Th('Map markers')+'</h2></div><div class="schedwrap"><table class="sched"><tbody>'+ms.slice().sort(function(a,b){return order[a.type]-order[b.type]||(a.phase||0)-(b.phase||0);}).map(row).join('')+'</tbody></table></div></div>';}
+/* --- navigation --- */
+function zoneTabs(pl){return pl.zones.filter(function(z){return editing||z.members.length||!fullConZone(pl,z.id)||anchoredTo(pl,'zone',z.id).length;});}
+function tabList(){var pl=P(),t=[['me','👤',admin.ok?'Players':'My orders'],['map','🗺️','Map']];
+ zoneTabs(pl).forEach(function(z){t.push(['z:'+z.id,emojiFor(z.color),z.name,1]);});
+ if(editing||(pl.briefingText||'').trim())t.push(['brief','📜','Briefing']);
+ if(editing||contOf(pl).length)t.push(['ifthen','🔀','If → Then']);
+ t.push(['times','⏱️','Schedule']);if(admin.ok)t.push(['admin','🛠','Admin']);return t;}
+function goTab(t){view.tab=t;try{sessionStorage.setItem('swp-tab',t);}catch(e){}render();window.scrollTo(0,0);}
+function select(sel){view.confirmDel=null;
+ if(sel&&sel.type==='player'){view.who=sel.id;view.focus=sel.id;view.tab='me';render();window.scrollTo(0,0);return;}
+ if(sel&&sel.type==='zone'){goTab('z:'+sel.id);return;}
+ view.sel=sel;view.focus=null;if(sel)view.tab='map';render();if(window.innerWidth<=900&&sel){var p=$('#panel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});}}
+function render(){var pl=P(),m=M(pl);try{document.documentElement.lang=LANG;document.documentElement.dir=RTL[LANG]?'rtl':'ltr';}catch(e){}
+ if(view.sel&&view.sel.type==='player'){view.who=view.sel.id;view.sel=null;}if(view.sel&&view.sel.type==='zone')view.sel=null;
+ var tabs=tabList();if(!view.tab){try{view.tab=sessionStorage.getItem('swp-tab');}catch(e){}}if(!tabs.some(function(t){return t[0]===view.tab;}))view.tab='me';
+ var st=startMs(pl),h='<div class="wrap">';
+ h+='<header class="top2"><div class="brand"><div class="eyebrow">'+esc(m.league)+' · '+esc(m.round)+'</div><h1>'+Th('Mega Legion Battle Plan')+'</h1><div class="vsline">'+esc(m.us.k)+' ['+esc(m.us.tag)+'] <span class="vs">VS</span> '+esc(m.them.k)+' ['+esc(m.them.tag)+']</div></div><div class="who">'+whoHTML()+'</div></header>';
+ h+='<div class="bar2"><label class="pick">'+Th('Plan')+' <select id="plansel" aria-label="Plan">'+S.planOrder.filter(function(k){return S.plans[k];}).map(function(k){var q=S.plans[k];return '<option value="'+k+'"'+(k===view.plan?' selected':'')+'>'+esc(q.name+' · '+q.label)+(k===S.livePlan?' ● LIVE':'')+'</option>';}).join('')+'</select></label>'+
+  '<span class="mt">🕒 '+(st!=null?'<b>'+esc(fmtClock(st,true))+'</b> <span id="countdown" class="mt-c">'+esc(countdown(pl))+'</span>':'<span class="note">'+Th('Match time not set')+'</span>')+'</span>'+
+  '<span class="bar2r"><label class="pick">🌐 <select id="langsel" aria-label="Language">'+LANGS.map(function(l){return '<option value="'+l[0]+'"'+(l[0]===LANG?' selected':'')+'>'+l[1]+'</option>';}).join('')+'</select></label>'+
+  '<span class="tz" role="group" aria-label="Time zone"><button data-act="tz" data-tz="utc" aria-pressed="'+(TZ==='utc')+'">UTC</button><button data-act="tz" data-tz="local" aria-pressed="'+(TZ==='local')+'">'+Th('Local')+'</button></span>'+
+  (admin.ok&&!editing?'<button class="btn gold" data-act="edit">Edit plan</button>':'')+'</span></div>';
+ if(S.livePlan!==view.plan&&S.plans[S.livePlan])h+='<div class="notlive">'+Th('You’re looking at {plan}, not the live plan.',{plan:'<b>'+esc(pl.name+' · '+pl.label)+'</b>'})+' <button class="mini" data-act="golive">'+Th('Show the live plan')+'</button></div>';
+ if(editing)h+='<div class="editbar slim"><span class="msg"><b>Editing</b> · '+(dirty?'unsaved changes':'no changes yet')+'</span><button class="btn" data-act="undo"'+(HIST.length>1?'':' disabled')+' title="Ctrl/Cmd+Z">↶ Undo</button><button class="btn ghost" data-act="discard">'+(dirty?'Discard':'Done')+'</button><button class="btn gold" data-act="save"'+(dirty?'':' disabled')+'>Save for everyone</button></div>';
+ h+=activeBanner();
+ h+='<nav class="tabbar" role="tablist">'+tabs.map(function(t){return '<button role="tab" class="tabbtn'+(t[3]?' ztab':'')+'" data-tab="'+esc(t[0])+'" aria-selected="'+(view.tab===t[0])+'">'+t[1]+' '+(t[3]?esc(Tt(t[2])):(t[0]==='admin'||(t[0]==='me'&&admin.ok)?esc(t[2]):Th(t[2])))+'</button>';}).join('')+'</nav>';
+ h+='<div class="tabbody">'+tabBody(view.tab,pl)+'</div>';
+ h+='<footer>Swordland Planner · '+esc(m.us.k)+' ['+esc(m.us.tag)+']</footer></div>';
+ var y=window.scrollY;$('#app').innerHTML=h;window.scrollTo(0,y);}
+function tabBody(t,pl){
+ if(t==='me'){var o=lookupHTML(),w=view.who&&S.players[view.who]?view.who:null;
+  if(w)o+='<div class="card mecard panel"><div class="metools"><button class="mini" data-act="showmap" data-p="'+esc(w)+'">🗺️ '+Th('Show on map')+'</button></div>'+playerPanel(w)+'</div>';
+  else o+='<div class="card hint"><p>'+Th('Type your in-game name above to see your zone, your building, your orders and your substitutes.')+'</p></div>';return o;}
+ if(t==='map')return '<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
+  (editing?mapTools():liveBar())+'<div class="mapbox'+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+  '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
+  '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
+ if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
+ if(t==='brief')return (pl.mission?'<div class="card"><p class="mission" style="max-width:none"><b>'+Th('Mission')+'</b>'+lineHTML(pl.mission)+'</p></div>':'')+briefingCard();
+ if(t==='ifthen')return playbookCard();
+ if(t==='times')return scheduleCard()+timelineCard()+ordersCard()+markersCard();
+ if(t==='admin')return adminTab(pl);
+ return '';}
+function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zone no longer exists.</p>';var c=concedeOf(pl,zid),mg=managerOf(pl,zid);
+ var o='<div class="card zt" style="--zc:'+z.color+'"><div class="zbanner" style="'+zoneStyle(z.color)+'"><b>'+Th('{zone} Zone',{zone:esc(Tt(z.name))})+'</b><span>'+Th('{n} players',{n:z.members.length})+(zoneSum(pl,zid)?' · '+fk(zoneSum(pl,zid)):'')+(c?' · '+(c>=pl.phases.length?Th('Conceded all match'):esc(concedeText(pl,zid))):'')+'</span></div>'+switchesHTML(pl,'zone',zid);
+ var bs=zoneBuildings(pl,zid);
+ if(bs.length)o+='<section><h4>'+Th('Buildings')+'</h4><div class="zbs">'+bs.map(function(b){var l=blead(pl,b.id),co=coOf(pl,b.id),bk=(pl.bmap[b.id]||{}).backup,fc=fullCon(pl,b.id),u=unlockOf(pl,b.id);
+  return '<div class="zb'+(bStatus(b.id)?' st-'+bStatus(b.id):'')+'"><div class="zbh"><b>'+esc(Tt(b.name))+'</b>'+(u?'<span class="note">'+esc(whenBT(pl,b.id))+'</span>':'')+(bStatus(b.id)?'<span class="status" style="background:'+BSTAT[bStatus(b.id)][2]+';color:#fff">'+BSTAT[bStatus(b.id)][0]+' '+Th(BSTAT[bStatus(b.id)][1])+'</span>':'')+'</div>'+
+  (fc?'<span class="empty">'+Th('Conceded')+'</span>':'<div class="chips">'+(l?chip(l,Tt('Lead')):'<span class="empty">'+Th('no lead')+'</span>')+co.map(function(x){return chip(x,Tt('Co-Lead'));}).join('')+'</div>')+(bk?'<div class="note">'+Th('Backup: {player}',{player:esc(nm(bk))})+'</div>':'')+switchesHTML(pl,'building',b.id)+'</div>';}).join('')+'</div></section>';
+ var sup=supportersOf(pl,zid);if(sup.length)o+='<section><h4>'+Th('Supporters ({n})',{n:sup.length})+'</h4><div class="chips">'+sup.map(function(id){return chip(id,badgeFor(pl,id));}).join('')+'</div></section>';
+ if(mg)o+='<section><h4>'+Th('Sub Manager')+'</h4>'+chip(mg)+'</section>';
+ var rows=z.members.filter(function(m){return (pl.pairs[m]||[]).length;});
+ if(rows.length)o+='<section><h4>'+Th('Rotations')+'</h4><ul class="rotl">'+rows.map(function(m){var ps=pl.pairs[m];return '<li>'+chip(m)+' → '+ps.map(function(s,i){return chip(s,ps.length>1?'C'+(i+1):'');}).join(' → ')+' <span class="note">'+esc(rotAt(pl,m))+'</span></li>';}).join('')+'</ul></section>';
+ var res=pl.subs.filter(function(s){return subZone(pl,s)===zid&&!coverOf(pl,s);});if(res.length)o+='<section><h4>'+Th('Reserves on standby')+'</h4><div class="chips">'+res.map(function(s){return chip(s);}).join('')+'</div></section>';
+ var tcs=(pl.markers||[]).filter(function(m){return m.type==='tp'&&(m.players||[]).some(function(p){return zoneOf(pl,p)===zid;});});
+ if(tcs.length)o+='<section><h4>📍 '+Th('Town Center spots')+'</h4><div class="chips">'+tcs.map(function(m){return '<button class="chip" data-marker="'+m.id+'"><span>📍 '+esc(Tt(mkTitle(pl,m)))+'</span><small>'+(m.players||[]).length+'</small></button>';}).join('')+'</div></section>';
+ var cs=contOf(pl).filter(function(cn){var sc=cn.scope||{};return (cn.anchor&&((cn.anchor.type==='zone'&&cn.anchor.id===zid)||(cn.anchor.type==='building'&&bz(pl,cn.anchor.id)===zid)))||(sc.zones||[]).indexOf(zid)>=0;});
+ if(cs.length)o+='<section><h4>🔀 '+Th('If → Then')+'</h4><div class="conts">'+cs.map(function(cn){return contHTML(pl,cn);}).join('')+'</div></section>';
+ o+='</div>';
+ if(editing)o+='<div class="card">'+zonePanel(zid).replace(/^[\s\S]*?(<section class="ed">)/,'$1')+'</div>';
+ return o;}
+function adminTab(pl){var o='';
+ o+='<div class="card"><div class="sechead"><h2>🛠 Plan tools</h2><p>'+(editing?'You’re editing. Save for everyone when you’re done.':'Tap Edit plan to change the plan. Attendance and live mode work without editing.')+'</p></div><div class="admgrid">'+
+  [['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Translate new text, fix lines, glossary'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
+ o+=attendanceCard();
+ o+='<div class="card">'+overviewPanel()+'</div>';
+ o+='<section class="two">'+subsCard()+rotationCard()+'</section>';
+ if(editing)o+=benchCard();
+ return o;}
+
+var BPOS={bell:[215,58,110],merc:[448,92,128],purple_abbey:[688,62,111],blue_sanctum:[145,213,247],blue_abbey:[135,350,384],green_abbey:[748,215,249],green_sanctum:[752,350,383],hall:[447,398,447],yellow_abbey:[192,478,508],yellow_stables:[722,478,508]};
+var ZPOS={purple:[445,34],blue:[70,150],green:[818,150],yellow:[445,582]};
+function mapSVG(){var pl=P(),ph=view.phase,o=[];
+ var focusZone=view.focus?(zoneOf(pl,view.focus)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
+ var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null,selB=view.sel&&view.sel.type==='building'?view.sel.id:null;
+ o.push('<svg viewBox="0 0 '+MAPW+' '+MAPH+'" role="img" aria-label="Battle map for '+esc(pl.name)+'"><image href="map.jpg" x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" preserveAspectRatio="none"/>');
+ // zone labels
+ pl.zones.forEach(function(z){var bs=zoneBuildings(pl,z.id),p=ZPOS[z.id];if(!p){if(!bs.length)return;var sx=0,sy=0;bs.forEach(function(b){var q=BPOS[b.id]||[b.x,b.y];sx+=q[0];sy+=q[1];});p=[sx/bs.length,sy/bs.length-60];}
+  var con=concedeOf(pl,z.id)>=ph,sw=anchoredTo(pl,'zone',z.id).some(function(c){return isActiveC(c.id);});
+  var t=(sw?'⚡ ':'')+Tt('{zone} Zone',{zone:Tt(z.name)}).toUpperCase()+(con?' · '+Tt('Conceded').toUpperCase():'');var hl=selZ===z.id||focusZone===z.id;
+  o.push('<g data-zone="'+z.id+'" style="cursor:pointer"'+(hl?' class="pulse"':'')+'>'+plate(p[0],p[1],t,shade(z.color,.35),'#fff',hl?'#fff':shade(z.color,.6),false,15)+'</g>');});
+ // buildings
+ BL().forEach(function(b){var p=BPOS[b.id];if(!p)return;var x=p[0],y=p[1],ny=p[2];
+  var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=active(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id);
+  var hl=focusB.indexOf(b.id)>=0||selB===b.id;
+  o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
+  o.push('<rect x="'+(x-72)+'" y="'+(y-42)+'" width="144" height="'+(ny-y+58)+'" fill="transparent"/>');
+  if(!zid||!act)o.push('<ellipse cx="'+x+'" cy="'+(y+8)+'" rx="44" ry="36" fill="#141821" fill-opacity="'+(!zid||fc?0.55:0.4)+'" pointer-events="none"/>');
+  if(hl)o.push('<ellipse class="pulse" cx="'+x+'" cy="'+(y+8)+'" rx="50" ry="42" fill="none" stroke="#fff" stroke-width="4"/>');
+  if(zid)o.push('<circle cx="'+(x-36)+'" cy="'+(y-24)+'" r="9" fill="'+zcol(pl,zid)+'" stroke="#111" stroke-width="2.5"><title>'+esc(zname(pl,zid))+'</title></circle>');
+  var ut=clockAt(pl,unlockOf(pl,b.id)),tag=ut?ut.replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):'P'+e,lt,lf,lc,ls,ld=false;
+  if(!zid){lt=Tt('Not in plan');lf='#efe7d2';lc='#6b6455';ls='#6b6455';ld=true;}
+  else if(fc&&!lid){lt=Tt('Conceded');lf='#3a2f45';lc='#e8dcf5';ls='#111';}
+  else if(!lid){lt=act?Tt('no lead'):Tt('no lead')+' · '+tag;lf='#fffaf0';lc='#8a3b3b';ls='#8a3b3b';ld=true;}
+  else{lt=nm(lid)+(act?'':' · '+tag);lf=lz?shade(zcol(pl,lz),.3):'#555';lc='#fff';ls='#111';}
+  o.push(plate(x,ny+26,lt,lf,lc,ls,ld,14));
+  var cos=coOf(pl,b.id);if(cos.length){var cz=zoneOf(pl,cos[0]);o.push(plate(x,ny+48,Tt('Co-Lead')+': '+cos.map(nm).join(', '),'#fffaf0',cz?shade(zcol(pl,cz),.45):'#333',cz?shade(zcol(pl,cz),.2):'#333',false,12));}
+  var bs0=bStatus(b.id);if(bs0&&BSTAT[bs0]){o.push('<g'+(bs0==='contested'?' class="pulse"':'')+'><circle cx="'+(x+38)+'" cy="'+(y-24)+'" r="15" fill="'+BSTAT[bs0][2]+'" stroke="#111" stroke-width="2.5"/><text x="'+(x+38)+'" y="'+(y-19)+'" text-anchor="middle" font-size="15" fill="#fff">'+(bs0==='ours'?'✓':bs0==='enemy'?'✕':'⚔')+'</text></g>');if(bs0==='enemy')o.push('<ellipse cx="'+x+'" cy="'+(y+8)+'" rx="48" ry="40" fill="none" stroke="#e5484d" stroke-width="5" stroke-dasharray="8 6"/>');}
+  if(anchoredTo(pl,'building',b.id).some(function(c){return isActiveC(c.id);}))o.push('<text x="'+(x-62)+'" y="'+(y-14)+'" font-size="22">⚡</text>');
+  o.push('</g>');});
+ // markers
+ var selM=view.sel&&view.sel.type==='marker'?view.sel.id:null,focusM=view.focus?tpsOf(pl,view.focus).map(function(m){return m.id;}):[];
+ (pl.markers||[]).forEach(function(m){var vis=mkVisible(m,ph);if(!vis&&!editing)return;var hl=selM===m.id||focusM.indexOf(m.id)>=0;
+  o.push('<g data-marker="'+m.id+'" opacity="'+(vis?1:0.35)+'" style="cursor:pointer">');
+  if(hl)o.push('<circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="28" fill="#fff6" stroke="#111" stroke-width="3"/>');
+  if(m.type==='tp'){var c=mkColor(pl,m),ps=m.players||[];
+   o.push('<path transform="translate('+m.x+','+m.y+')" d="M0,0 C-6,-10 -13,-17 -13,-26 A13,13 0 1 1 13,-26 C13,-17 6,-10 0,0Z" fill="'+c+'" stroke="#111" stroke-width="2.5"/><circle cx="'+m.x+'" cy="'+(m.y-26)+'" r="8" fill="#fff"/><text x="'+m.x+'" y="'+(m.y-22.5)+'" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="11" fill="#111">'+(ps.length||'TC')+'</text>');
+   o.push(plate(m.x,m.y+13,ps.length?ps.slice(0,2).map(nm).join(', ')+(ps.length>2?' +'+(ps.length-2):''):(m.label||Tt('Town Center spot')),shade(c,.35),'#fff','#111',false,12));}
+  else if(m.type==='cellar'){o.push('<circle cx="'+m.x+'" cy="'+(m.y-14)+'" r="15" fill="#4b4436" stroke="#f3d79a" stroke-width="2.5"/><text x="'+m.x+'" y="'+(m.y-8)+'" text-anchor="middle" font-size="16">⛏</text>');
+   o.push(plate(m.x,m.y+13,(m.label||Tt('Undercellar'))+(m.phase?' · '+(clockAt(pl,phStart(pl,m.phase))||'P'+m.phase).replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):''),'#fff3d6','#3b2208','#3b2208',false,12));}
+  else{o.push('<g transform="translate('+m.x+','+(m.y-12)+')"><path d="M-15,-2 h30 v13 h-30z" fill="#b8741a" stroke="#3b2208" stroke-width="2.2"/><path d="M-15,-2 v-6 a6,6 0 0 1 6,-6 h18 a6,6 0 0 1 6,6 v6z" fill="#d99a2b" stroke="#3b2208" stroke-width="2.2"/><path d="M-2,-6 h4 v8 h-4z" fill="#f4d35e" stroke="#3b2208" stroke-width="1.4"/></g>');
+   if(m.label)o.push(plate(m.x,m.y+14,m.label,'#fff3d6','#3b2208','#3b2208',false,12));}
+  o.push('<rect x="'+(m.x-20)+'" y="'+(m.y-44)+'" width="40" height="52" fill="transparent"/></g>');});
+ return o.join('')+'</svg>';}
+
+seedSetups();migrateFormats();HIST=[JSON.stringify(S)];
 try{var me0=localStorage.getItem('swp-me');if(me0&&S.players[me0]){view.me=me0;if(!view.sel){view.sel={type:'player',id:me0};view.focus=me0;}}}catch(e){}
 render();fbInit();
 setInterval(function(){var el=document.getElementById('countdown');if(el)el.textContent=countdown(P());},30000);

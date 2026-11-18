@@ -10,6 +10,7 @@ Players open the site, look up their assignment and check in without logging in.
 | `index.html` | The whole planner (map, plans, roster, attendance). |
 | `firebase-config.js` | Your Firebase connection (already filled in). |
 | `firestore.rules` | Who can read and write what (setup step 3). |
+| `map.jpg` | The battle map (Duvy's Round 3 map, names removed). |
 | `netlify/functions/translate.js` | The server step that sends new text to Google Translate (step 7). |
 
 
@@ -67,24 +68,53 @@ Translation is optional; the site works in English without it. Players pick thei
 
 The translation key lives only on Netlify, never in the page. Only signed-in leaders on the ⚙️ Settings list can run translation.
 
-## Writing a briefing (admins)
+## How the site is laid out
 
-In **Edit plan**, the **📜 Briefing** card is the planner's message to the alliance:
+Tabs across the top:
 
-- **Add blocks:** heading, paragraph, bullet and callout.
-- **Templates:** pick a saved line and fill in the blanks (player, zone, building, time, number). A template is translated once; filling in different names never needs translating again.
-- **Live sections:** zone rosters, rotation plan, phase timeline, orders and substitute list, built from the plan itself. They update automatically when you move players.
-- **Save as template:** turns any line you wrote into a reusable template. Replace names with blanks like `{player}`.
-- **Templates button:** opens the library to add, edit or delete templates.
-- **Copy briefing from…:** starts this week's briefing from last week's.
-- **Copy briefing:** gives a Discord-ready version in whatever language you're viewing.
+- **👤 My orders** (shows as **Players** for leaders): look up a name and see that player's assignment.
+- **🗺️ Map:** the map, with a side panel for whatever you tap.
+- **One tab per zone:** that zone's buildings, leads and co-leads, supporters, sub manager, rotations, Town Center spots and If → Then switches. These tabs follow the plan's zones, so renaming, adding or removing zones updates them automatically.
+- **📜 Briefing**
+- **🔀 If → Then**
+- **⏱️ Schedule:** unlock times, phases, orders and map markers.
+- **🛠 Admin** (leaders only): every plan tool, attendance, the plan check, substitutes and rotations.
 
-Lines marked **🌐 new** haven't been translated yet. Click **🌐 Translations → Translate what's new** before you **Save for everyone**. Only new wording is sent, and everything translated before is reused from the translation memory.
+Times show in **UTC** by default. Anyone can switch to their own local time.
 
-In **🌐 Translations** you can also:
+## The map
 
-- **Fix any line in any language.** Fixes are locked, so auto-translate never overwrites them.
-- **Edit the glossary** of game terms (Sanctum, Abbey, Undercellar, Relic Points…). Each term is translated once, using the name the game itself uses in that language, and every sentence uses that version.
+The map is Duvy's Round 3 map with this week's names cleaned off. Building positions are fixed to it. In **Edit plan → Map**, you can place:
+
+- 📍 **Town Center spots:** add the players who set up there.
+- ⛏ **Undercellars:** each one shows only in the phase you place it in, because they spawn at different times.
+- 🎁 **Loot crates:** also tied to a phase.
+
+**Zones ▾** on the map toolbar moves buildings between zones, or leaves them out of the plan.
+
+To use a clean copy of the map without any text, replace `map.jpg` in the repo with it. Keep the same file name and the same layout.
+
+## Writing the briefing
+
+In **Edit plan**, the **📜 Briefing** tab is a writing box with a live preview beside it. Just type:
+
+| Type this | You get |
+|---|---|
+| `# Heading` | a heading |
+| `## Subheading` | a smaller heading |
+| `- text` | a bullet |
+| `1. text` | a numbered line |
+| `> text` | a red callout |
+| `**text**` | bold |
+| `[[zones]]` `[[rotations]]` `[[playbook]]` `[[orders]]` `[[timeline]]` `[[subs]]` | a live section built from the plan |
+
+The buttons above the box insert these for you. **Saved line** inserts a reusable sentence.
+
+Translation stays cheap without any templates: player names, times and numbers in each line are filled in automatically. "**Support** takes the Hall at **15:00**" is translated once, and when it becomes "**Duvy** takes the Hall at **18:00**" no new translation is needed.
+
+The **🔀 If → Then** tab works the same way: one IF line and free-written THEN orders. **Who & where ▾** holds the zone, role and player options, the zone or building switch, and the phase.
+
+When the briefing shows **🌐 new lines to translate**, run **🛠 Admin → 🌐 Translations → Translate what's new** before you save.
 
 ## Attendance
 
@@ -97,8 +127,8 @@ In **🌐 Translations** you can also:
 
 Plans branch depending on what happens. In **Edit plan**, the **🔀 If → Then playbook** card lists each branch:
 
-- **IF:** pick a trigger template ("The enemy captures {building}", "{player} fails to report", "We lose both buildings in {zone}"…) or write your own.
-- **THEN:** the orders, built the same way as the briefing (text, bullets, templates).
+- **IF:** write the trigger, e.g. "The enemy captures Blue Sanctum". Saved triggers are suggested as you type.
+- **THEN:** the orders, written the same way as the briefing.
 - **Applies to:** zones, roles (Building Leads, Co-Leads, Supporters, Substitutes, Sub Managers) and/or specific players. Nothing ticked means everyone.
 - **Attach to a zone or building:** the entry becomes a **switch** on that zone's card and that building's panel, so one zone can shift plans while the others stay normal.
 - **Replaces their normal orders:** while it's active, those players' usual orders show as paused.
@@ -108,7 +138,7 @@ Players see the entries that apply to them on their assignment card, with an **O
 
 ## Live match mode
 
-Leaders tap **🔴 Live match** (top of the page, outside Edit mode):
+Leaders tap **🔴 Live match** on the **🗺️ Map** tab, outside Edit mode:
 
 - **Building status:** pick 🟢 Ours, 🔴 Enemy or ⚔️ Under attack, then tap buildings on the map. Every player's map updates within a second.
 - **Suggested switches:** marking a building Enemy or Under attack offers any If → Then entry tied to that building, with one tap to activate it.
