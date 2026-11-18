@@ -535,6 +535,19 @@ function swapPlayers(pl,a,b){function w(x){return x===a?b:x===b?a:x;}function wk
  pl.rotateAt=wk(pl.rotateAt);pl.joinAt=wk(pl.joinAt);pl.subZone=wk(pl.subZone);
  (pl.markers||[]).forEach(function(mk){if(mk.players)mk.players=mk.players.map(w);});}
 function placeOf(pl,id){return zoneOf(pl,id)||(pl.subs.indexOf(id)>=0?'subs':'bench');}
+function coverSelect(pl,sid){var cv=coverOf(pl,sid),cur=cv?'m:'+cv.main+':'+cv.order:'sb:'+((pl.subZone||{})[sid]||'');
+ var o='<select data-set="rcover" data-pid="'+esc(sid)+'" aria-label="Who '+esc(nm(sid))+' subs for"><optgroup label="Not paired"><option value="sb:"'+(cur==='sb:'?' selected':'')+'>Standby (any zone)</option>'+
+  pl.zones.map(function(z){return '<option value="sb:'+esc(z.id)+'"'+(cur==='sb:'+z.id?' selected':'')+'>Standby · '+esc(z.name)+' reserve</option>';}).join('')+'</optgroup>';
+ pl.zones.forEach(function(z){var mem=z.members.slice().sort(function(a,b){return nm(a).localeCompare(nm(b));});if(!mem.length)return;
+  o+='<optgroup label="'+esc(z.name)+'">';
+  mem.forEach(function(m){var arr=(pl.pairs[m]||[]).filter(function(x){return x!==sid;}),n=arr.length+1;
+   for(var k=0;k<n;k++){var who=arr[k];o+='<option value="m:'+esc(m)+':'+k+'"'+(cur==='m:'+m+':'+k?' selected':'')+'>'+esc(nm(m))+' · Cycle '+(k+1)+(who?' (before '+esc(nm(who))+')':'')+'</option>';}});
+  o+='</optgroup>';});
+ return o+'</select>';}
+function setCover(pl,sid,val){for(var m in pl.pairs){pl.pairs[m]=pl.pairs[m].filter(function(x){return x!==sid;});if(!pl.pairs[m].length)delete pl.pairs[m];}
+ if(val.indexOf('sb:')===0){var zz=val.slice(3);pl.subZone=pl.subZone||{};if(zz)pl.subZone[sid]=zz;else delete pl.subZone[sid];return;}
+ var j=val.lastIndexOf(':'),main=val.slice(2,j),k=+val.slice(j+1);if(!zoneOf(pl,main))return;
+ var arr=(pl.pairs[main]||[]).slice();arr.splice(Math.min(k,arr.length),0,sid);pl.pairs[main]=arr;}
 function roleText(pl,id){var z=zoneOf(pl,id),out=[];if(z){var a=ownLeads(pl,id),c=ownCo(pl,id);out.push(a.length?'Lead · '+a.map(function(b){return BB(b).name;}).join(', '):c.length?'Co-Lead · '+c.map(function(b){return BB(b).name;}).join(', '):'Supporter');
   objectivesOf(pl,id).forEach(function(b){out.push('Holds '+bname(pl,b));});backupsOf(pl,id).forEach(function(b){out.push('Backup '+bname(pl,b));});}
  else if(pl.subs.indexOf(id)>=0){var cv=coverOf(pl,id);out.push(cv?'Sub for '+nm(cv.main)+' · '+cyc(cv.order):'Sub · standby');}
@@ -1010,6 +1023,7 @@ function discordText(){var pl=P(),m=M(pl),L=[];
 /* ---------- modals ---------- */
 function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
  if(kind==='i18n'){h=i18nModalHTML();}
+ else if(kind==='tplfill'){h=tplFillHTML();}
  else if(kind==='plantext'){var m=M(pl);h='<h3>Plan text · '+esc(pl.name)+'</h3>'+
   '<div class="grid2"><div class="f"><label for="m-name">Plan name</label><input id="m-name" value="'+esc(pl.name)+'"></div><div class="f"><label for="m-label">Short label</label><input id="m-label" value="'+esc(pl.label)+'"></div></div>'+
   '<div class="f"><label for="m-blurb">One-line summary</label><input id="m-blurb" value="'+esc(pl.blurb)+'"></div>'+
@@ -1033,11 +1047,11 @@ function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
   var q=(view.rq||'').toLowerCase();var shown=ids.filter(function(i){return !q||nm(i).toLowerCase().indexOf(q)>=0;});
   var placeSel=function(i){var c=placeOf(pl,i);return '<select data-set="rplace" data-pid="'+esc(i)+'" aria-label="Placement for '+esc(nm(i))+'">'+pl.zones.map(function(z){return '<option value="'+esc(z.id)+'"'+(c===z.id?' selected':'')+'>'+esc(z.name)+'</option>';}).join('')+'<option value="subs"'+(c==='subs'?' selected':'')+'>Substitute</option><option value="bench"'+(c==='bench'?' selected':'')+'>Not in plan</option></select>';};
   h='<h3>Roster · '+esc(pl.name)+'</h3><p class="note">Everyone on the alliance roster. Placement and role apply to '+esc(pl.name)+' only; name and power apply to every plan. “Not in plan” keeps a player on the roster; Delete removes them everywhere.</p>'+
-  '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="m-rq" placeholder="Filter by name" value="'+esc(view.rq||'')+'" style="flex:1;min-width:160px"><span class="note">'+combatants(pl).length+' on the field · '+pl.subs.length+' subs · '+benchOf(pl).length+' not in plan</span></div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="m-rq" placeholder="Filter by name" value="'+esc(view.rq||'')+'" style="flex:1;min-width:160px"><span class="note">'+combatants(pl).length+' on the field · '+pl.subs.length+' subs · '+benchOf(pl).length+' not in plan</span><button class="btn" data-act="copyalllinks">🔗 Copy all links</button></div>'+
   '<div class="schedwrap" style="max-height:52vh;overflow:auto;border:1px solid var(--line);border-radius:8px"><table class="sched roster"><thead><tr><th>Name</th><th>Power</th><th>Placement</th><th>Role</th><th></th></tr></thead><tbody>'+
   shown.map(function(i){var z=zoneOf(pl,i);return '<tr><td><input data-set="rname" data-pid="'+esc(i)+'" value="'+esc(nm(i))+'" aria-label="Name" style="width:150px"></td><td><input data-set="rpower" data-pid="'+esc(i)+'" value="'+esc(pw(i)||'')+'" inputmode="numeric" aria-label="Power" style="width:80px"></td><td>'+placeSel(i)+'</td>'+
-   '<td>'+(z?'<select data-set="rrole" data-pid="'+esc(i)+'" aria-label="Role">'+roleOptions(pl,i)+'</select>':'')+'<div class="note" style="font-size:12px">'+esc(roleText(pl,i))+'</div></td>'+
-   '<td style="white-space:nowrap"><button class="mini" data-act="ropen" data-pid="'+esc(i)+'">Open</button> <button class="mini" data-act="rdel" data-pid="'+esc(i)+'" style="color:var(--red)">'+(view.confirmDel==='p:'+i?'Confirm':'Delete')+'</button></td></tr>';}).join('')+
+   '<td>'+(z?'<select data-set="rrole" data-pid="'+esc(i)+'" aria-label="Role">'+roleOptions(pl,i)+'</select>':pl.subs.indexOf(i)>=0?coverSelect(pl,i):'')+'<div class="note" style="font-size:12px">'+esc(roleText(pl,i))+'</div></td>'+
+   '<td style="white-space:nowrap"><button class="mini" data-act="copylink" data-p="'+esc(i)+'" title="Copy '+esc(nm(i))+'’s personal link">🔗 Link</button> <button class="mini" data-act="ropen" data-pid="'+esc(i)+'">Open</button> <button class="mini" data-act="rdel" data-pid="'+esc(i)+'" style="color:var(--red)">'+(view.confirmDel==='p:'+i?'Confirm':'Delete')+'</button></td></tr>';}).join('')+
   '</tbody></table></div>'+
   '<div class="f"><label for="m-bulk">Add players: one per line, power optional (e.g. “NewGuy 5,200” or “NewGuy, 5.2k”)</label><textarea id="m-bulk" placeholder="NewGuy 5200&#10;Another Player, 4.8k"></textarea></div>'+
   '<div class="actions" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><label for="m-bdest" class="note">Add to</label><select id="m-bdest"><option value="bench">Not in plan</option><option value="subs">Substitutes</option>'+pl.zones.map(function(z){return '<option value="'+esc(z.id)+'">'+esc(z.name)+'</option>';}).join('')+'</select><button class="btn gold" data-act="rbulk">Add players</button></div><button class="btn ghost" data-act="mclose">Close</button></div>';}
@@ -1279,8 +1293,8 @@ function fbInit(){
   if(editing&&dirty){if(newer&&!FB.savingNow)toast((d.updatedBy||'Another admin')+' just saved. Discard your changes to load theirs, or saving will be blocked.');return;}
   S=inc;seedSetups();migrateFormats();HIST=[JSON.stringify(S)];dirty=false;
   if(!S.plans[view.plan]||!view.chosen)view.plan=(planFromHash()&&S.plans[planFromHash()])?planFromHash():S.livePlan;
-  if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;softRender();
- },function(err){toast('Couldn’t load the shared plan: '+err.message);});
+  if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;softRender();applyLink(true);
+ },function(err){toast('Couldn’t load the shared plan: '+err.message);applyLink(true);});
  subLang();
  FB.db.doc('swordland_live/state').onSnapshot(function(sn){var d=sn.exists?sn.data():{};LIVE={active:d.active||{},bstat:d.bstat||{},msg:d.msg||{},at:d.at||0,by:d.by||''};softRender();},function(){});
  FB.db.collection('swordland_attendance').onSnapshot(function(qs){FB.att={};qs.forEach(function(doc){FB.att[doc.id]=doc.data();});softRender();},function(){});
@@ -1351,8 +1365,8 @@ function attendanceCard(){if(!admin.ok)return '';var pl=P(),all=combatants(pl).c
  '<div class="timeline">'+pl.zones.filter(function(z){return z.members.length;}).map(function(z){return col(z.name,z.members,z.color);}).join('')+(pl.subs.length?col('Substitutes',pl.subs):'')+'</div></div>';}
 function attPlayerSection(id){var pl=P();if(!inPlan(pl,id))return '';var a=attOf(id);
  return '<section><h4>'+Th('Attendance · {plan}',{plan:esc(pl.name)})+'</h4>'+(a?'<p style="margin:0 0 6px">'+attIcon(a.status)+' <b>'+(a.status==='in'?Th('Confirmed in'):Th('Can’t make it'))+'</b> <span class="note">'+(a.by==='admin'?Th('set by an admin'):'')+' '+ago(a.at)+'</span>'+(a.note?'<br><span class="note">“'+esc(a.note)+'”</span>':'')+'</p>':'<p style="margin:0 0 6px">'+Th('Are you {player}? Let leadership know if you’ll be there.',{player:esc(nm(id))})+'</p>')+
- '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn'+(a&&a.status==='in'?' gold':'')+'" data-act="attme" data-s="in">✅ '+Th('I’m in')+'</button><button class="btn'+(a&&a.status==='out'?' gold':'')+'" data-act="attme" data-s="out">❌ '+Th('Can’t make it')+'</button></div>'+
- '<input id="att-note" placeholder="'+esc(Tt('Optional note, e.g. “late by 5 min”'))+'" maxlength="140" style="margin-top:8px;width:100%;background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 9px" value="'+esc(a&&a.note||'')+'"></section>';}
+ '<div class="row" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn'+(a&&a.status==='in'?' gold':'')+'" data-act="attme" data-s="in" data-p="'+esc(id)+'">✅ '+Th('I’m in')+'</button><button class="btn'+(a&&a.status==='out'?' gold':'')+'" data-act="attme" data-s="out" data-p="'+esc(id)+'">❌ '+Th('Can’t make it')+'</button></div>'+
+ '<input id="att-note" class="att-note" placeholder="'+esc(Tt('Optional note, e.g. “late by 5 min”'))+'" maxlength="140" style="margin-top:8px;width:100%;background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:6px 9px" value="'+esc(a&&a.note||'')+'"></section>';}
 var tt;function toast(t){var n=$('#toast');if(!n)return;n.textContent=t;n.style.display='block';clearTimeout(tt);tt=setTimeout(function(){n.style.display='none';},4200);}
 
 /* ---------- events ---------- */
@@ -1455,7 +1469,13 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='admrm'){var em3=el.getAttribute('data-e');if(view.confirmDel!=='a:'+em3){view.confirmDel='a:'+em3;openModal('settings');return;}view.confirmDel=null;removeAdmin(em3);}
  else if(k==='admrole'){FB.db.doc('swordland_admins/'+el.getAttribute('data-e')).set({role:el.getAttribute('data-r')},{merge:true}).catch(function(e){toast('Couldn’t change role: '+e.message);});}
  else if(k==='logout'){if(dirty&&!window.confirm){}FB.auth&&FB.auth.signOut();editing=false;wantEdit=false;persist();render();}
- else if(k==='attme'){var pid=view.sel&&view.sel.id;if(!pid)return;var stt=el.getAttribute('data-s');var nt=val('att-note');setAtt(pid,stt,admin.ok?'admin':'player',nt).then(function(){try{localStorage.setItem('swp-me',pid);}catch(x){}view.me=pid;toast(stt==='in'?Tt('Thanks, {player}! You’re confirmed.',{player:nm(pid)}):Tt('Got it. Leadership will see you can’t make it.'));},function(e){toast('Couldn’t save: '+e.message);});}
+ else if(k==='tfins'){tplFillInsert(true);}
+  else if(k==='tfskip'){tplFillInsert(false);}
+  else if(k==='copylink'){var lp=el.getAttribute('data-p');if(lp&&S.players[lp])copyText(myLinkURL(lp,true),admin.ok?'Copied '+nm(lp)+'’s link. Send it to them.':Tt('Link copied. Open it any time to go straight to your orders.'));}
+  else if(k==='copyalllinks'){copyText(allLinksText(),'Copied a personal link for every player in '+P().name+'. Paste it into Discord.');}
+  else if(k==='exportplan'){exportPlan();}
+  else if(k==='importplan'){pickPlanFile();}
+  else if(k==='attme'){var pid=el.getAttribute('data-p')||(view.sel&&view.sel.type==='player'&&view.sel.id)||view.who;if(!pid||!S.players[pid]){toast(Tt('Type your in-game name'));return;}var stt=el.getAttribute('data-s');var sec0=el.closest('section'),ni0=sec0&&sec0.querySelector('.att-note');var nt=ni0?ni0.value:val('att-note');setAtt(pid,stt,admin.ok?'admin':'player',nt).then(function(){try{localStorage.setItem('swp-me',pid);}catch(x){}view.me=pid;toast(stt==='in'?Tt('Thanks, {player}! You’re confirmed.',{player:nm(pid)}):Tt('Got it. Leadership will see you can’t make it.'));},function(e){toast('Couldn’t save: '+e.message);});}
  else if(k==='rollcall'){var rt=rollCallText();try{navigator.clipboard.writeText(rt).then(function(){toast('Roll call copied. Paste it into Discord.');},function(){view.txtOverride=rt;openModal('text');});}catch(x){view.txtOverride=rt;openModal('text');}}
  else if(k==='attpaste')openModal('attpaste');
  else if(k==='attapply'){var lines=val('m-attl').split(/[\n,]+/).map(function(x){return x.replace(/[@✅❌⏳]/g,'').trim().toLowerCase();}).filter(Boolean);var stv=val('m-atts'),hit=[],miss=[];
@@ -1510,6 +1530,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='newplayer'){var name=val('np-name').trim();if(!name){toast('Type a name first.');return;}var nid=newPlayerId(name);S.players[nid]={name:name};var pp=+String(val('np-pw')).replace(/\D/g,'');if(pp)S.players[nid].power=pp;view.sel={type:'player',id:nid};view.focus=nid;touch();}
 }
 document.addEventListener('change',function(e){var asel=e.target&&e.target.getAttribute&&e.target.getAttribute('data-act-sel');
+ if(asel==='inssnip'&&e.target.value){var tp3=tplById(e.target.value),ta3=document.getElementById(e.target.getAttribute('data-w'));if(tp3&&ta3&&tplFields(tp3.text).length){view.tfill={tpl:tp3.id,w:ta3.id,pos:ta3.selectionStart||ta3.value.length};e.target.value='';openModal('tplfill');return;}}
  if(asel&&e.target.value){var ta2=document.getElementById(e.target.getAttribute('data-w'));if(ta2){var tp2=tplById(e.target.value);var ins=asel==='inslive'?'[['+e.target.value+']]':(tp2?'- '+tp2.text.replace(/\{\w+\}/g,'___'):'');var p0=ta2.selectionStart,v2=ta2.value,le2=v2.indexOf('\n',p0);if(le2<0)le2=v2.length;ta2.value=v2.slice(0,le2)+(v2.slice(0,le2).trim()?'\n':'')+ins+v2.slice(le2);ta2.dispatchEvent(new Event('change',{bubbles:true}));}e.target.value='';return;}
  if(e.target&&e.target.id==='plansel'){view.plan=e.target.value;view.chosen=true;view.phase=1;try{history.replaceState(null,'','#plan-'+view.plan);}catch(x){}persist();render();return;}
 
@@ -1534,6 +1555,7 @@ document.addEventListener('change',function(e){var asel=e.target&&e.target.getAt
  else if(k==='mgrof'){var zz=Z(pl,t.getAttribute('data-z'));if(zz){if(t.checked)zz.subManager=id;else if(zz.subManager===id)delete zz.subManager;touch();}}
  else if(k==='rplace'){moveTo(pl,t.getAttribute('data-pid'),t.value);}
  else if(k==='rrole'){setRole(pl,t.getAttribute('data-pid'),t.value);touch();}
+  else if(k==='rcover'){setCover(pl,t.getAttribute('data-pid'),t.value);touch();}
  else if(k==='rname'){var rv=t.value.trim(),rp=t.getAttribute('data-pid');if(rv&&S.players[rp]){S.players[rp].name=rv;touch();}}
  else if(k==='rpower'){var rp2=t.getAttribute('data-pid'),rn2=+String(t.value).replace(/\D/g,'');if(S.players[rp2]){if(rn2)S.players[rp2].power=rn2;else delete S.players[rp2].power;touch();}}
  else if(k==='btext'){blk(t).text=t.value;touch();}
@@ -1608,14 +1630,45 @@ try{if(!localStorage.getItem('swp-tz'))TZ='utc';}catch(e){TZ='utc';}
 function escRe(x){return String(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
 /* --- auto blanks: player names, times and numbers become placeholders so a line is translated once --- */
 var PHC={};
+function enList(a){return a.length<2?(a[0]||''):a.length===2?a[0]+' and '+a[1]:a.slice(0,-1).join(', ')+', and '+a[a.length-1];}
+function tplFillHTML(){var pl=P(),tf=view.tfill||{},tp=tplById(tf.tpl);if(!tp)return '<p>That saved line is gone.</p>';
+ var flds=tplFields(tp.text),ids=Object.keys(S.players).sort(function(a,b){return nm(a).localeCompare(nm(b));});
+ var h='<h3>💬 Fill in the blanks</h3><p class="note" style="font-size:15px">'+esc(tp.text.replace(/\*\*/g,'')).replace(/\{(\w+)\}/g,'<b>___</b>')+'</p>';
+ flds.forEach(function(f){var k=fieldKind(f),lab=f.replace(/\d+$/,'');h+='<div class="f"><label>'+esc(lab.charAt(0).toUpperCase()+lab.slice(1))+'</label>';
+  if(k==='zone')h+='<select data-tf="'+esc(f)+'"><option value="">Choose a zone…</option>'+pl.zones.map(function(z){return '<option>'+esc(z.name)+'</option>';}).join('')+'</select>';
+  else if(k==='zones')h+='<div style="display:flex;flex-wrap:wrap;gap:12px">'+pl.zones.map(function(z){return '<label style="display:flex;gap:5px;align-items:center;font-weight:400"><input type="checkbox" data-tfz="'+esc(f)+'" value="'+esc(z.name)+'"'+(concedeOf(pl,z.id)?'':' checked')+'> '+esc(z.name)+'</label>';}).join('')+'</div>';
+  else if(k==='building')h+='<select data-tf="'+esc(f)+'"><option value="">Choose a building…</option>'+BL().filter(function(b){return bz(pl,b.id);}).map(function(b){return '<option>'+esc(bname(pl,b.id))+'</option>';}).join('')+'</select>';
+  else if(k==='player')h+='<input data-tf="'+esc(f)+'" list="tf-names" placeholder="Player name">';
+  else if(k==='time')h+='<input data-tf="'+esc(f)+'" placeholder="e.g. 15:00" inputmode="numeric">';
+  else if(k==='number')h+='<input data-tf="'+esc(f)+'" inputmode="numeric" placeholder="Number">';
+  else h+='<input data-tf="'+esc(f)+'">';
+  h+='</div>';});
+ h+='<datalist id="tf-names">'+ids.map(function(i){return '<option value="'+esc(nm(i))+'">';}).join('')+'</datalist>';
+ h+='<p class="note">Anything you leave empty goes in as ___ so you can type it later. You can edit the sentence freely after it’s inserted.</p>';
+ return h+'<div class="actions"><button class="btn ghost" data-act="tfskip">Skip (insert with blanks)</button><button class="btn gold" data-act="tfins">Insert</button></div>';}
+function tplFillInsert(fill){var tf=view.tfill||{},tp=tplById(tf.tpl),ta=document.getElementById(tf.w);if(!tp||!ta){closeModal();return;}
+ var vals={};if(fill){document.querySelectorAll('[data-tf]').forEach(function(e){vals[e.getAttribute('data-tf')]=e.value.trim();});
+  var zs={};document.querySelectorAll('[data-tfz]').forEach(function(e){var f=e.getAttribute('data-tfz');zs[f]=zs[f]||[];if(e.checked)zs[f].push(e.value);});Object.keys(zs).forEach(function(f){vals[f]=enList(zs[f]);});}
+ var line='- '+tp.text.replace(/\{(\w+)\}/g,function(m,f){return vals[f]||'___';});
+ closeModal();view.tfill=null;var v=ta.value,p0=Math.min(tf.pos||v.length,v.length),le=v.indexOf('\n',p0);if(le<0)le=v.length;
+ ta.value=v.slice(0,le)+(v.slice(0,le).trim()?'\n':'')+line+v.slice(le);ta.dispatchEvent(new Event('change',{bubbles:true}));toast('Line inserted.');}
+
+function placeNames(){if(PHC.__places)return PHC.__places;var seen={},out=[];function add(x){x=String(x||'').trim();if(x.length<3||seen[x.toLowerCase()])return;seen[x.toLowerCase()]=1;out.push(x);}
+ S.planOrder.forEach(function(k){var pl=S.plans[k];if(!pl)return;pl.zones.forEach(function(z){add(z.name);});BL().forEach(function(b){if(bz(pl,b.id))add(bname(pl,b.id));});});
+ BL().forEach(function(b){if(BL().filter(function(o){return o.name===b.name;}).length===1)add(b.name);});
+ return (PHC.__places=out.sort(function(a,b){return b.length-a.length;}));}
+function placeT(hit){var c=placeNames().filter(function(x){return x.toLowerCase()===String(hit).toLowerCase();})[0]||hit,t=Tt(c);return (hit!==c&&hit===hit.toUpperCase())?t.toUpperCase():t;}
 function autoPH(line){if(PHC[line])return PHC[line];var vals={},n=0,out=String(line);
  var names=Object.keys(S.players).map(function(i){return nm(i);}).filter(function(x){return x&&x.length>1;}).sort(function(a,b){return b.length-a.length;});
  names.forEach(function(nmx){var re=new RegExp('(^|[^\\w~{])('+escRe(nmx)+')(?![\\w}])',nmx.length<=4?'g':'gi');out=out.replace(re,function(m,pre,hit){var k='p'+(n++);vals[k]=hit;return pre+'{'+k+'}';});});
+ placeNames().forEach(function(px){var re=new RegExp('(^|[^\\w~{])('+escRe(px)+')(?![\\w}])','gi');out=out.replace(re,function(m,pre,hit){var k='z'+(n++);vals[k]=hit;return pre+'{'+k+'}';});});
  out=out.replace(/(^|[^\w{])(\d{1,2}:\d{2}(?::\d{2})?)(?![\w}])/g,function(m,pre,t){var k='t'+(n++);vals[k]=t;return pre+'{'+k+'}';});
  out=out.replace(/(^|[^\w{])(\d+(?:[.,]\d+)?)(?![\w}])/g,function(m,pre,d){var k='n'+(n++);vals[k]=d;return pre+'{'+k+'}';});
+ var zk=[];out.replace(/\{z(\d+)\}/g,function(m,d){zk.push(+d);return m;});if(zk.length>1){var so=zk.slice().sort(function(x,y){return x-y;}),zm={},nv={};zk.forEach(function(d,i){zm[d]=so[i];});out=out.replace(/\{z(\d+)\}/g,function(m,d){return '{z'+zm[d]+'}';});Object.keys(vals).forEach(function(k){if(k.charAt(0)==='z')nv['z'+zm[+k.slice(1)]]=vals[k];else nv[k]=vals[k];});vals=nv;}
  return (PHC[line]={pat:out,vals:vals});}
-function lineHTML(t){t=String(t||'');if(!t.trim())return '';var a=autoPH(t),v={};Object.keys(a.vals).forEach(function(k){v[k]=esc(a.vals[k]);});return Th(a.pat,v);}
-function lineText(t){t=String(t||'');if(!t.trim())return '';var a=autoPH(t);return Tt(a.pat,a.vals);}
+function phVal(k,x){return k.charAt(0)==='z'?placeT(x):x;}
+function lineHTML(t){t=String(t||'');if(!t.trim())return '';var a=autoPH(t),v={};Object.keys(a.vals).forEach(function(k){v[k]=esc(phVal(k,a.vals[k]));});return Th(a.pat,v);}
+function lineText(t){t=String(t||'');if(!t.trim())return '';var a=autoPH(t),v={};Object.keys(a.vals).forEach(function(k){v[k]=phVal(k,a.vals[k]);});return Tt(a.pat,v);}
 /* --- light markup: # heading, ## subheading, - bullet, 1. numbered, > callout, [[live]] --- */
 function parseMD(text){var out=[];String(text||'').split('\n').forEach(function(raw){var l=raw.replace(/\s+$/,'');var m;
  if(!l.trim()){out.push({k:'gap'});return;}
@@ -1777,7 +1830,7 @@ function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zon
  return o;}
 function adminTab(pl){var o='';
  o+='<div class="card"><div class="sechead"><h2>🛠 Plan tools</h2><p>'+(editing?'You’re editing. Save for everyone when you’re done.':'Tap Edit plan to change the plan. Attendance and live mode work without editing.')+'</p></div><div class="admgrid">'+
-  [['matchup','⚔️ Matchup','Kingdoms, alliance tags, round'],['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Free copy-and-paste translation with any AI chat'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
+  [['matchup','⚔️ Matchup','Kingdoms, alliance tags, round'],['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Free copy-and-paste translation with any AI chat'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['exportplan','⬇️ Export plan','Save this plan as a file'],['importplan','⬆️ Import plan','Add a plan from an exported file'],['copyalllinks','🔗 Player links','Copy everyone’s personal link'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n','exportplan','copyalllinks','data'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
  o+=attendanceCard();
  o+='<div class="card">'+overviewPanel()+'</div>';
  o+='<section class="two">'+subsCard()+rotationCard()+'</section>';
@@ -1847,7 +1900,7 @@ function whoSummary(pl,w){var z=zoneOf(pl,w),bits=[];if(z){var own=ownLeads(pl,w
  else if(pl.subs.indexOf(w)>=0)bits.push(Tt('Substitute'));else bits.push(Tt('Not in this plan'));return bits.join(' · ');}
 function tabBody(t,pl){
  if(t==='map'||t==='me'){var w=view.who&&S.players[view.who]?view.who:null;
-  var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓</div>':'');
+  var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓ <button type="button" class="mini" data-act="copylink" data-p="'+esc(w)+'">🔗 '+Th('My link')+'</button></div>':'');
   o+='<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
    (editing?mapTools():liveBar())+'<div class="mapbox'+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
    '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
@@ -2004,9 +2057,42 @@ function i18nModalHTML(){var all=collectStrings(),keys=Object.keys(all),cov=cove
  h+='<details style="margin-top:6px"><summary class="note" style="cursor:pointer">Automatic translation with Google (optional, needs setup)</summary><p class="note">Only if you set up Google Translate (README, “Turn on translation”). When on, new text is translated automatically every time you save.</p><label class="bcheck"><input type="checkbox" data-set="trauto"'+(S.meta.autoTranslate?' checked':'')+'> Translate automatically on save</label>'+(S.meta.autoTranslate?'<button class="btn" data-act="trrun"'+(TR.busy?' disabled':'')+'>Run Google now</button>'+(TR.busy?' <span class="note">'+esc(TR.msg)+'</span>':''):'')+'</details>';
  return h+'<div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';}
 
+
+/* ---------- personal links ---------- */
+function myLinkURL(id,withLang){return location.origin+location.pathname+'?p='+encodeURIComponent(nm(id))+(withLang&&LANG!=='en'?'&lang='+encodeURIComponent(LANG):'');}
+function copyText(txt,msg){try{navigator.clipboard.writeText(txt).then(function(){toast(msg);},function(){view.txtOverride=txt;openModal('text');});}catch(x){view.txtOverride=txt;openModal('text');}}
+function applyLink(final){if(!LINKQ)return;var r=findByName(LINKQ);
+ if(typeof r==='string'){LINKQ=null;view.q=nm(r);view.qmsg='';if(!admin.ok){view.me=r;try{localStorage.setItem('swp-me',r);}catch(x){}}select({type:'player',id:r});return;}
+ if(final){view.q=LINKQ;view.qmsg='No player named “'+esc(LINKQ)+'” in the roster. Check the spelling, or ask a leader to add you.';LINKQ=null;render();}}
+function allLinksText(){var pl=P(),ids=combatants(pl).concat(pl.subs);ids.sort(function(a,b){return nm(a).localeCompare(nm(b));});
+ return '🔗 Personal links · '+pl.name+'\n'+ids.map(function(i){return nm(i)+': '+myLinkURL(i,false);}).join('\n');}
+/* ---------- plan export / import ---------- */
+function slugify(t){return String(t||'plan').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'plan';}
+function exportPlan(){var pl=P(),obj={type:'swordland-plan',v:1,exported:new Date().toISOString(),name:pl.name,label:pl.label||'',plan:clone(pl),players:clone(S.players)};
+ var blob=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download='swordland-'+slugify(pl.name+' '+(pl.label||''))+'-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+ toast('Saved “'+pl.name+'” as a file. Import plan adds it back any time.');}
+function pickPlanFile(){var inp=document.createElement('input');inp.type='file';inp.accept='.json,application/json';
+ inp.onchange=function(){var f=inp.files&&inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){importPlanText(String(rd.result||''));};rd.readAsText(f);};inp.click();}
+function remapIds(o,map){if(Array.isArray(o))return o.map(function(v){return remapIds(v,map);});
+ if(o&&typeof o==='object'){var r={};Object.keys(o).forEach(function(k){r[map[k]||k]=remapIds(o[k],map);});return r;}
+ return (typeof o==='string'&&map[o])?map[o]:o;}
+function importPlanText(txt){var obj;try{obj=JSON.parse(txt);}catch(e){toast('That file isn’t a plan export (it couldn’t be read).');return;}
+ var plans=[];if(obj&&obj.type==='swordland-plan'&&obj.plan)plans=[obj.plan];
+ else if(obj&&obj.plans&&typeof obj.plans==='object')plans=(obj.planOrder||Object.keys(obj.plans)).map(function(k){return obj.plans[k];}).filter(Boolean);
+ plans=plans.filter(function(p){return p&&Array.isArray(p.zones)&&Array.isArray(p.phases);});
+ if(!plans.length){toast('That file doesn’t contain a Swordland plan.');return;}
+ var map={},added=0,src=obj.players||{};
+ Object.keys(src).forEach(function(id){if(S.players[id])return;var nmn=normName(src[id]&&src[id].name);var same=Object.keys(S.players).filter(function(i){return normName(nm(i))===nmn;})[0];
+  if(same)map[id]=same;else{S.players[id]=clone(src[id]);added++;}});
+ var names=Object.keys(S.plans).map(function(k){return S.plans[k].name;}),done=[];
+ plans.forEach(function(p){var c=Object.keys(map).length?remapIds(clone(p),map):clone(p);if(names.indexOf(c.name)>=0)c.name=c.name+' (imported)';done.push(c.name);addPlan(c);});
+ migrateFormats();rerender();
+ toast('Imported '+done.map(function(n){return '“'+n+'”';}).join(', ')+' as a new plan'+(done.length>1?'s':'')+(added?' and added '+added+' player'+(added>1?'s':'')+' to the roster':'')+'. Tap Save for everyone to share it.');}
 seedSetups();migrateFormats();HIST=[JSON.stringify(S)];
+var LINKQ=null;try{var qs0=new URLSearchParams(location.search),lq0=qs0.get('lang'),pq0=qs0.get('p');if(lq0&&LANGS.some(function(l){return l[0]===lq0;})){LANG=lq0;try{localStorage.setItem('swp-lang',lq0);}catch(x){}}if(pq0)LINKQ=pq0;}catch(e){}
 try{var me0=localStorage.getItem('swp-me');if(me0&&S.players[me0]){view.me=me0;view.who=me0;view.focus=me0;}}catch(e){}
-render();loadSeed(LANG);fbInit();
+render();loadSeed(LANG);fbInit();applyLink(false);setTimeout(function(){applyLink(true);},5000);
 setInterval(function(){var el=document.getElementById('countdown');if(el)el.textContent=countdown(P());},30000);
 })();
 </script>

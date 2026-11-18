@@ -110,11 +110,35 @@ In **Edit plan**, the **📜 Briefing** tab is a writing box with a live preview
 
 The buttons above the box insert these for you. **Saved line** inserts a reusable sentence.
 
-Translation stays cheap without any templates: player names, times and numbers in each line are filled in automatically. "**Support** takes the Hall at **15:00**" is translated once, and when it becomes "**Duvy** takes the Hall at **18:00**" no new translation is needed.
+**+ Saved line…** opens a small fill-in box: pick the zone, tick the zones, choose the player or building, then **Insert**. The finished sentence goes into your text as normal writing you can edit. **Skip** inserts it with ___ blanks instead.
+
+Translation stays cheap without any templates: player names, zone names, building names, times and numbers in each line are filled in automatically. "**Support** takes the Hall at **15:00**" is translated once, and when it becomes "**Duvy** takes the Mercenary Camp at **18:00**" no new translation is needed. The same goes for "We are CONCEDING **Purple**…" becoming "We are CONCEDING **Yellow**…".
 
 The **🔀 If → Then** tab works the same way: one IF line and free-written THEN orders. **Who & where ▾** holds the zone, role and player options, the zone or building switch, and the phase.
 
 New wording appears in English until you translate it with **🛠 Admin → 🌐 Translations** (see **Translation** above). That panel also shows progress and lets you fix any line.
+
+## Pairing substitutes by hand
+
+In **👥 Roster**, every substitute has a dropdown in the Role column:
+- **Standby** (or **Standby · Blue reserve** etc.) means not paired yet.
+- **Andy · Cycle 1** makes them Andy's first rotation sub; **Andy · Cycle 2** is the next one after that. The list is grouped by zone.
+
+**🔁 Auto-pair subs** still fills in any unpaired subs for you; you can then adjust individual pairings here.
+
+## Personal links
+
+Every player has a link that opens straight to their own orders, with nothing to type. It works for anyone on the roster, including players you add later.
+
+- **Players:** after looking themselves up, they tap **🔗 My link**. Their link also remembers their language.
+- **Leaders:** in **👥 Roster**, tap **🔗 Link** next to any name to copy that player's link, or **🔗 Copy all links** for a list to paste into Discord. **🛠 Admin → 🔗 Player links** does the same.
+- A link looks like `your-site.netlify.app/?p=Boshbon`. Add `&lang=es` (or any language code) to open it in that language.
+
+## Saving and reusing plans
+
+- **🛠 Admin → ⬇️ Export plan** saves the plan you're viewing as a file on your device.
+- **🛠 Admin → ⬆️ Import plan** adds a plan from one of those files as a new plan. It never replaces an existing one. Players in the file who aren't on the roster are added; players already on the roster are matched by name. Tap **Save for everyone** afterwards.
+- **💾 Plan data** is still there for a backup of the whole planner at once.
 
 ## Attendance
 
