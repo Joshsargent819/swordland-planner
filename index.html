@@ -1080,7 +1080,7 @@ function discordText(){var pl=P(),m=M(pl),L=[];
  return L.join('\n');}
 
 /* ---------- modals ---------- */
-function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
+function openModal(kind){var keepSc=null;if(view.modal===kind){var ob=document.querySelector('.modal-bg');if(ob){keepSc={bg:ob.scrollTop,inner:[].map.call(ob.querySelectorAll('.schedwrap,.modal'),function(e){return e.scrollTop;})};}}closeModal();view.modal=kind;var pl=P(),h='';
  if(kind==='i18n'){h=i18nModalHTML();}
  else if(kind==='tplfill'){h=tplFillHTML();}
  else if(kind==='plantext'){var m=M(pl);h='<h3>Plan text · '+esc(pl.name)+'</h3>'+
@@ -1102,7 +1102,8 @@ function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
   '<div class="actions"><button class="btn danger" data-act="mt-clear">Clear time</button><button class="btn ghost" data-act="mclose">Cancel</button><button class="btn gold" data-act="mt-apply">Apply</button></div>';}
  else if(kind==='setups'){h='<h3>Setups</h3><p class="note">A setup is a map layout: the zones, their colors, which buildings each covers, and what is conceded. Switching setups keeps players in zones that stay; players in removed zones go to the bench. Leads, subs and orders stay with the plan.</p>'+'<div class="f"><label for="m-sname">Save '+esc(pl.name)+'’s current layout as a new setup</label><div style="display:flex;gap:8px"><input id="m-sname" placeholder="e.g. Concede Blue, merge Green + Yellow" style="flex:1"><button class="btn gold" data-act="savesetup">Save setup</button></div></div>'+(S.setups.length?'<h4 style="margin:4px 0 0;font-family:var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-size:13px">Your setups</h4>'+S.setups.map(function(st){return setupCard(st,pl);}).join(''):'')+'<h4 style="margin:4px 0 0;font-family:var(--cond);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-size:13px">Presets</h4>'+builtinSetups().map(function(st){return setupCard(st,pl);}).join('')+'<div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';}
  else if(kind==='roster'){var ids=Object.keys(S.players);var ord2=pl.zones.map(function(z){return z.id;}).concat(['subs','bench']);
-  ids.sort(function(a,b){var pa=ord2.indexOf(placeOf(pl,a)),pb=ord2.indexOf(placeOf(pl,b));if(pa!==pb)return pa-pb;var ra=roleValue(pl,a)==='sup'?1:0,rb=roleValue(pl,b)==='sup'?1:0;if(ra!==rb)return ra-rb;return nm(a).localeCompare(nm(b));});
+  if(view.rorder&&view.rorderPlan===view.plan){var ro=view.rorder;ids.sort(function(a,b){var ia=ro.indexOf(a),ib=ro.indexOf(b);return (ia<0?1e6:ia)-(ib<0?1e6:ib)||nm(a).localeCompare(nm(b));});}else ids.sort(function(a,b){var pa=ord2.indexOf(placeOf(pl,a)),pb=ord2.indexOf(placeOf(pl,b));if(pa!==pb)return pa-pb;var ra=roleValue(pl,a)==='sup'?1:0,rb=roleValue(pl,b)==='sup'?1:0;if(ra!==rb)return ra-rb;return nm(a).localeCompare(nm(b));});
+  view.rorder=ids.slice();view.rorderPlan=view.plan;
   var q=(view.rq||'').toLowerCase();var shown=ids.filter(function(i){return !q||nm(i).toLowerCase().indexOf(q)>=0;});
   var placeSel=function(i){var c=placeOf(pl,i);return '<select data-set="rplace" data-pid="'+esc(i)+'" aria-label="Placement for '+esc(nm(i))+'">'+pl.zones.map(function(z){return '<option value="'+esc(z.id)+'"'+(c===z.id?' selected':'')+'>'+esc(z.name)+'</option>';}).join('')+'<option value="subs"'+(c==='subs'?' selected':'')+'>Substitute</option><option value="bench"'+(c==='bench'?' selected':'')+'>Not in plan</option></select>';};
   h='<h3>Roster · '+esc(pl.name)+'</h3><p class="note">Everyone on the alliance roster. Placement and role apply to '+esc(pl.name)+' only; name and power apply to every plan. “Not in plan” keeps a player on the roster; Delete removes them everywhere.</p>'+
@@ -1141,7 +1142,8 @@ function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
   '<p class="note">New leaders: send them the site link. They tap 🔒 Admin sign-in → Sign in with Google, and the edit tools appear.</p><div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';}
  else if(kind==='attpaste'){h='<h3>Mark attendance from a list</h3><p class="note">Paste names, one per line or separated by commas (for example, everyone who reacted ✅ in Discord). Names must match the roster.</p><textarea id="m-attl" style="min-height:200px"></textarea><div class="actions" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center"><label for="m-atts" class="note">Mark as</label><select id="m-atts"><option value="in">✅ In</option><option value="out">❌ Can’t make it</option></select></div><div style="display:flex;gap:8px"><button class="btn ghost" data-act="mclose">Cancel</button><button class="btn gold" data-act="attapply">Mark them</button></div></div>';}
  else if(kind==='text'){var tx0=view.txtOverride||discordText();view.txtOverride=null;h='<h3>Copy this text</h3><p class="note">Copying was blocked here. Select all of the text below and copy it.</p><textarea id="m-txt" style="min-height:340px">'+esc(tx0)+'</textarea><div class="actions"><button class="btn gold" data-act="mclose">Close</button></div>';}
- var bg=document.createElement('div');bg.className='modal-bg';bg.innerHTML='<div class="modal" role="dialog" aria-modal="true">'+h+'</div>';document.body.appendChild(bg);}
+ var bg=document.createElement('div');bg.className='modal-bg';bg.innerHTML='<div class="modal" role="dialog" aria-modal="true">'+h+'</div>';document.body.appendChild(bg);
+ if(keepSc){bg.scrollTop=keepSc.bg;[].forEach.call(bg.querySelectorAll('.schedwrap,.modal'),function(e,ix){if(keepSc.inner[ix]!=null)e.scrollTop=keepSc.inner[ix];});}}
 function closeModal(){view.modal=null;document.querySelectorAll('.modal-bg').forEach(function(n){n.remove();});}
 function val(id){var e=document.getElementById(id);return e?e.value:'';}
 function applyPlanText(){var pl=P();pl.name=val('m-name')||pl.name;pl.label=val('m-label')||pl.label;pl.blurb=val('m-blurb');pl.mission=val('m-mission');
@@ -1554,7 +1556,7 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='itsme'){select({type:'player',id:view.me});}
  else if(k==='notme'){try{localStorage.removeItem('swp-me');}catch(x){}view.me=null;render();}
  else if(k==='undo')undo();
- else if(k==='roster'){view.confirmDel=null;openModal('roster');}
+ else if(k==='roster'){view.confirmDel=null;view.rorder=null;openModal('roster');}
  else if(k==='ropen'){closeModal();select({type:'player',id:el.getAttribute('data-pid')});}
  else if(k==='rdel'){var rid=el.getAttribute('data-pid');if(view.confirmDel!=='p:'+rid){view.confirmDel='p:'+rid;openModal('roster');return;}var rn=nm(rid);removePlayer(rid);view.confirmDel=null;if(view.sel&&view.sel.id===rid){view.sel=null;view.focus=null;}touch();toast(rn+' removed from the roster.');}
  else if(k==='rbulk'){var res=bulkAdd(val('m-bulk'),val('m-bdest'));touch();toast((res.added.length?'Added '+res.added.length+': '+res.added.join(', ')+'.':'No new players added.')+(res.skipped.length?' Already on the roster: '+res.skipped.join(', ')+'.':''));}
