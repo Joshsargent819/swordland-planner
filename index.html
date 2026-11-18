@@ -139,7 +139,11 @@ table.sched tr.done td{opacity:.55}
 .tabbtn[aria-selected="true"]{color:var(--text);border-bottom-color:var(--gold)}
 .tabbtn:hover{color:var(--text)}
 .tabbody{display:flex;flex-direction:column;gap:14px}
-.mecard{max-width:760px}.mecard.panel{position:static;max-height:none;overflow:visible}.metools{display:flex;justify-content:flex-end}
+.mecard{max-width:none}
+.lookup2 form{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.lookup2 label{font-family:var(--display);font-weight:600;font-size:16px;margin-inline-end:4px}
+.lookup2 input{flex:1;min-width:180px;background:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:16px}
+.whobar{background:#1d2a20;border:1px solid #2f5a3c;border-radius:10px;padding:8px 12px;font-size:15px}.mecard.panel{position:static;max-height:none;overflow:visible}.metools{display:flex;justify-content:flex-end}
 .hint p{margin:0;color:var(--muted)}
 .maptop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .more{position:relative;display:inline-block}.more>summary{list-style:none;cursor:pointer}.more>summary::-webkit-details-marker{display:none}
@@ -996,6 +1000,7 @@ function discordText(){var pl=P(),m=M(pl),L=[];
  var rows=[];pl.zones.forEach(function(z){var any=z.members.filter(function(mm){return (pl.pairs[mm]||[]).length;});if(!any.length)return;var mg=managerOf(pl,z.id);rows.push(emojiFor(z.color)+' '+z.name.toUpperCase()+(mg?' (Mgr: '+nm(mg)+')':''));
   any.forEach(function(mm){rows.push('• '+nm(mm)+' → '+pl.pairs[mm].map(function(s,i){return nm(s)+(pl.pairs[mm].length>1?' [C'+(i+1)+']':'');}).join(' → ')+' ('+rotAt(pl,mm)+')');});});
  if(rows.length){L.push('🔁 ROTATIONS');L=L.concat(rows);L.push('');}
+ var cr=[];Object.keys(CELLARS).forEach(function(id){var lb=cellarLabel(pl,id);if(lb)cr.push('• '+CELLARS[id].name+': '+lb);});if(cr.length){L.push('⛏ UNDERCELLAR REFRESH');L=L.concat(cr);L.push('');}
  var tpl=(pl.markers||[]).filter(function(m2){return m2.type==='tp'&&(m2.players||[]).length;});if(tpl.length){L.push('📍 TELEPORTS');tpl.forEach(function(m2){L.push('• '+mkTitle(pl,m2)+(m2.phase?' (Phase '+m2.phase+')':'')+': '+m2.players.map(nm).join(', ')+(m2.note?' — '+m2.note:''));});L.push('');}
  var lol=(pl.markers||[]).filter(function(m2){return m2.type==='loot';});if(lol.length){L.push('🎁 LOOT CRATES');lol.forEach(function(m2){L.push('• '+mkTitle(pl,m2)+(m2.phase?' (Phase '+m2.phase+')':'')+(m2.note?' — '+m2.note:''));});L.push('');}
  if(pl.orders.length){L.push('🚨 '+(pl.ordersTitle||'ORDERS').toUpperCase());pl.orders.forEach(function(o,i){L.push((i+1)+'. '+o);});}
@@ -1051,6 +1056,7 @@ function openModal(kind){closeModal();view.modal=kind;var pl=P(),h='';
   '<h3 style="font-size:16px">Glossary</h3><p class="note">Game terms translated once and kept the same everywhere, one per line. Fix each term per language above, using the game’s own name for it.</p><textarea data-set="glossary" rows="5" style="width:100%">'+esc((S.glossary||[]).join('\n'))+'</textarea>'+
   '<div class="actions"><button class="btn ghost" data-act="mclose">Close</button></div>';}
  else if(kind==='suggest'){var sg=view.suggest||{ids:[]};h='<h3>⚡ Switch the plan?</h3><p>'+esc(bname(pl,sg.bid))+' is now marked <b>'+esc(BSTAT[bStatus(sg.bid)]?BSTAT[bStatus(sg.bid)][1]:'')+'</b>. These If → Then entries are tied to it:</p>'+sg.ids.map(function(cid){var c=CN(pl,cid);return c?'<div class="cont">'+'<div class="cif"><span class="ck">IF</span><span>'+trigHTML(pl,c)+'</span></div><div class="cmeta">'+Th('Applies to: {who}',{who:esc(scopeText(pl,c))})+' <button class="btn gold" data-act="ctoggle" data-cid="'+esc(cid)+'">⚡ Activate for everyone</button></div></div>':'';}).join('')+'<div class="actions"><button class="btn ghost" data-act="mclose">Not now</button></div>';}
+ else if(kind==='matchup'){h=matchupModal();}
  else if(kind==='login'){h='<h3>Admin sign-in</h3><p class="note">Leaders sign in with their Google account. No password to create: the owner gives access by email in ⚙️ Settings.</p><div class="actions" style="justify-content:space-between"><button class="btn ghost" data-act="mclose">Cancel</button><button class="btn gold" data-act="dologin">Sign in with Google</button></div>';}
  else if(kind==='claim'){h='<h3>Claim this planner</h3><p>Nobody owns this planner yet. Make <b>'+esc(admin.email)+'</b> the owner? The owner can add and remove other leaders in ⚙️ Settings.</p><p class="note">This only appears once, on a brand-new site.</p><div class="actions"><button class="btn ghost" data-act="mclose">Not now</button><button class="btn gold" data-act="claim">Yes, I’m the owner</button></div>';}
  else if(kind==='settings'){var list=(FB.admins||[]).slice().sort(function(a,b){return (a.role==='owner'?0:1)-(b.role==='owner'?0:1)||a.email.localeCompare(b.email);}),own=admin.role==='owner';
@@ -1291,7 +1297,7 @@ function save(){if(!FB.ok){toast('Firebase isn’t set up yet, so this preview c
  var ref=FB.db.doc('swordland/state'),base=FB.rev,json=JSON.stringify(S);FB.savingNow=true;toast('Saving…');
  FB.db.runTransaction(function(tx){return tx.get(ref).then(function(sn){var cur=sn.exists?(sn.data().rev||0):0;if(cur!==base)throw {code:'conflict'};
   tx.set(ref,{data:json,rev:cur+1,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:admin.name||''});});})
- .then(function(){FB.savingNow=false;FB.rev=base+1;FB.serverState=json;dirty=false;HIST=[json];toast('Saved. Everyone now sees this version.');render();})
+ .then(function(){FB.savingNow=false;FB.rev=base+1;FB.serverState=json;dirty=false;HIST=[json];toast('Saved. Everyone now sees this version.');render();setTimeout(autoTranslate,600);})
  .catch(function(e){FB.savingNow=false;if(e&&e.code==='conflict')toast('Another admin saved first. Copy your changes from Plan data, then Discard to load their version.');else toast('Save failed: '+(e&&e.message||e));});}
 function doLogin(){var prov=new firebase.auth.GoogleAuthProvider();prov.setCustomParameters({prompt:'select_account'});
  FB.auth.signInWithPopup(prov).then(function(){closeModal();},function(e){var c=e&&e.code;
@@ -1299,7 +1305,7 @@ function doLogin(){var prov=new firebase.auth.GoogleAuthProvider();prov.setCusto
   if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return;
   toast(c==='auth/unauthorized-domain'?'This web address isn’t authorized in Firebase yet (Authentication → Settings → Authorized domains).':'Sign-in failed: '+(e.message||c));});}
 function autoSeed(){if(!FB.ok||!FB.loaded||!FB.empty||!admin.ok||FB.seeding)return;FB.seeding=true;var ref=FB.db.doc('swordland/state'),json=JSON.stringify(S);
- ref.set({data:json,rev:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:admin.name||admin.email||''}).then(function(){FB.rev=1;FB.serverState=json;FB.empty=false;toast('Your plans are now saved online. Everyone with the link sees them.');},function(e){FB.seeding=false;toast('Couldn’t save the starting plans: '+e.message);});}
+ ref.set({data:json,rev:1,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),updatedBy:admin.name||admin.email||''}).then(function(){FB.rev=1;FB.serverState=json;FB.empty=false;toast('Your plans are now saved online. Everyone with the link sees them.');setTimeout(autoTranslate,1500);},function(e){FB.seeding=false;toast('Couldn’t save the starting plans: '+e.message);});}
 function claimOwner(){var e=admin.email;if(!e)return;var batch=FB.db.batch();
  batch.set(FB.db.doc('swordland_meta/owner'),{email:e,at:Date.now()});
  batch.set(FB.db.doc('swordland_admins/'+e),{email:e,name:admin.name||'',role:'owner',addedBy:e,at:Date.now()});
@@ -1355,6 +1361,7 @@ function paintAt(bid){var pl=P(),z=view.tool.slice(6),m=bm(pl,bid);if(m.zone===z
  if(!z){m.lead=null;}touch();}
 document.addEventListener('click',function(e){var t=e.target;
  if(drag&&drag.moved)return;
+ var cl0=t.closest('[data-cellar]');if(cl0&&!(editing&&view.tool.indexOf('place:')===0)){select({type:'cellar',id:cl0.getAttribute('data-cellar')});return;}
  var tb=t.closest('[data-tab]');if(tb){goTab(tb.getAttribute('data-tab'));return;}
  var a=t.closest('[data-act]');if(a){if(a.hasAttribute('data-needs-edit')&&!editing&&admin.ok){editing=true;wantEdit=true;persist();}act(a.getAttribute('data-act'),a,e);return;}
  var ab=t.closest('[data-att]');if(ab){if(!admin.ok)return;var aid=ab.getAttribute('data-att'),cur=attOf(aid),nx=!cur?'in':cur.status==='in'?'out':null;setAtt(aid,nx,'admin',cur&&cur.note).catch(function(e){toast('Couldn’t update: '+e.message);});return;}
@@ -1388,6 +1395,10 @@ function act(k,el){var pl=P(),id=view.sel&&view.sel.id;
  else if(k==='delplan'){if(view.confirmDel!=='plan'){view.confirmDel='plan';render();return;}var gone=view.plan;delete S.plans[gone];S.planOrder=S.planOrder.filter(function(x){return x!==gone;});if(S.livePlan===gone)S.livePlan=S.planOrder[0];view.plan=S.livePlan;view.sel=null;view.confirmDel=null;persist();touch();}
  else if(k==='addzone')addZone();
  else if(k==='setups')openModal('setups');
+ else if(k==='cellarall'){var src0=cellarTimes(pl,el.getAttribute('data-c'));pl.cellars=pl.cellars||{};Object.keys(CELLARS).forEach(function(id){pl.cellars[id]=Object.assign({},pl.cellars[id]||{},{times:src0.slice()});});touch();toast('All six Undercellars now use these refresh times.');}
+ else if(k==='matchup'){openModal('matchup');}
+ else if(k==='muapply'){applyMatchup();}
+ else if(k==='clearwho'){view.who=null;view.focus=null;view.q='';view.qmsg='';render();}
  else if(k==='golive'){view.plan=S.livePlan;view.chosen=true;persist();render();}
  else if(k==='showmap'){view.focus=el.getAttribute('data-p');view.sel=null;goTab('map');}
  else if(k==='copen'){var cc0=el.getAttribute('data-cid');view.copen=view.copen===cc0?null:cc0;render();}
@@ -1533,6 +1544,8 @@ document.addEventListener('change',function(e){var asel=e.target&&e.target.getAt
  else if(k==='canchor'){var can=CN(pl,t.getAttribute('data-cid'));if(can){if(t.value){var pp=t.value.split(':');can.anchor={type:pp[0],id:pp.slice(1).join(':')};}else delete can.anchor;touch();}}
  else if(k==='creplace'){var crp=CN(pl,t.getAttribute('data-cid'));if(crp){crp.replace=t.checked;touch();}}
  else if(k==='tplcat'){var tc2=tplById(t.getAttribute('data-id'));if(tc2){if(t.value)tc2.cat=t.value;else delete tc2.cat;touch();}}
+ else if(k==='cellartimes'){var cid0=t.getAttribute('data-c');pl.cellars=pl.cellars||{};var cd0=pl.cellars[cid0]=Object.assign({},pl.cellars[cid0]||{});cd0.times=t.value.split(/[,;\s]+/).map(parseOff).filter(function(x){return x!=null;});touch();}
+ else if(k==='cellarnote'){var cid1=t.getAttribute('data-c');pl.cellars=pl.cellars||{};var cd1=pl.cellars[cid1]=Object.assign({},pl.cellars[cid1]||{});cd1.note=t.value.trim();touch();}
  else if(k==='btxt'){pl.briefingText=t.value;touch();}
  else if(k==='cif'){var ci1=CN(pl,t.getAttribute('data-cid'));if(ci1){ci1.ifText=t.value;touch();}}
  else if(k==='cthen'){var ci2=CN(pl,t.getAttribute('data-cid'));if(ci2){ci2.thenText=t.value;touch();}}
@@ -1706,9 +1719,9 @@ function select(sel){view.confirmDel=null;
  view.sel=sel;view.focus=null;if(sel)view.tab='map';render();if(window.innerWidth<=900&&sel){var p=$('#panel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});}}
 function render(){var pl=P(),m=M(pl);try{document.documentElement.lang=LANG;document.documentElement.dir=RTL[LANG]?'rtl':'ltr';}catch(e){}
  if(view.sel&&view.sel.type==='player'){view.who=view.sel.id;view.sel=null;}if(view.sel&&view.sel.type==='zone')view.sel=null;
- var tabs=tabList();if(!view.tab){try{view.tab=sessionStorage.getItem('swp-tab');}catch(e){}}if(!tabs.some(function(t){return t[0]===view.tab;}))view.tab='me';
+ var tabs=tabList();if(!view.tab){try{view.tab=sessionStorage.getItem('swp-tab');}catch(e){}}if(!tabs.some(function(t){return t[0]===view.tab;}))view.tab=(view.tab==='me'?'map':'map');
  var st=startMs(pl),h='<div class="wrap">';
- h+='<header class="top2"><div class="brand"><div class="eyebrow">'+esc(m.league)+' · '+esc(m.round)+'</div><h1>'+Th('Mega Legion Battle Plan')+'</h1><div class="vsline">'+esc(m.us.k)+' ['+esc(m.us.tag)+'] <span class="vs">VS</span> '+esc(m.them.k)+' ['+esc(m.them.tag)+']</div></div><div class="who">'+whoHTML()+'</div></header>';
+ h+='<header class="top2"><div class="brand"><div class="eyebrow">'+esc(m.league)+' · '+esc(m.round)+'</div><h1>'+Th('Mega Legion Battle Plan')+'</h1><div class="vsline">'+esc(m.us.k)+' ['+esc(m.us.tag)+'] <span class="vs">VS</span> '+esc(m.them.k)+' ['+esc(m.them.tag)+']'+(editing?' <button class="mini" data-act="matchup">✏️ Change</button>':'')+'</div></div><div class="who">'+whoHTML()+'</div></header>';
  h+='<div class="bar2"><label class="pick">'+Th('Plan')+' <select id="plansel" aria-label="Plan">'+S.planOrder.filter(function(k){return S.plans[k];}).map(function(k){var q=S.plans[k];return '<option value="'+k+'"'+(k===view.plan?' selected':'')+'>'+esc(q.name+' · '+q.label)+(k===S.livePlan?' ● LIVE':'')+'</option>';}).join('')+'</select></label>'+
   '<span class="mt">🕒 '+(st!=null?'<b>'+esc(fmtClock(st,true))+'</b> <span id="countdown" class="mt-c">'+esc(countdown(pl))+'</span>':'<span class="note">'+Th('Match time not set')+'</span>')+'</span>'+
   '<span class="bar2r"><label class="pick">🌐 <select id="langsel" aria-label="Language">'+LANGS.map(function(l){return '<option value="'+l[0]+'"'+(l[0]===LANG?' selected':'')+'>'+l[1]+'</option>';}).join('')+'</select></label>'+
@@ -1732,7 +1745,7 @@ function tabBody(t,pl){
  if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
  if(t==='brief')return (pl.mission?'<div class="card"><p class="mission" style="max-width:none"><b>'+Th('Mission')+'</b>'+lineHTML(pl.mission)+'</p></div>':'')+briefingCard();
  if(t==='ifthen')return playbookCard();
- if(t==='times')return scheduleCard()+timelineCard()+ordersCard()+markersCard();
+ if(t==='times')return scheduleCard()+cellarCard()+timelineCard()+ordersCard()+markersCard();
  if(t==='admin')return adminTab(pl);
  return '';}
 function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zone no longer exists.</p>';var c=concedeOf(pl,zid),mg=managerOf(pl,zid);
@@ -1750,12 +1763,13 @@ function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zon
  if(tcs.length)o+='<section><h4>📍 '+Th('Town Center spots')+'</h4><div class="chips">'+tcs.map(function(m){return '<button class="chip" data-marker="'+m.id+'"><span>📍 '+esc(Tt(mkTitle(pl,m)))+'</span><small>'+(m.players||[]).length+'</small></button>';}).join('')+'</div></section>';
  var cs=contOf(pl).filter(function(cn){var sc=cn.scope||{};return (cn.anchor&&((cn.anchor.type==='zone'&&cn.anchor.id===zid)||(cn.anchor.type==='building'&&bz(pl,cn.anchor.id)===zid)))||(sc.zones||[]).indexOf(zid)>=0;});
  if(cs.length)o+='<section><h4>🔀 '+Th('If → Then')+'</h4><div class="conts">'+cs.map(function(cn){return contHTML(pl,cn);}).join('')+'</div></section>';
+ o+=cellarZoneHTML(pl,zid);
  o+='</div>';
  if(editing)o+='<div class="card">'+zonePanel(zid).replace(/^[\s\S]*?(<section class="ed">)/,'$1')+'</div>';
  return o;}
 function adminTab(pl){var o='';
  o+='<div class="card"><div class="sechead"><h2>🛠 Plan tools</h2><p>'+(editing?'You’re editing. Save for everyone when you’re done.':'Tap Edit plan to change the plan. Attendance and live mode work without editing.')+'</p></div><div class="admgrid">'+
-  [['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Translate new text, fix lines, glossary'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
+  [['matchup','⚔️ Matchup','Kingdoms, alliance tags, round'],['roster','👥 Roster','Add, remove, rename, move players'],['matchtime','🕒 Match time','Start time for this plan'],['plantext','📝 Plan text','Mission, phases, orders, duties, matchup'],['setups','🧩 Setups','Saved zone layouts'],['i18n','🌐 Translations','Translate new text, fix lines, glossary'],['tpls','💬 Saved lines','Reusable sentences and IF triggers'],['autopair','🔁 Auto-pair subs','Pair free subs with supporters'],['makelive','● Make this plan live','Players see it by default'],['dupplan','📄 Duplicate plan','Copy this plan'],['newplan','➕ New plan','Blank plan from the map'],['data','💾 Plan data','Backup or restore'],['settings','⚙️ Leaders & access','Who can edit'],['delplan',view.confirmDel==='plan'?'Tap again to delete':'🗑 Delete plan','Remove this plan']].filter(function(x){return x[0]!=='makelive'||S.livePlan!==view.plan;}).filter(function(x){return x[0]!=='delplan'||S.planOrder.length>1;}).map(function(x){var needEdit=['settings','i18n'].indexOf(x[0])<0;return '<button class="admbtn'+(x[0]==='delplan'?' danger':'')+'" data-act="'+x[0]+'"'+(needEdit&&!editing?' data-needs-edit="1"':'')+'><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>';}).join('')+'</div></div>';
  o+=attendanceCard();
  o+='<div class="card">'+overviewPanel()+'</div>';
  o+='<section class="two">'+subsCard()+rotationCard()+'</section>';
@@ -1763,7 +1777,7 @@ function adminTab(pl){var o='';
  return o;}
 
 var BPOS={bell:[215,58,110],merc:[448,92,128],purple_abbey:[688,62,111],blue_sanctum:[145,213,247],blue_abbey:[135,350,384],green_abbey:[748,215,249],green_sanctum:[752,350,383],hall:[447,398,447],yellow_abbey:[192,478,508],yellow_stables:[722,478,508]};
-var ZPOS={purple:[445,34],blue:[70,150],green:[818,150],yellow:[445,582]};
+var ZPOS={purple:[445,34],blue:[66,182],green:[820,182],yellow:[445,582]};
 function mapSVG(){var pl=P(),ph=view.phase,o=[];
  var focusZone=view.focus?(zoneOf(pl,view.focus)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
  var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null,selB=view.sel&&view.sel.type==='building'?view.sel.id:null;
@@ -1780,7 +1794,8 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
   o.push('<rect x="'+(x-72)+'" y="'+(y-42)+'" width="144" height="'+(ny-y+58)+'" fill="transparent"/>');
   if(!zid||!act)o.push('<ellipse cx="'+x+'" cy="'+(y+8)+'" rx="44" ry="36" fill="#141821" fill-opacity="'+(!zid||fc?0.55:0.4)+'" pointer-events="none"/>');
-  if(hl)o.push('<ellipse class="pulse" cx="'+x+'" cy="'+(y+8)+'" rx="50" ry="42" fill="none" stroke="#fff" stroke-width="4"/>');
+  if(hl){o.push('<ellipse cx="'+x+'" cy="'+(y+8)+'" rx="54" ry="46" fill="none" stroke="#111" stroke-width="9" stroke-opacity=".55"/><ellipse class="pulse" cx="'+x+'" cy="'+(y+8)+'" rx="54" ry="46" fill="none" stroke="#ffd34d" stroke-width="5"/>');
+   if(view.focus&&focusB.indexOf(b.id)>=0)o.push(plate(x,y-50,'★ '+nm(view.focus),'#ffd34d','#1b1404','#111',false,14));}
   if(zid)o.push('<circle cx="'+(x-36)+'" cy="'+(y-24)+'" r="9" fill="'+zcol(pl,zid)+'" stroke="#111" stroke-width="2.5"><title>'+esc(zname(pl,zid))+'</title></circle>');
   var ut=clockAt(pl,unlockOf(pl,b.id)),tag=ut?ut.replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):'P'+e,lt,lf,lc,ls,ld=false;
   if(!zid){lt=Tt('Not in plan');lf='#efe7d2';lc='#6b6455';ls='#6b6455';ld=true;}
@@ -1796,7 +1811,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
  var selM=view.sel&&view.sel.type==='marker'?view.sel.id:null,focusM=view.focus?tpsOf(pl,view.focus).map(function(m){return m.id;}):[];
  (pl.markers||[]).forEach(function(m){var vis=mkVisible(m,ph);if(!vis&&!editing)return;var hl=selM===m.id||focusM.indexOf(m.id)>=0;
   o.push('<g data-marker="'+m.id+'" opacity="'+(vis?1:0.35)+'" style="cursor:pointer">');
-  if(hl)o.push('<circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="28" fill="#fff6" stroke="#111" stroke-width="3"/>');
+  if(hl)o.push('<circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="30" fill="#ffd34d55" stroke="#ffd34d" stroke-width="5"/>');
   if(m.type==='tp'){var c=mkColor(pl,m),ps=m.players||[];
    o.push('<path transform="translate('+m.x+','+m.y+')" d="M0,0 C-6,-10 -13,-17 -13,-26 A13,13 0 1 1 13,-26 C13,-17 6,-10 0,0Z" fill="'+c+'" stroke="#111" stroke-width="2.5"/><circle cx="'+m.x+'" cy="'+(m.y-26)+'" r="8" fill="#fff"/><text x="'+m.x+'" y="'+(m.y-22.5)+'" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="11" fill="#111">'+(ps.length||'TC')+'</text>');
    o.push(plate(m.x,m.y+13,ps.length?ps.slice(0,2).map(nm).join(', ')+(ps.length>2?' +'+(ps.length-2):''):(m.label||Tt('Town Center spot')),shade(c,.35),'#fff','#111',false,12));}
@@ -1807,8 +1822,147 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   o.push('<rect x="'+(m.x-20)+'" y="'+(m.y-44)+'" width="40" height="52" fill="transparent"/></g>');});
  return o.join('')+'</svg>';}
 
+/* ===================== v4: map-first, matchup editing, automatic translation ===================== */
+function tabList(){var pl=P(),t=[['map','🗺️','Map']];
+ zoneTabs(pl).forEach(function(z){t.push(['z:'+z.id,emojiFor(z.color),z.name,1]);});
+ if(editing||(pl.briefingText||'').trim()||pl.mission)t.push(['brief','📜','Briefing']);
+ if(editing||contOf(pl).length)t.push(['ifthen','🔀','If → Then']);
+ t.push(['times','⏱️','Schedule']);if(admin.ok)t.push(['admin','🛠','Admin']);return t;}
+function select(sel){view.confirmDel=null;
+ if(sel&&sel.type==='player'){view.who=sel.id;view.focus=sel.id;view.tab='map';render();var mp=document.querySelector('.mapcard');if(mp)mp.scrollIntoView({behavior:'smooth',block:'start'});return;}
+ if(sel&&sel.type==='zone'){goTab('z:'+sel.id);return;}
+ view.sel=sel;if(sel)view.tab='map';render();if(window.innerWidth<=900&&sel){var p=$('#panel');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});}}
+function lookupHTML(){var pl=P();return '<section class="lookup2"><form id="lookup"><label for="q">'+Th('Check my assignment')+'</label><input id="q" list="names" autocomplete="off" placeholder="'+esc(Tt('Type your in-game name'))+'" value="'+esc(view.q||'')+'"><button class="btn gold" type="submit">'+Th('Check')+'</button>'+
+ (view.me&&S.players[view.me]&&view.who!==view.me?'<button type="button" class="btn" data-act="itsme">👤 '+esc(nm(view.me))+'</button>':'')+(view.who?'<button type="button" class="btn ghost" data-act="clearwho">'+Th('Clear')+'</button>':'')+
+ '<datalist id="names">'+Object.keys(S.players).map(function(i){return '<option value="'+esc(nm(i))+'">';}).join('')+'</datalist></form>'+(view.qmsg?'<div id="qmsg" class="note">'+view.qmsg+'</div>':'')+'</section>';}
+function whoSummary(pl,w){var z=zoneOf(pl,w),bits=[];if(z){var own=ownLeads(pl,w),co=ownCo(pl,w);bits.push(Tt('{zone} Zone',{zone:Tt(zname(pl,z))}));bits.push(own.length?Tt('Building Lead')+' · '+own.map(function(b){return Tt(BB(b).name);}).join(' + '):co.length?Tt('Co-Lead')+' · '+co.map(function(b){return Tt(BB(b).name);}).join(' + '):Tt('Zone Supporter'));}
+ else if(pl.subs.indexOf(w)>=0)bits.push(Tt('Substitute'));else bits.push(Tt('Not in this plan'));return bits.join(' · ');}
+function tabBody(t,pl){
+ if(t==='map'||t==='me'){var w=view.who&&S.players[view.who]?view.who:null;
+  var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓</div>':'');
+  o+='<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
+   (editing?mapTools():liveBar())+'<div class="mapbox'+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+   '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
+   '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
+  if(w)o+='<div class="card mecard panel" id="mecard">'+playerPanel(w)+'</div>';
+  else o+='<div class="card hint"><p>'+Th('Type your in-game name above to see your zone, your building, your orders and your substitutes.')+'</p></div>';
+  return o;}
+ if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
+ if(t==='brief')return (pl.mission?'<div class="card"><p class="mission" style="max-width:none"><b>'+Th('Mission')+'</b>'+lineHTML(pl.mission)+'</p></div>':'')+briefingCard();
+ if(t==='ifthen')return playbookCard();
+ if(t==='times')return scheduleCard()+cellarCard()+timelineCard()+ordersCard()+markersCard();
+ if(t==='admin')return adminTab(pl);
+ return '';}
+/* matchup editor */
+function matchupModal(){var pl=P(),m=M(pl);
+ return '<h3>⚔️ Matchup · '+esc(pl.name)+'</h3><p class="note">Shown at the top of the page and in every Discord copy.</p>'+
+ '<div class="grid2"><div class="f"><label for="mu-uk">Our kingdom</label><input id="mu-uk" value="'+esc(m.us.k)+'" placeholder="K976"></div><div class="f"><label for="mu-ut">Our alliance tag</label><input id="mu-ut" value="'+esc(m.us.tag)+'" placeholder="OPC"></div>'+
+ '<div class="f"><label for="mu-tk">Opponent kingdom</label><input id="mu-tk" value="'+esc(m.them.k)+'" placeholder="K1039"></div><div class="f"><label for="mu-tt">Opponent alliance tag</label><input id="mu-tt" value="'+esc(m.them.tag)+'" placeholder="KOH"></div>'+
+ '<div class="f"><label for="mu-up">Our squad power (optional)</label><input id="mu-up" inputmode="numeric" value="'+esc(m.us.power||'')+'"></div><div class="f"><label for="mu-tp">Opponent squad power (optional)</label><input id="mu-tp" inputmode="numeric" value="'+esc(m.them.power||'')+'"></div>'+
+ '<div class="f"><label for="mu-rd">Round</label><input id="mu-rd" value="'+esc(m.round)+'" placeholder="Round 4 · Finals"></div><div class="f"><label for="mu-lg">Event name</label><input id="mu-lg" value="'+esc(S.meta.league)+'"></div></div>'+
+ '<label class="bcheck"><input type="checkbox" id="mu-all"> Use our kingdom and tag for every plan</label>'+
+ '<div class="actions"><button class="btn ghost" data-act="mclose">Cancel</button><button class="btn gold" data-act="muapply">Apply</button></div>';}
+function applyMatchup(){var pl=P(),num=function(id){return +String(val(id)).replace(/\D/g,'')||0;};pl.match=pl.match||{};
+ pl.match.us={k:val('mu-uk').trim(),tag:val('mu-ut').trim().replace(/^\[|\]$/g,''),power:num('mu-up')};
+ pl.match.them={k:val('mu-tk').trim(),tag:val('mu-tt').trim().replace(/^\[|\]$/g,''),power:num('mu-tp')};
+ pl.match.round=val('mu-rd').trim();if(val('mu-lg').trim())S.meta.league=val('mu-lg').trim();
+ if(document.getElementById('mu-all')&&document.getElementById('mu-all').checked){S.planOrder.forEach(function(k){var q=S.plans[k];if(!q)return;q.match=q.match||{};q.match.us=Object.assign({},q.match.us||S.meta.us,{k:pl.match.us.k,tag:pl.match.us.tag});});S.meta.us=Object.assign({},S.meta.us,{k:pl.match.us.k,tag:pl.match.us.tag});}
+ closeModal();touch();toast('Matchup updated. Save for everyone to share it.');}
+/* automatic translation after saving */
+function autoTranslate(){if(!FB.ok||!admin.ok||TR.busy)return;if(!I18N_ALL_LOADED){setTimeout(autoTranslate,800);return;}translateMissing({quiet:true});}
+function translateMissing(opts){opts=opts||{};if(TR.busy)return;if(!FB.ok){if(!opts.quiet)toast('Translation runs on the live site (Firebase + Netlify).');return;}if(!FB.user||!admin.ok){if(!opts.quiet)toast('Log in as an admin to translate.');return;}
+ var all=collectStrings(),cov=coverage(all),jobs=Object.keys(cov).filter(function(l){return cov[l].miss.length;}).map(function(l){return {lang:l,keys:cov[l].miss};});
+ if(!jobs.length){if(!opts.quiet)toast('Everything is already translated.');return;}
+ TR.busy=true;var i=0,ok=0,fail=[],stop=false;var show=function(){if(view.modal==='i18n')openModal('i18n');};
+ FB.user.getIdToken().then(function(tok){(function next(){if(stop||i>=jobs.length){TR.busy=false;TR.msg='';if(!stop)toast(fail.length?'Translated '+ok+' languages. Failed: '+fail.join(', ')+'.':'🌐 New text translated into '+ok+' languages.');show();rerender();return;}
+  var j=jobs[i++];TR.msg='Translating '+langName(j.lang)+' ('+i+'/'+jobs.length+')…';show();if(opts.quiet&&i===1)toast('🌐 Translating new text into '+jobs.length+' languages…');
+  fetch('/.netlify/functions/translate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:tok,target:j.lang,texts:j.keys.map(function(k){return prepMT(all[k]);})})})
+  .then(function(r){return r.json().catch(function(){return {};}).then(function(d){if(!r.ok){var er=new Error(d.error||('HTTP '+r.status));er.status=r.status;throw er;}return d;});})
+  .then(function(d){var lk=LOCK[j.lang]||{},map={};(d.translations||[]).forEach(function(t,ix){var k=j.keys[ix];if(k&&!lk[k])map[k]=postMT(t);});return saveI18n(j.lang,map);})
+  .then(function(){ok++;next();},function(e){if(e.status===500||e.status===404||e.status===401||e.status===403){stop=true;TR.busy=false;TR.msg='';toast(e.status===404||/not configured/i.test(e.message)?'Translation isn’t switched on yet (see README: Turn on translation). Everything else saved fine.':'Translation stopped: '+e.message);show();return;}fail.push(langName(j.lang));next();});})();},function(e){TR.busy=false;if(!opts.quiet)toast('Couldn’t get login token: '+e.message);});}
+
+/* ===================== v5: untouched map, lead cards over printed boxes, fixed Undercellars with refresh times ===================== */
+var BOX={bell:[126,125,310,166],purple_abbey:[594,123,776,166],merc:[366,145,526,176],blue_sanctum:[58,258,236,308],blue_abbey:[55,393,241,444],green_abbey:[664,258,838,313],green_sanctum:[668,393,846,446],hall:[354,459,534,498],yellow_abbey:[104,517,296,592],yellow_stables:[612,522,838,571]};
+var CELLARS={uc_pl:{x:300,y:190,zone:'purple',name:'Undercellar (northwest)'},uc_pr:{x:592,y:190,zone:'purple',name:'Undercellar (northeast)'},uc_bl:{x:282,y:339,zone:'blue',name:'Undercellar (west)'},uc_gr:{x:628,y:339,zone:'green',name:'Undercellar (east)'},uc_yl:{x:282,y:459,zone:'yellow',name:'Undercellar (southwest)'},uc_yr:{x:628,y:459,zone:'yellow',name:'Undercellar (southeast)'}};
+var BANNER={purple:[443,59],yellow:null};
+function cellarData(pl,id){pl.cellars=pl.cellars||{};return pl.cellars[id]||{};}
+function cellarTimes(pl,id){var d=cellarData(pl,id);return (d.times||[]).slice().sort(function(a,b){return a-b;});}
+function cellarZone(pl,id){var c=CELLARS[id];return Z(pl,c.zone)?c.zone:null;}
+function cellarLabel(pl,id){var ts=cellarTimes(pl,id);if(!ts.length)return '';return ts.map(function(t){var c=clockAt(pl,t);return c?c.replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):fmtOff(t);}).join(' · ');}
+function nextRefresh(pl,id){var ts=cellarTimes(pl,id),st=startMs(pl);if(!ts.length||st==null)return null;var now=(Date.now()-st)/1000;for(var i=0;i<ts.length;i++)if(ts[i]>now)return ts[i];return null;}
+function textW(t,fs){return String(t).length*fs*0.56;}
+function fitFs(t,w,max){var fs=max;while(fs>9&&textW(t,fs)>w-12)fs--;return fs;}
+function cardSVG(box,lines,bg,stroke){var x1=box[0],y1=box[1],x2=box[2],y2=box[3],w=x2-x1,h=y2-y1,o='<rect x="'+x1+'" y="'+y1+'" width="'+w+'" height="'+h+'" rx="8" fill="'+bg+'" stroke="'+stroke+'" stroke-width="2"/>';
+ var n=lines.length,lh=h/n;lines.forEach(function(l,i){var fs=fitFs(l.t,w,l.fs||15);o+='<text x="'+(x1+w/2)+'" y="'+(y1+lh*i+lh/2+fs*0.36)+'" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="'+(l.b?700:600)+'" font-size="'+fs+'" fill="'+(l.c||'#fff')+'">'+esc(l.t)+'</text>';});return o;}
+function mapSVG(){var pl=P(),ph=view.phase,o=[];
+ var focusZone=view.focus?(zoneOf(pl,view.focus)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
+ var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null,selB=view.sel&&view.sel.type==='building'?view.sel.id:null,selC=view.sel&&view.sel.type==='cellar'?view.sel.id:null;
+ o.push('<svg viewBox="0 0 '+MAPW+' '+MAPH+'" role="img" aria-label="Battle map for '+esc(pl.name)+'"><image href="map.jpg" x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" preserveAspectRatio="none"/>');
+ // zone status: printed banners for Purple and Yellow stay; Purple's second line follows the plan
+ pl.zones.forEach(function(z){var con=concedeOf(pl,z.id)>=ph,sw=anchoredTo(pl,'zone',z.id).some(function(c){return isActiveC(c.id);}),hl=selZ===z.id||focusZone===z.id;
+  if(z.id==='purple'&&BANNER.purple){var b=BANNER.purple;var t=sw?'⚡ '+Tt('Plan switched').toUpperCase():con?'('+Tt('Conceded').toUpperCase()+')':'('+Tt('Active').toUpperCase()+')';o.push('<g data-zone="purple" style="cursor:pointer"><rect x="'+(b[0]-84)+'" y="'+(b[1]-15)+'" width="168" height="27" rx="7" fill="#3d1458" stroke="'+(hl?'#ffd34d':'#7a3fa8')+'" stroke-width="2"/><text x="'+b[0]+'" y="'+(b[1]+5)+'" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="15" fill="#fff">'+esc(t)+'</text></g>');return;}
+  if(z.id==='yellow'){if(con||sw)o.push('<g data-zone="yellow" style="cursor:pointer">'+plate(443,548,(sw?'⚡ ':'')+(con?Tt('Conceded').toUpperCase():Tt('{zone} Zone',{zone:Tt(z.name)}).toUpperCase()),shade(z.color,.45),'#fff',hl?'#ffd34d':'#111',false,13)+'</g>');return;}
+  var p=ZPOS[z.id];if(!p){var bs=zoneBuildings(pl,z.id);if(!bs.length)return;var sx=0,sy=0;bs.forEach(function(bb){var q=BPOS[bb.id]||[0,0];sx+=q[0];sy+=q[1];});p=[sx/bs.length,sy/bs.length-60];}
+  o.push('<g data-zone="'+z.id+'" style="cursor:pointer"'+(hl?' class="pulse"':'')+'>'+plate(p[0],p[1],(sw?'⚡ ':'')+Tt('{zone} Zone',{zone:Tt(z.name)}).toUpperCase()+(con?' · '+Tt('Conceded').toUpperCase():''),shade(z.color,.35),'#fff',hl?'#ffd34d':shade(z.color,.6),false,15)+'</g>');});
+ // buildings: live card exactly over the printed lead box
+ BL().forEach(function(b){var p=BPOS[b.id],box=BOX[b.id];if(!p||!box)return;var x=p[0],y=p[1];
+  var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=active(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id),cos=coOf(pl,b.id);
+  var hl=focusB.indexOf(b.id)>=0||selB===b.id;
+  o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
+  o.push('<rect x="'+(Math.min(box[0],x-70))+'" y="'+(y-40)+'" width="'+(Math.max(box[2],x+70)-Math.min(box[0],x-70))+'" height="'+(box[3]-y+40)+'" fill="transparent"/>');
+  if(hl)o.push('<ellipse cx="'+x+'" cy="'+(y+4)+'" rx="52" ry="40" fill="none" stroke="#111" stroke-width="9" stroke-opacity=".5"/><ellipse class="pulse" cx="'+x+'" cy="'+(y+4)+'" rx="52" ry="40" fill="none" stroke="#ffd34d" stroke-width="5"/>');
+  var ut=clockAt(pl,unlockOf(pl,b.id)),tag=ut?ut.replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):'P'+e,lines,bg,stroke;
+  var zc=zid?zcol(pl,zid):'#555';bg=shade(zc,.62);stroke=hl?'#ffd34d':shade(zc,.2);
+  if(!zid){lines=[{t:Tt('Not in this plan'),c:'#cfd6e4'}];bg='#2a2f39';}
+  else if(fc&&!lid){lines=[{t:Tt('Conceded').toUpperCase(),b:1,c:'#ffd0d0',fs:17}];bg='#6b1d1d';stroke='#ff9a9a';}
+  else{lines=[{t:(lid?Tt('Lead')+': '+nm(lid):Tt('no lead'))+(act?'':' · '+tag),b:1,c:lid?'#fff':'#ffb3b3'}];
+   if(cos.length)lines.push({t:Tt('Co-Lead')+': '+cos.map(nm).join(', '),c:'#dfe6f5',fs:13});
+   var bk=(pl.bmap[b.id]||{}).backup;if(bk&&box[3]-box[1]>55)lines.push({t:'('+Tt('Backup: {player}',{player:nm(bk)})+')',c:'#ffd34d',fs:12});}
+  o.push(cardSVG(box,lines,bg,stroke));
+  if(zid&&!act&&!fc)o.push('<ellipse cx="'+x+'" cy="'+(y+2)+'" rx="40" ry="30" fill="#141821" fill-opacity=".35" pointer-events="none"/>');
+  if(zid&&b.home&&zid!==b.home)o.push('<circle cx="'+(x-36)+'" cy="'+(y-24)+'" r="9" fill="'+zcol(pl,zid)+'" stroke="#111" stroke-width="2.5"><title>'+esc(zname(pl,zid))+'</title></circle>');
+  if(view.focus&&focusB.indexOf(b.id)>=0){var tx2=x<MAPW/2?x+92:x-92;o.push(plate(tx2,y-6,'★ '+nm(view.focus),'#ffd34d','#1b1404','#111',false,14));}
+  var bs0=bStatus(b.id);if(bs0&&BSTAT[bs0]){o.push('<g'+(bs0==='contested'?' class="pulse"':'')+'><circle cx="'+(x+38)+'" cy="'+(y-24)+'" r="15" fill="'+BSTAT[bs0][2]+'" stroke="#111" stroke-width="2.5"/><text x="'+(x+38)+'" y="'+(y-19)+'" text-anchor="middle" font-size="15" fill="#fff">'+(bs0==='ours'?'✓':bs0==='enemy'?'✕':'⚔')+'</text></g>');if(bs0==='enemy')o.push('<ellipse cx="'+x+'" cy="'+(y+4)+'" rx="50" ry="38" fill="none" stroke="#e5484d" stroke-width="5" stroke-dasharray="8 6"/>');}
+  if(anchoredTo(pl,'building',b.id).some(function(c){return isActiveC(c.id);}))o.push('<text x="'+(x-62)+'" y="'+(y-14)+'" font-size="22">⚡</text>');
+  o.push('</g>');});
+ // Undercellars: printed on the map; show refresh times under each
+ Object.keys(CELLARS).forEach(function(id){var c=CELLARS[id],lab=cellarLabel(pl,id),nx=nextRefresh(pl,id),hl=selC===id;
+  o.push('<g data-cellar="'+id+'" style="cursor:pointer"><rect x="'+(c.x-48)+'" y="'+(c.y-16)+'" width="96" height="'+(lab?52:32)+'" fill="transparent"/>');
+  if(hl)o.push('<rect x="'+(c.x-50)+'" y="'+(c.y-17)+'" width="100" height="34" rx="12" fill="none" stroke="#ffd34d" stroke-width="3"/>');
+  if(lab)o.push(plate(c.x,c.y+26,'⏱ '+lab,nx!=null?'#2a1f05':'#1d2030',nx!=null?'#ffd34d':'#cfd6e4','#111',false,12));
+  o.push('</g>');});
+ // placed markers (Town Center spots, loot)
+ var selM=view.sel&&view.sel.type==='marker'?view.sel.id:null,focusM=view.focus?tpsOf(pl,view.focus).map(function(m){return m.id;}):[];
+ (pl.markers||[]).filter(function(m){return m.type!=='cellar';}).forEach(function(m){var vis=mkVisible(m,ph);if(!vis&&!editing)return;var hl=selM===m.id||focusM.indexOf(m.id)>=0;
+  o.push('<g data-marker="'+m.id+'" opacity="'+(vis?1:0.35)+'" style="cursor:pointer">');
+  if(hl)o.push('<circle class="pulse" cx="'+m.x+'" cy="'+(m.y-16)+'" r="30" fill="#ffd34d55" stroke="#ffd34d" stroke-width="5"/>');
+  if(m.type==='tp'){var c=mkColor(pl,m),ps=m.players||[];
+   o.push('<path transform="translate('+m.x+','+m.y+')" d="M0,0 C-6,-10 -13,-17 -13,-26 A13,13 0 1 1 13,-26 C13,-17 6,-10 0,0Z" fill="'+c+'" stroke="#111" stroke-width="2.5"/><circle cx="'+m.x+'" cy="'+(m.y-26)+'" r="8" fill="#fff"/><text x="'+m.x+'" y="'+(m.y-22.5)+'" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="11" fill="#111">'+(ps.length||'TC')+'</text>');
+   o.push(plate(m.x,m.y+13,ps.length?ps.slice(0,2).map(nm).join(', ')+(ps.length>2?' +'+(ps.length-2):''):(m.label||Tt('Town Center spot')),shade(c,.35),'#fff','#111',false,12));}
+  else{o.push('<g transform="translate('+m.x+','+(m.y-12)+')"><path d="M-15,-2 h30 v13 h-30z" fill="#b8741a" stroke="#3b2208" stroke-width="2.2"/><path d="M-15,-2 v-6 a6,6 0 0 1 6,-6 h18 a6,6 0 0 1 6,6 v6z" fill="#d99a2b" stroke="#3b2208" stroke-width="2.2"/><path d="M-2,-6 h4 v8 h-4z" fill="#f4d35e" stroke="#3b2208" stroke-width="1.4"/></g>');
+   if(m.label)o.push(plate(m.x,m.y+14,m.label,'#fff3d6','#3b2208','#3b2208',false,12));}
+  o.push('<rect x="'+(m.x-20)+'" y="'+(m.y-44)+'" width="40" height="52" fill="transparent"/></g>');});
+ return o.join('')+'</svg>';}
+function mapTools(){var pl=P(),t=view.tool;var cur=allSetups().filter(function(st){return setupMatches(pl,st);})[0];
+ var o='<div class="maptools" role="group"><span class="lbl">Place</span><button class="tool" data-act="tool" data-t="select" aria-pressed="'+(t==='select')+'">Select / drag</button><button class="tool" data-act="tool" data-t="place:tp" aria-pressed="'+(t==='place:tp')+'">📍 Town Center</button><button class="tool" data-act="tool" data-t="place:loot" aria-pressed="'+(t==='place:loot')+'">🎁 Loot</button>'+
+ '<details class="more"><summary class="tool">Zones ▾</summary><div class="morebox"><span class="lbl">Tap buildings to move them into</span>'+pl.zones.map(function(z){return '<button class="tool" style="background:'+z.color+';color:'+inkOn(z.color)+'" data-act="tool" data-t="paint:'+esc(z.id)+'" aria-pressed="'+(t==='paint:'+z.id)+'">'+esc(z.name)+'</button>';}).join('')+'<button class="tool" data-act="tool" data-t="paint:" aria-pressed="'+(t==='paint:')+'">Not in plan</button><span class="lbl">Setup</span><select id="ed-setup" data-set="setup" style="background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px"><option value="">'+(cur?'':'Custom layout')+'</option>'+allSetups().map(function(st){return '<option value="'+esc(st.id)+'"'+(cur&&cur.id===st.id?' selected':'')+'>'+esc(st.name)+'</option>';}).join('')+'</select></div></details>';
+ var hint=t==='select'?'Tap a building, an Undercellar (to set refresh times) or a marker. Drag markers to move them.':t==='place:tp'?'Tap the map where a Town Center should go, then add players to it.':t==='place:loot'?'Tap where loot drops. It shows only in the phase you’re viewing.':t==='paint:'?'Tap buildings to leave them out of this plan.':'Tap buildings to put them in the '+esc(zname(pl,t.slice(6)))+' zone.';
+ return o+'<span class="maphint">'+hint+'</span></div>';}
+function cellarPanel(id){var pl=P(),c=CELLARS[id];if(!c)return overviewPanel();var ts=cellarTimes(pl,id),d=cellarData(pl,id),z=cellarZone(pl,id),nx=nextRefresh(pl,id);
+ var o='<h3>⛏ '+esc(Tt('Undercellar'))+'</h3><p class="sub">'+(z?Th('{zone} Zone',{zone:esc(Tt(zname(pl,z)))})+' · ':'')+esc(c.name.replace('Undercellar ',''))+'</p>';
+ o+='<section><h4>'+Th('Refresh times')+'</h4>'+(ts.length?'<ul>'+ts.map(function(t){var cl=clockAt(pl,t);return '<li'+(nx===t?' style="font-weight:700;color:var(--gold)"':'')+'>'+esc(fmtOff(t))+' '+Th('into the match')+(cl?' · <b>'+esc(cl)+'</b>':'')+(nx===t?' · '+Th('next'):'')+'</li>';}).join('')+'</ul>':'<p class="empty">'+Th('No refresh times set.')+'</p>')+(d.note?'<p>'+lineHTML(d.note)+'</p>':'')+'</section>';
+ if(editing)o+='<section class="ed"><label for="ed-ct">Refresh times (minutes:seconds into the match, separated by commas)</label><input id="ed-ct" data-set="cellartimes" data-c="'+id+'" value="'+esc(ts.map(fmtOff).join(', '))+'" placeholder="e.g. 15:00, 25:00, 35:00"><label for="ed-cn">Note</label><input id="ed-cn" data-set="cellarnote" data-c="'+id+'" value="'+esc(d.note||'')+'" placeholder="Optional, e.g. Yellow supporters gather here"><button class="btn" data-act="cellarall" data-c="'+id+'">Use these times for every Undercellar</button></section>';
+ return o;}
+function panelHTML(){var s=view.sel;if(!s)return overviewPanel();
+ var back='<div style="display:flex;justify-content:flex-end;margin:-4px 0 4px"><button class="mini" data-act="closepanel">← Plan overview</button></div>';
+ if(s.type==='building')return back+buildingPanel(s.id);if(s.type==='marker')return back+markerPanel(s.id);if(s.type==='cellar')return back+cellarPanel(s.id);if(s.type==='zone')return back+zonePanel(s.id);return overviewPanel();}
+function cellarZoneHTML(pl,zid){var ids=Object.keys(CELLARS).filter(function(id){return CELLARS[id].zone===zid;});if(!ids.length)return '';
+ return '<section><h4>⛏ '+Th('Undercellar refresh')+'</h4><div class="chips">'+ids.map(function(id){var lab=cellarLabel(pl,id);return '<button class="chip" data-cellar="'+id+'"><span>⛏ '+esc(CELLARS[id].name.replace('Undercellar ','').replace(/[()]/g,''))+'</span><small>'+(lab?esc(lab):esc(Tt('No times set')))+'</small></button>';}).join('')+'</div></section>';}
+function cellarCard(){var pl=P(),rows=[];Object.keys(CELLARS).forEach(function(id){cellarTimes(pl,id).forEach(function(t){rows.push([t,id]);});});if(!rows.length&&!editing)return '';rows.sort(function(a,b){return a[0]-b[0];});var st=startMs(pl),now=Date.now();
+ return '<div class="card"><div class="sechead"><h2>⛏ '+Th('Undercellar refresh times')+'</h2><p>'+(editing?'Tap an Undercellar on the map to set its times':'')+'</p></div>'+(rows.length?'<div class="schedwrap"><table class="sched"><thead><tr><th>'+Th('Refresh')+'</th><th>'+Th('Into match')+'</th><th>'+Th('Undercellar')+'</th><th>'+Th('Zone')+'</th></tr></thead><tbody>'+rows.map(function(r){var z=cellarZone(pl,r[1]),done=st!=null&&st+r[0]*1000<now;return '<tr'+(done?' class="done"':'')+'><td class="t">'+esc(clockAt(pl,r[0])||'–')+'</td><td class="t">'+esc(fmtOff(r[0]))+'</td><td><button class="mini" data-cellar="'+r[1]+'" style="border:0;background:none;padding:0;color:var(--text);text-decoration:underline dotted">'+esc(CELLARS[r[1]].name)+'</button></td><td>'+(z?dot(zcol(pl,z))+' '+esc(Tt(zname(pl,z))):'')+'</td></tr>';}).join('')+'</tbody></table></div>':'<p class="empty">No refresh times set yet.</p>')+'</div>';}
+
 seedSetups();migrateFormats();HIST=[JSON.stringify(S)];
-try{var me0=localStorage.getItem('swp-me');if(me0&&S.players[me0]){view.me=me0;if(!view.sel){view.sel={type:'player',id:me0};view.focus=me0;}}}catch(e){}
+try{var me0=localStorage.getItem('swp-me');if(me0&&S.players[me0]){view.me=me0;view.who=me0;view.focus=me0;}}catch(e){}
 render();fbInit();
 setInterval(function(){var el=document.getElementById('countdown');if(el)el.textContent=countdown(P());},30000);
 })();

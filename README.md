@@ -10,7 +10,7 @@ Players open the site, look up their assignment and check in without logging in.
 | `index.html` | The whole planner (map, plans, roster, attendance). |
 | `firebase-config.js` | Your Firebase connection (already filled in). |
 | `firestore.rules` | Who can read and write what (setup step 3). |
-| `map.jpg` | The battle map (Duvy's Round 3 map, names removed). |
+| `map.jpg` | The battle map (Duvy's Round 3 map). |
 | `netlify/functions/translate.js` | The server step that sends new text to Google Translate (step 7). |
 
 
@@ -68,12 +68,15 @@ Translation is optional; the site works in English without it. Players pick thei
 
 The translation key lives only on Netlify, never in the page. Only signed-in leaders on the ⚙️ Settings list can run translation.
 
+## Changing the matchup
+
+In **Edit plan**, tap **✏️ Change** next to the kingdoms at the top, or go to **🛠 Admin → ⚔️ Matchup**. You can set our kingdom and alliance tag, the opponent's, the round and the event name. Tick **Use our kingdom and tag for every plan** to update all plans at once.
+
 ## How the site is laid out
 
 Tabs across the top:
 
-- **👤 My orders** (shows as **Players** for leaders): look up a name and see that player's assignment.
-- **🗺️ Map:** the map, with a side panel for whatever you tap.
+- **🗺️ Map (first tab):** type a name in **Check my assignment**. Your buildings and Town Center spot get a gold ★ on the map, and your full orders appear right under it.
 - **One tab per zone:** that zone's buildings, leads and co-leads, supporters, sub manager, rotations, Town Center spots and If → Then switches. These tabs follow the plan's zones, so renaming, adding or removing zones updates them automatically.
 - **📜 Briefing**
 - **🔀 If → Then**
@@ -84,15 +87,15 @@ Times show in **UTC** by default. Anyone can switch to their own local time.
 
 ## The map
 
-The map is Duvy's Round 3 map with this week's names cleaned off. Building positions are fixed to it. In **Edit plan → Map**, you can place:
+The map is Duvy's Round 3 map, untouched. Each building's live **Lead / Co-Lead** card sits exactly over the printed box, so it always shows the current plan. The Purple banner's second line follows the plan too (Conceded or Active).
 
-- 📍 **Town Center spots:** add the players who set up there.
-- ⛏ **Undercellars:** each one shows only in the phase you place it in, because they spawn at different times.
-- 🎁 **Loot crates:** also tied to a phase.
+- ⛏ **Undercellars** are the six printed on the map. Tap one (in **Edit plan**) to set its **refresh times** (e.g. `15:00, 25:00, 35:00`). The times appear under it on the map, in that zone's tab and in **⏱️ Schedule**, and the next refresh is highlighted during the match. **Use these times for every Undercellar** copies them to all six.
+- 📍 **Town Center spots:** tap to place them, then add the players who set up there.
+- 🎁 **Loot crates:** tap to place them. Each one is tied to the phase you're viewing.
 
 **Zones ▾** on the map toolbar moves buildings between zones, or leaves them out of the plan.
 
-To use a clean copy of the map without any text, replace `map.jpg` in the repo with it. Keep the same file name and the same layout.
+To use a newer copy of the same map, replace `map.jpg` in the repo with it. Keep the same file name and the same layout.
 
 ## Writing the briefing
 
@@ -114,7 +117,7 @@ Translation stays cheap without any templates: player names, times and numbers i
 
 The **🔀 If → Then** tab works the same way: one IF line and free-written THEN orders. **Who & where ▾** holds the zone, role and player options, the zone or building switch, and the phase.
 
-When the briefing shows **🌐 new lines to translate**, run **🛠 Admin → 🌐 Translations → Translate what's new** before you save.
+Translation runs by itself every time a leader taps **Save for everyone**, including the very first save, and only for text that's new. **🛠 Admin → 🌐 Translations** shows progress and lets you fix any line. Until translation is switched on (below), the site simply stays in English.
 
 ## Attendance
 
