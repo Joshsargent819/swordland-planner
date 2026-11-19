@@ -370,5 +370,13 @@
 "k107mp971ykuond1l": "**{player}**から**{zone}**の控え管理を引き継ぐ。",
 "kan4okeh0quh612": "**{zone}**の控えの管理を開始する。",
 "k11526cgonq3g21e": "**{zone}**の控え管理を**{player}**に引き継ぐ。",
-"k9e6ruulxcd9s11": "**{zone}**の控えの管理を終了する。"
+"k9e6ruulxcd9s11": "**{zone}**の控えの管理を終了する。",
+"kj7lufqhdojnug": "フェーズ{n}開始",
+"k1jjujyq1yh5b78g": "{building}解放",
+"kepkvf911cbb3vy": "{building}：{player}が指揮を引き継ぐ",
+"ktlq4351572qgv9": "{time}後",
+"k1pbs3httkmy8rm": "試合開始まで{time}",
+"kyjpjqanp98hs4": "次",
+"kv37rxh1c60uq3g": "時計に合わせる",
+"k1byotiy13e29icc": "あなたの次の行動"
 }

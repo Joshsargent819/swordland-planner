@@ -360,6 +360,11 @@ details.bench .chips{margin-top:10px}
 .touchonly{display:none}@media (hover:none){.touchonly{display:inline}}
 
 .chgbanner{background:#3a2a07;border:1px solid var(--gold);color:#ffe8a8;border-radius:10px;padding:10px 12px;margin:8px 0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}.chgbanner b{color:var(--gold)}
+.lclock{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;background:#2a1414;border:1px solid #7a2a2a;border-radius:10px;padding:7px 12px;margin:6px 0;font-size:14px}
+.lclock .lnow b,.lclock>b{font-size:18px;font-variant-numeric:tabular-nums;color:#ffd34d}
+.lclock .lnext{display:flex;flex-wrap:wrap;gap:4px 14px}.lclock .lev b{color:#ffd34d;font-variant-numeric:tabular-nums}.lclock .lev small{opacity:.75}
+.lclock.me{background:#1d2a1a;border-color:#3d6a2a}
+.lcctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lcctl b{font-variant-numeric:tabular-nums;color:#ffd34d}
 </style>
 </head>
 <body>
@@ -635,7 +640,7 @@ function movesOf(pl,id){var z=moveBase(pl,id);if(z==null)return [];var byT={};
  var out=[],cur=z;Object.keys(byT).map(Number).sort(function(a,b){return a-b;}).forEach(function(t){var m=byT[t];if(m.z!==cur){out.push({id:id,z:m.z,t:t,at:m.at,ph:m.at!=null?phaseAtT(pl,t):m.ph,from:cur});cur=m.z;}});return out;}
 function moveWhen(pl,m,T){if(m.at!=null){var c=clockAt(pl,m.at);return (c?c+' · ':'')+fmtOff(m.at);}return T?Tt('Phase {n}',{n:m.ph}):'Phase '+m.ph;}
 function moveOf(pl,id){return movesOf(pl,id)[0]||null;}
-function zoneAt(pl,id,ph){var cv=pl.subs.indexOf(id)>=0&&coverOf(pl,id);if(cv&&!rawMoves(pl,id).length)return zoneAt(pl,cv.main,ph);var z=moveBase(pl,id);movesOf(pl,id).forEach(function(m){if(ph>=m.ph)z=m.z;});return z;}
+function zoneAt(pl,id,ph){var cv=pl.subs.indexOf(id)>=0&&coverOf(pl,id);if(cv&&!rawMoves(pl,id).length)return zoneAt(pl,cv.main,ph);var z=moveBase(pl,id),lt=LTfor(pl,ph);movesOf(pl,id).forEach(function(m){if(lt!=null?m.t<=lt:ph>=m.ph)z=m.z;});return z;}
 function saveMoves(pl,id,arr){pl.moves=pl.moves||{};var clean=arr.filter(function(m){return m&&m.z&&(m.ph||m.at!=null);}).map(function(m){return m.at!=null?{z:m.z,at:+m.at}:{z:m.z,ph:+m.ph};}).sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});if(clean.length)pl.moves[id]=clean;else delete pl.moves[id];}
 function setMove(pl,id,zid,ph,at){var nm0=at!=null?{z:zid,at:at}:{z:zid,ph:ph||Math.min(2,pl.phases.length)};var arr=rawMoves(pl,id).filter(function(m){return moveT(pl,m)!==moveT(pl,nm0);});if(zid)arr.push(nm0);saveMoves(pl,id,arr);}
 function moveEntries(pl){var out=[];combatants(pl).concat(pl.subs).forEach(function(i){out=out.concat(movesOf(pl,i));});return out;}
@@ -857,7 +862,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[],bl=BL(),lm=S.map.landmarks;
  pl.zones.forEach(function(z){var p=labels[z.id];if(!p)return;var con=concedeOf(pl,z.id)>=ph;var t=(anchoredTo(pl,'zone',z.id).some(function(c){return isActiveC(c.id);})?'⚡ ':'')+Tt('{zone} Zone',{zone:Tt(z.name)}).toUpperCase()+(con?' · '+Tt('Conceded').toUpperCase():'');
   o.push('<g data-zone="'+z.id+'" style="cursor:pointer">'+plate(p[0],p[1],t,shade(z.color,.3),'#fff',shade(z.color,.5),false,15)+'</g>');});
  // buildings
- bl.forEach(function(b){var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=active(pl,b.id,ph),e=eff(pl,b.id);
+ bl.forEach(function(b){var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=liveActive(pl,b.id,ph),e=eff(pl,b.id);
   var col=zid?zcol(pl,zid):'#cfc6ad',dk=zid?shade(zcol(pl,zid),.45):'#8a8270';
   var hl=focusB.indexOf(b.id)>=0||selB===b.id;
   o.push('<g data-building="'+b.id+'" opacity="'+(!zid?0.55:(act?1:0.5))+'">');
@@ -1118,7 +1123,7 @@ function render(){var pl=P(),m=M(pl);try{document.documentElement.lang=LANG;docu
  h+=lookupHTML();
  '<p class="mission"><b>Mission</b>'+esc(pl.mission||'No mission written yet.')+'</p></section>';
  h+='<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">Phase '+(i+1)+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||p.time)+'</small></button>';}).join('')+'</div></div>'+
- (editing?mapTools():liveBar())+
+ (editing?mapTools():liveBar()+clockStrip())+
  '<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool==='arrange'?' arrange':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
  '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(z.name)+(z.concede?' (conceded'+(z.concede>1?' P1–'+z.concede:' P1')+')':'')+'</button>';}).join('')+'<span>Castle color = zone · Lead tag color = lead\'s own zone</span><span>Hatched = taken in a later phase</span></div></section>'+
  '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
@@ -1400,7 +1405,7 @@ function activeBanner(){notifyMine();var pl=P(),act=contOf(pl).filter(function(c
  (msg?'<div class="actmsg">📣 '+Th(msg)+'</div>':'')+
  act.map(function(c){var mine=view.me&&inPlan(pl,view.me)&&appliesTo(pl,c,view.me);return '<div class="actrow"><span class="ck">'+Th('IF')+'</span><span>'+trigHTML(pl,c)+'</span>'+(mine?'<span class="trb">'+Th('Applies to you')+'</span>':'')+'<button class="mini" data-act="gocont" data-cid="'+esc(c.id)+'">'+Th('See orders')+'</button></div>';}).join('')+'</div>';}
 function writeLive(){LIVE.at=Date.now();LIVE.by=admin.name||admin.email||'';if(!FB.ok){rerender();return Promise.resolve();}
- return FB.db.doc('swordland_live/state').set({active:LIVE.active||{},bstat:LIVE.bstat||{},msg:LIVE.msg||{},at:LIVE.at,by:LIVE.by}).then(function(){},function(e){toast('Couldn’t update live state: '+e.message);});}
+ return FB.db.doc('swordland_live/state').set({active:LIVE.active||{},bstat:LIVE.bstat||{},msg:LIVE.msg||{},clock:LIVE.clock||{},at:LIVE.at,by:LIVE.by}).then(function(){},function(e){toast('Couldn’t update live state: '+e.message);});}
 function toggleActive(cid){var a=activeIds().slice(),i=a.indexOf(cid);if(i>=0)a.splice(i,1);else a.push(cid);LIVE.active=LIVE.active||{};LIVE.active[view.plan]=a;writeLive();
  toast(i>=0?'Marked resolved.':'Activated. Everyone sees it now.');}
 function setBStatus(bid,st){LIVE.bstat=LIVE.bstat||{};var m=LIVE.bstat[view.plan]=Object.assign({},LIVE.bstat[view.plan]||{});if(st)m[bid]=st;else delete m[bid];writeLive();
@@ -1420,9 +1425,55 @@ function playbookEditor(){var pl=P(),cs=contOf(pl),o='<div class="bedit">';
   '<div class="row"><label class="bcheck"><input type="checkbox" data-set="creplace" data-cid="'+esc(c.id)+'"'+(c.replace?' checked':'')+'> Replaces their normal orders while active</label></div>'+
   '<div class="row"><span class="fl">When</span><select data-set="cphase" data-cid="'+esc(c.id)+'"><option value="0">Any time</option>'+pl.phases.map(function(p,i){return '<option value="'+(i+1)+'"'+(c.phase===i+1?' selected':'')+'>Phase '+(i+1)+' · '+esc(p.time)+'</option>';}).join('')+'</select></div></div>';});
  return o+'</div><div class="addbar"><button class="btn gold" data-act="cadd">+ Add If → Then</button><span class="note">Triggers and orders use the same templates as the briefing, so they translate once.</span></div>';}
+/* ---------- live match clock ---------- */
+function clockOf(pid){var c=(LIVE.clock||{})[pid||view.plan];return c&&(c.start!=null)?c:null;}
+function liveT(){var c=clockOf();if(!c)return null;return Math.floor((Date.now()-c.start)/1000);}
+function LTfor(pl,ph){if(editing||view.manualPh)return null;var t=liveT();if(t==null||t<0)return null;return phaseAtT(pl,t)===ph?t:null;}
+function liveActive(pl,bid,ph){var lt=LTfor(pl,ph);if(lt==null)return active(pl,bid,ph);var u=unlockOf(pl,bid);return !!bz(pl,bid)&&(u!=null?u<=lt:ph>=eff(pl,bid));}
+function tSlot(tpl,html){return esc(Tt(tpl,{time:'\u0001'})).replace('\u0001',html);}
+function fmtLeft(sec){sec=Math.max(0,Math.ceil(sec));return fmtOff(sec);}
+function liveEvents(pl){var ev=[],seen={};function add(t,txt){if(t==null||t<=0)return;var k=t+'|'+txt;if(seen[k])return;seen[k]=1;ev.push({t:t,txt:txt});}
+ for(var k=2;k<=pl.phases.length;k++)add(phStart(pl,k),Tt('Phase {n} begins',{n:k}));
+ BL().forEach(function(b){if(!bz(pl,b.id)||fullCon(pl,b.id))return;add(unlockOf(pl,b.id),Tt('{building} opens',{building:Tt(bname(pl,b.id))}));
+  changeSteps(pl,b.id).forEach(function(c){if(c.to!==c.from&&c.to)add(c.t,Tt('{building}: {player} takes command',{building:Tt(bname(pl,b.id)),player:nm(c.to)}));});});
+ Object.keys(CELLARS).forEach(function(cid){if(!cellarZone(pl,cid))return;cellarTimes(pl,cid).forEach(function(t){add(t,Tt('Undercellar refresh'));});});
+ return groupEv(ev);}
+function groupEv(ev){ev.sort(function(a,b){return a.t-b.t;});var out=[];ev.forEach(function(e){var l=out[out.length-1];if(l&&l.t===e.t)l.txt.push(e.txt);else out.push({t:e.t,txt:[e.txt]});});return out;}
+function myEvents(pl,id){var ev=[],st=function(x){return String(x).replace(/\*\*/g,'');};
+ movesOf(pl,id).forEach(function(m){ev.push({t:m.t,txt:Tt('Move to **{zone}**.',{zone:Tt(zname(pl,m.z))})});});
+ BL().forEach(function(b){var bn=Tt(bname(pl,b.id));changeSteps(pl,b.id).forEach(function(c){
+  if(c.to!==c.from&&c.from===id)ev.push({t:c.t,txt:Tt('Hand **{building}** over to {player}.',{building:bn,player:c.to?nm(c.to):'—'})});
+  if(c.to!==c.from&&c.to===id)ev.push({t:c.t,txt:Tt('Take command of **{building}** from {player}.',{building:bn,player:c.from?nm(c.from):Tt('the lead')})});
+  if(c.added.indexOf(id)>=0)ev.push({t:c.t,txt:Tt('Join **{building}** as co-lead.',{building:bn})});
+  if(c.removed.indexOf(id)>=0)ev.push({t:c.t,txt:Tt('Stop co-leading **{building}**.',{building:bn})});});
+  var u=unlockOf(pl,b.id);if(u>0&&bz(pl,b.id)&&stateAt(pl,b.id,99,u).lead===id)ev.push({t:u,txt:Tt('{building} opens',{building:bn})});});
+ pl.zones.forEach(function(z){mgrSteps(pl,z.id).forEach(function(c){var zn=Tt(zname(pl,z.id));
+  if(c.to===id)ev.push({t:c.t,txt:c.from?Tt('Take over sub management of **{zone}** from **{player}**.',{zone:zn,player:nm(c.from)}):Tt('Start managing **{zone}** substitutes.',{zone:zn})});
+  if(c.from===id)ev.push({t:c.t,txt:c.to?Tt('Hand sub management of **{zone}** to **{player}**.',{zone:zn,player:nm(c.to)}):Tt('Stop managing **{zone}** substitutes.',{zone:zn})});});});
+ ev.forEach(function(e){e.txt=st(e.txt);});return groupEv(ev);}
+function evRow(e,t){return '<span class="lev"><b>'+esc(fmtOff(e.t))+'</b> '+esc(e.txt.join(' · '))+' <small>('+tSlot('in {time}','<span data-lin="'+e.t+'">'+esc(fmtLeft(e.t-t))+'</span>')+')</small></span>';}
+function clockStrip(){var pl=P(),t=liveT();if(t==null||editing)return '';
+ if(t<0)return '<div class="lclock">⏱ '+tSlot('Match starts in {time}','<b data-lneg="1">'+esc(fmtLeft(-t))+'</b>')+'</div>';
+ var ph=phaseAtT(pl,t),nx=liveEvents(pl).filter(function(e){return e.t>t;}).slice(0,2);
+ return '<div class="lclock"><span class="lnow">⏱ <b data-lclk>'+esc(fmtOff(t))+'</b> · '+esc(Tt('Phase {n}',{n:ph}))+'</span>'+(nx.length?'<span class="lnext">'+esc(Tt('Next'))+': '+nx.map(function(e){return evRow(e,t);}).join('')+'</span>':'')+(view.manualPh?'<button class="mini" data-act="lcfollow">↻ '+esc(Tt('Follow the clock'))+'</button>':'')+'</div>';}
+function meNextHTML(id){var pl=P(),t=liveT();if(t==null||editing||!id)return '';var nx=myEvents(pl,id).filter(function(e){return e.t>Math.max(t,0);}).slice(0,2);
+ return '<div class="lclock me">⏱ '+(t>=0?'<b data-lclk>'+esc(fmtOff(t))+'</b>':tSlot('Match starts in {time}','<b data-lneg="1">'+esc(fmtLeft(-t))+'</b>')+'')+(nx.length?' · <span class="lnext">'+esc(Tt('Next for you'))+': '+nx.map(function(e){return evRow(e,Math.max(t,0));}).join('')+'</span>':'')+'</div>';}
+function clockControls(){var pl=P(),c=clockOf(),sm=startMs(pl);
+ if(c)return '<span class="maphint lcctl">⏱ '+(liveT()<0?'Starts in <b data-lneg="1">'+fmtLeft(-liveT())+'</b>':'<b data-lclk>'+fmtOff(liveT())+'</b>')+' <input id="lcset" placeholder="Fix: e.g. 16:20" inputmode="numeric" style="width:110px"><button class="btn" data-act="lcset">Set clock</button><button class="btn ghost" data-act="lcstop">'+(view.confirmDel==='lcstop'?'Tap again to stop':'⏹ Stop clock')+'</button></span>';
+ return '<span class="maphint lcctl">⏱ Match clock: <button class="btn gold" data-act="lcstart">▶ Start now (0:00)</button> <input id="lcset" placeholder="or already at e.g. 2:30" inputmode="numeric" style="width:150px"><button class="btn" data-act="lcset">Start from there</button>'+(sm?'<button class="btn" data-act="lcsched">Start at scheduled time ('+esc(fmtClock(sm))+')</button>':'')+'</span>';}
+function liveTimes(pl){var ts=liveEvents(pl).map(function(e){return e.t;});moveEntries(pl).forEach(function(m){ts.push(m.t);});pl.zones.forEach(function(z){mgrSteps(pl,z.id).forEach(function(c){ts.push(c.t);});});return ts;}
+function liveTick(){var pl=P();if(!view.chosen&&!clockOf()){var ks=Object.keys(LIVE.clock||{}).filter(function(k){return S.plans[k]&&clockOf(k);});if(ks.length){view.plan=ks[0];view._lkey=null;render();return;}}
+ var t=liveT();if(t==null){if(view._lkey){view._lkey=null;if(!document.querySelector('.modal-bg'))render();}return;}
+ document.querySelectorAll('[data-lclk]').forEach(function(e){e.textContent=fmtOff(Math.max(0,t));});
+ document.querySelectorAll('[data-lneg]').forEach(function(e){e.textContent=fmtLeft(-t);});
+ document.querySelectorAll('[data-lin]').forEach(function(e){e.textContent=fmtLeft(+e.getAttribute('data-lin')-t);});
+ var ph=t>=0?phaseAtT(pl,t):1,n=liveTimes(pl).filter(function(x){return x<=t;}).length,key=view.plan+'|'+(t<0?'pre':ph)+'|'+n+'|'+(view.manualPh?1:0);
+ if(key===view._lkey)return;var ae=document.activeElement,busy=document.querySelector('.modal-bg')||(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))||editing||(typeof drag!=='undefined'&&drag);if(busy)return;
+ view._lkey=key;if(!view.manualPh&&t>=0)view.phase=ph;render();}
+setInterval(liveTick,1000);
 function liveBar(){if(!admin.ok||!view.live)return '';var t=view.ltool||'enemy';
  return '<div class="maptools livebar" role="group" aria-label="Live match"><span class="lbl">🔴 Live · tap a building</span>'+Object.keys(BSTAT).map(function(k){return '<button class="tool" style="background:'+BSTAT[k][2]+';color:#fff" data-act="ltool" data-t="'+k+'" aria-pressed="'+(t===k)+'">'+BSTAT[k][0]+' '+BSTAT[k][1]+'</button>';}).join('')+'<button class="tool" data-act="ltool" data-t="clear" aria-pressed="'+(t==='clear')+'">Clear</button><button class="tool" data-act="lreset">Reset map</button>'+
- '<span class="maphint" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">📣 <input id="lmsg" placeholder="Message to everyone, e.g. Hold Abbey, rally at 18:00" value="'+esc(liveMsg())+'" style="flex:1;min-width:200px;background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px"><button class="btn" data-act="lsend">Send</button>'+(liveMsg()?'<button class="btn ghost" data-act="lclear">Clear message</button>':'')+'</span></div>';}
+ clockControls()+'<span class="maphint" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">📣 <input id="lmsg" placeholder="Message to everyone, e.g. Hold Abbey, rally at 18:00" value="'+esc(liveMsg())+'" style="flex:1;min-width:200px;background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px"><button class="btn" data-act="lsend">Send</button>'+(liveMsg()?'<button class="btn ghost" data-act="lclear">Clear message</button>':'')+'</span></div>';}
 function anchorText(pl,c){var a=c.anchor;if(!a||!a.id)return '';if(a.type==='zone')return Tt('{zone} Zone',{zone:Tt(zname(pl,a.id))});return BB(a.id)?Tt(bname(pl,a.id)):'';}
 function anchoredTo(pl,type,id){return contOf(pl).filter(function(c){return c.anchor&&c.anchor.type===type&&c.anchor.id===id;});}
 function switchesHTML(pl,type,id){var cs=anchoredTo(pl,type,id);if(!cs.length)return '';
@@ -1454,7 +1505,7 @@ function fbInit(){
   if(view.sel&&view.sel.type==='player'&&!S.players[view.sel.id])view.sel=null;softRender();applyLink(true);
  },function(err){toast('Couldn’t load the shared plan: '+err.message);applyLink(true);});
  subLang();
- FB.db.doc('swordland_live/state').onSnapshot(function(sn){var d=sn.exists?sn.data():{};LIVE={active:d.active||{},bstat:d.bstat||{},msg:d.msg||{},at:d.at||0,by:d.by||''};softRender();},function(){});
+ FB.db.doc('swordland_live/state').onSnapshot(function(sn){var d=sn.exists?sn.data():{};LIVE={active:d.active||{},bstat:d.bstat||{},msg:d.msg||{},clock:d.clock||{},at:d.at||0,by:d.by||''};softRender();},function(){});
  FB.db.collection('swordland_attendance').onSnapshot(function(qs){FB.att={};qs.forEach(function(doc){FB.att[doc.id]=doc.data();});softRender();},function(){});
  FB.auth.onAuthStateChanged(function(u){FB.user=u;admin.ok=false;admin.role='';admin.email=u&&u.email?u.email.toLowerCase():'';admin.name=u?(u.displayName||u.email||''):'';admin.canClaim=false;
   if(FB.unsubAdmins){FB.unsubAdmins();FB.unsubAdmins=null;}
@@ -1553,7 +1604,7 @@ document.addEventListener('click',function(e){var t=e.target;
  var a=t.closest('[data-act]');if(a){if(a.hasAttribute('data-needs-edit')&&!editing&&admin.ok){editing=true;wantEdit=true;persist();}act(a.getAttribute('data-act'),a,e);return;}
  var ab=t.closest('[data-att]');if(ab){if(!admin.ok)return;var aid=ab.getAttribute('data-att'),cur=attOf(aid),nx=!cur?'in':cur.status==='in'?'out':null;setAtt(aid,nx,'admin',cur&&cur.note).catch(function(e){toast('Couldn’t update: '+e.message);});return;}
  var pb=t.closest('[data-plan]');if(pb){view.chosen=true;if(pb.getAttribute('data-plan')!==view.plan){view.plan=pb.getAttribute('data-plan');view.phase=1;view.confirmDel=null;if(view.sel&&view.sel.type!=='player'&&view.sel.type!=='building'&&view.sel.type!=='landmark')view.sel=null;if(view.tool.indexOf('paint:')===0)view.tool='select';try{history.replaceState(null,'','#plan-'+view.plan);}catch(x){}persist();render();}return;}
- var ph=t.closest('[data-phase]');if(ph){view.phase=+ph.getAttribute('data-phase');render();return;}
+ var ph=t.closest('[data-phase]');if(ph){view.phase=+ph.getAttribute('data-phase');var lt0=liveT();view.manualPh=lt0!=null&&lt0>=0&&view.phase!==phaseAtT(P(),lt0);render();return;}
  var p=t.closest('[data-player]');if(p){select({type:'player',id:p.getAttribute('data-player')});return;}
  var cell=t.closest('[data-building],[data-cell]');
  if(admin.ok&&view.live&&!editing){var lb=t.closest('#map [data-building],#map [data-cell]');if(lb){var lbid=lb.getAttribute('data-building')||lb.getAttribute('data-cell');if(bz(P(),lbid)){var cur0=bStatus(lbid),nt0=view.ltool==='clear'?'':view.ltool;setBStatus(lbid,cur0===nt0?'':nt0);}return;}}
@@ -1626,6 +1677,9 @@ function act0(k,el,ev,pid){var pl=P(),id=pid||(view.sel&&view.sel.id);
  else if(k==='pbmine'){view.pbMine=!view.pbMine;render();}
  else if(k==='pbprev'){view.pbprev=!view.pbprev;render();}
  else if(k==='gocont'){if(view.tab!=='ifthen'){view.tab='ifthen';render();}var tgt=document.querySelector('#playbook-card [data-cid="'+el.getAttribute('data-cid')+'"]')||document.getElementById('playbook-card');if(tgt)tgt.scrollIntoView({behavior:'smooth',block:'center'});}
+ else if(k==='lcstart'||k==='lcset'||k==='lcsched'){var st0;if(k==='lcstart')st0=Date.now();else if(k==='lcsched')st0=startMs(pl);else{var ov=parseOff(val('lcset'));if(ov==null||ov<0){toast('Type how far into the match it is, e.g. 2:30');return;}st0=Date.now()-ov*1000;}if(st0==null)return;LIVE.clock=Object.assign({},LIVE.clock||{});LIVE.clock[view.plan]={start:st0};view.manualPh=false;view._lkey=null;writeLive();toast('Match clock running. Everyone’s map now follows it.');}
+ else if(k==='lcstop'){if(view.confirmDel!=='lcstop'){view.confirmDel='lcstop';render();return;}view.confirmDel=null;LIVE.clock=Object.assign({},LIVE.clock||{});delete LIVE.clock[view.plan];view.manualPh=false;view._lkey=null;writeLive();toast('Match clock stopped.');}
+ else if(k==='lcfollow'){view.manualPh=false;view._lkey=null;var lt1=liveT();if(lt1!=null&&lt1>=0)view.phase=phaseAtT(pl,lt1);render();}
  else if(k==='live'){view.live=!view.live;if(view.live)view.ltool=view.ltool||'enemy';render();}
  else if(k==='ltool'){view.ltool=el.getAttribute('data-t');render();}
  else if(k==='lreset'){if(view.confirmDel!=='lreset'){view.confirmDel='lreset';toast('Tap Reset map again to clear every building status.');return;}view.confirmDel=null;LIVE.bstat=LIVE.bstat||{};LIVE.bstat[view.plan]={};writeLive();}
@@ -2013,10 +2067,10 @@ function render(){var pl=P(),m=M(pl);try{document.documentElement.lang=LANG;docu
  var y=window.scrollY;$('#app').innerHTML=h;window.scrollTo(0,y);}
 function tabBody(t,pl){
  if(t==='me'){var o=lookupHTML(),w=view.who&&S.players[view.who]?view.who:null;
-  if(w)o+='<div class="card mecard panel"><div class="metools"><button class="mini" data-act="showmap" data-p="'+esc(w)+'">🗺️ '+Th('Show on map')+'</button></div>'+playerPanel(w)+'</div>';
+  if(w)o+=meNextHTML(w)+'<div class="card mecard panel"><div class="metools"><button class="mini" data-act="showmap" data-p="'+esc(w)+'">🗺️ '+Th('Show on map')+'</button></div>'+playerPanel(w)+'</div>';
   else o+='<div class="card hint"><p>'+Th('Type your in-game name above to see your zone, your building, your orders and your substitutes.')+'</p></div>';return o;}
  if(t==='map')return '<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
-  (editing?mapTools():liveBar())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+  (editing?mapTools():liveBar()+clockStrip())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
   '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
   '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
  if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
@@ -2069,7 +2123,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   o.push('<g data-zone="'+z.id+'" style="cursor:pointer"'+(hl?' class="pulse"':'')+'>'+plate(p[0],p[1],t,shade(z.color,.35),'#fff',hl?'#fff':shade(z.color,.6),false,15)+'</g>');});
  // buildings
  BL().forEach(function(b){var p=BPOS[b.id];if(!p)return;var x=p[0],y=p[1],ny=p[2];
-  var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=active(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id);
+  var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=liveActive(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id);
   var hl=focusB.indexOf(b.id)>=0||selB===b.id;
   o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
   o.push('<rect x="'+(x-72)+'" y="'+(y-42)+'" width="144" height="'+(ny-y+58)+'" fill="transparent"/>');
@@ -2123,10 +2177,10 @@ function tabBody(t,pl){
  if(t==='map'||t==='me'){var w=view.who&&S.players[view.who]?view.who:null;
   var o=lookupHTML()+(w?'<div class="whobar">📍 <b>'+esc(nm(w))+'</b> · '+esc(whoSummary(pl,w))+' — '+Th('highlighted on the map, orders below')+' ↓ <button type="button" class="mini" data-act="copylink" data-p="'+esc(w)+'">🔗 '+Th('My link')+'</button></div>'+changedBanner(pl,w):'');
   o+='<main class="grid"><section class="card mapcard"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||Tt(p.time))+'</small></button>';}).join('')+'</div>'+(admin.ok&&!editing?'<button class="btn'+(view.live?' danger':'')+'" data-act="live">'+(view.live?'⏹ Stop live':'🔴 Live match')+'</button>':'')+'</div>'+
-   (editing?mapTools():liveBar())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
+   (editing?mapTools():liveBar()+clockStrip())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
    '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
    '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
-  if(w)o+='<div class="card mecard panel" id="mecard">'+playerPanel(w)+'</div>';
+  if(w)o+=meNextHTML(w)+'<div class="card mecard panel" id="mecard">'+playerPanel(w)+'</div>';
   else o+='<div class="card hint"><p>'+Th('Type your in-game name above to see your zone, your building, your orders and your substitutes.')+'</p></div>';
   return o;}
  if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
@@ -2188,7 +2242,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   o.push('<g data-zone="'+z.id+'" style="cursor:pointer"'+(hl?' class="pulse"':'')+'>'+plate(p[0],p[1],(sw?'⚡ ':'')+Tt('{zone} Zone',{zone:Tt(z.name)}).toUpperCase()+(con?' · '+Tt('Conceded').toUpperCase():''),shade(z.color,.35),'#fff',hl?'#ffd34d':shade(z.color,.6),false,15)+'</g>');});
  // buildings: live card exactly over the printed lead box
  BL().forEach(function(b){var p=BPOS[b.id],box=BOX[b.id];if(!p||!box)return;var x=p[0],y=p[1];
-  var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=active(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id),cos=coOf(pl,b.id);
+  var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=liveActive(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id),cos=coOf(pl,b.id);
   var hl=focusB.indexOf(b.id)>=0||selB===b.id;
   o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
   o.push('<rect x="'+(Math.min(box[0],x-70))+'" y="'+(y-40)+'" width="'+(Math.max(box[2],x+70)-Math.min(box[0],x-70))+'" height="'+(box[3]-y+40)+'" fill="transparent"/>');
@@ -2197,7 +2251,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   var zc=zid?zcol(pl,zid):'#555';bg=shade(zc,.62);stroke=hl?'#ffd34d':shade(zc,.2);
   if(!zid){lines=[{t:Tt('Not in this plan'),c:'#cfd6e4'}];bg='#2a2f39';}
   else if(fc&&!lid){lines=[{t:Tt('Conceded').toUpperCase(),b:1,c:'#ffd0d0',fs:17}];bg='#6b1d1d';stroke='#ff9a9a';}
-  else{var pt9=moveT(pl,{ph:ph}),st9=stateAt(pl,b.id,ph,pt9);lid=st9.lead;cos=st9.co;var nt9=ph<pl.phases.length?moveT(pl,{ph:ph+1}):1e9,hd=changeSteps(pl,b.id).filter(function(c){return c.t>pt9;})[0];
+  else{var lt9=LTfor(pl,ph),pt9=lt9!=null?lt9:moveT(pl,{ph:ph}),st9=stateAt(pl,b.id,ph,pt9);lid=st9.lead;cos=st9.co;var nt9=ph<pl.phases.length?moveT(pl,{ph:ph+1}):1e9,hd=changeSteps(pl,b.id).filter(function(c){return c.t>pt9;})[0];
    lines=[{t:(lid?Tt('Lead')+': '+nm(lid):Tt('no lead'))+(act?'':' · '+tag),b:1,c:lid?'#fff':'#ffb3b3'}];
    if(cos.length)lines.push({t:Tt('Co-Lead')+': '+cos.map(nm).join(', '),c:'#dfe6f5',fs:13});
    if(hd)lines.push({t:'→ '+(hd.to!==hd.from?nm(hd.to):Tt('Co-Lead')+(hd.added.length?' '+hd.added.map(nm).join(', '):''))+' · '+chWhen(pl,hd,true),c:'#ffd34d',fs:12});

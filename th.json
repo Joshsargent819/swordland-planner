@@ -370,5 +370,13 @@
 "k107mp971ykuond1l": "รับช่วงการจัดการตัวสำรองของ **{zone}** ต่อจาก **{player}**",
 "kan4okeh0quh612": "เริ่มจัดการตัวสำรองของ **{zone}**",
 "k11526cgonq3g21e": "ส่งต่อการจัดการตัวสำรองของ **{zone}** ให้ **{player}**",
-"k9e6ruulxcd9s11": "หยุดจัดการตัวสำรองของ **{zone}**"
+"k9e6ruulxcd9s11": "หยุดจัดการตัวสำรองของ **{zone}**",
+"kj7lufqhdojnug": "เริ่มเฟส {n}",
+"k1jjujyq1yh5b78g": "{building} เปิด",
+"kepkvf911cbb3vy": "{building}: {player} รับหน้าที่บัญชาการ",
+"ktlq4351572qgv9": "อีก {time}",
+"k1pbs3httkmy8rm": "การแข่งขันเริ่มในอีก {time}",
+"kyjpjqanp98hs4": "ถัดไป",
+"kv37rxh1c60uq3g": "ติดตามนาฬิกา",
+"k1byotiy13e29icc": "ถัดไปสำหรับคุณ"
 }

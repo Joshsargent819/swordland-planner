@@ -370,5 +370,13 @@
 "k107mp971ykuond1l": "Reprends la gestion des remplaçants de **{zone}** à **{player}**.",
 "kan4okeh0quh612": "Commence à gérer les remplaçants de **{zone}**.",
 "k11526cgonq3g21e": "Confie la gestion des remplaçants de **{zone}** à **{player}**.",
-"k9e6ruulxcd9s11": "Arrête de gérer les remplaçants de **{zone}**."
+"k9e6ruulxcd9s11": "Arrête de gérer les remplaçants de **{zone}**.",
+"kj7lufqhdojnug": "Début de la phase {n}",
+"k1jjujyq1yh5b78g": "{building} ouvre",
+"kepkvf911cbb3vy": "{building} : {player} prend le commandement",
+"ktlq4351572qgv9": "dans {time}",
+"k1pbs3httkmy8rm": "Le match commence dans {time}",
+"kyjpjqanp98hs4": "Ensuite",
+"kv37rxh1c60uq3g": "Suivre l’horloge",
+"k1byotiy13e29icc": "Ta prochaine étape"
 }

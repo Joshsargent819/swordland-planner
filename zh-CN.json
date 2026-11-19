@@ -370,5 +370,13 @@
 "k107mp971ykuond1l": "从**{player}**手中接管**{zone}**的替补管理。",
 "kan4okeh0quh612": "开始管理**{zone}**的替补。",
 "k11526cgonq3g21e": "将**{zone}**的替补管理交给**{player}**。",
-"k9e6ruulxcd9s11": "停止管理**{zone}**的替补。"
+"k9e6ruulxcd9s11": "停止管理**{zone}**的替补。",
+"kj7lufqhdojnug": "第{n}阶段开始",
+"k1jjujyq1yh5b78g": "{building}开放",
+"kepkvf911cbb3vy": "{building}：{player}接管指挥",
+"ktlq4351572qgv9": "{time}后",
+"k1pbs3httkmy8rm": "比赛将在{time}后开始",
+"kyjpjqanp98hs4": "接下来",
+"kv37rxh1c60uq3g": "跟随时钟",
+"k1byotiy13e29icc": "你的下一步"
 }

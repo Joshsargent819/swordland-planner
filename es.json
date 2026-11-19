@@ -370,5 +370,13 @@
 "k107mp971ykuond1l": "Asume la gestión de suplentes de **{zone}** de **{player}**.",
 "kan4okeh0quh612": "Empieza a gestionar los suplentes de **{zone}**.",
 "k11526cgonq3g21e": "Pasa la gestión de suplentes de **{zone}** a **{player}**.",
-"k9e6ruulxcd9s11": "Deja de gestionar los suplentes de **{zone}**."
+"k9e6ruulxcd9s11": "Deja de gestionar los suplentes de **{zone}**.",
+"kj7lufqhdojnug": "Empieza la fase {n}",
+"k1jjujyq1yh5b78g": "Se abre {building}",
+"kepkvf911cbb3vy": "{building}: {player} toma el mando",
+"ktlq4351572qgv9": "en {time}",
+"k1pbs3httkmy8rm": "La partida empieza en {time}",
+"kyjpjqanp98hs4": "Siguiente",
+"kv37rxh1c60uq3g": "Seguir el reloj",
+"k1byotiy13e29icc": "Lo siguiente para ti"
 }

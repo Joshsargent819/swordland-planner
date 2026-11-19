@@ -227,6 +227,25 @@ Leaders tap **🔴 Live match** on the **🗺️ Map** tab, outside Edit mode:
 
 It's live the moment you tap it.
 
+### Match clock
+
+The match clock makes everyone's map follow the plan in real time. It's set per plan, so start it on the plan you're actually playing.
+
+1. Open the plan, tap **🔴 Live match**, and find **⏱ Match clock** in the live bar.
+2. Start it one of three ways:
+   - **▶ Start now (0:00)** the moment the match begins.
+   - Type how far in you already are (e.g. `2:30`) and tap **Start from there**.
+   - **Start at scheduled time**, if the plan has a match start time.
+3. If it drifts, type the in-game time (e.g. `16:20`) and tap **Set clock**. **⏹ Stop clock** (tap twice) ends it.
+
+While it runs, every player sees:
+
+- **The map follows the clock.** It switches phase on time. Buildings open at their unlock time, leads and co-leads change when planned, and players' pins move to their new zones at their move times.
+- **A clock bar** with the match time, the phase, and the next two things that happen ("15:00 Phase 2 begins · Swordshrine opens · Green Sanctum: Demadues takes command (in 0:08)").
+- **"Next for you"** at the top of their orders, with their own next step and a countdown ("15:00 Take command of Green Sanctum from Duvy. (in 4:58)").
+
+Anyone can tap another phase to look ahead. The map then stops following the clock until they tap **↻ Follow the clock**. Players who haven't picked a plan are switched to the plan with the running clock.
+
 ## Speed and player experience
 
 - **Faster loading:** after the first visit, phones load the plan from their own cache and then sync, so it opens quickly even on a weak connection.
