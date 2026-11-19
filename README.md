@@ -141,6 +141,14 @@ The map card shows who is in charge at the phase you are viewing, plus the next 
 
 Round 3 is set up this way: Duvy takes the Swordshrine when it opens in Phase 2, and Demadues takes over the Green Sanctum.
 
+## Substitute managers
+
+A sub manager is set per zone, and doesn't have to play in that zone. A Blue player can run Green's subs.
+
+- **Roster:** under each player's role, tap the zone buttons next to **Sub manager for** to make them that zone's manager from the start. One player can manage more than one zone.
+- **Changing mid-match:** open the zone tab while editing and use **+ Add a manager change** to hand a zone's subs to someone else at a phase or a set time (or to nobody).
+- **Orders:** the manager gets a "Substitute Manager · Zone" section listing that zone's subs, plus "17:30 · Hand sub management of Green to Taurus". The new manager gets "Take over sub management of Green from OSA". Subs see who manages them, including any change.
+
 ## When orders change
 
 When a leader changes something that affects a player, that player sees **“Your orders changed since you last looked”** at the top of their orders, with what changed, until they tap **Got it**. This is remembered per device. Every player's view also shows **🕒 Plan last updated** with the time of the last save.
