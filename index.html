@@ -825,7 +825,8 @@ function blankPlan(){var base=P();var zones=[['blue','Blue','#3f7ff2'],['green',
  return {name:'New Plan',label:'Draft',blurb:'Blank plan from the map',mission:'',zones:zones,bmap:bmap,subs:[],subZone:{},pairs:{},rotateAt:{},markers:[],briefing:[],contingencies:[],defaultRotate:'15:00',
   phases:[{title:'Opening',time:'0:00–15:00',start:0,lines:[]},{title:'Mid-game',time:'15:00–20:00',start:900,lines:[]},{title:'Late game',time:'20:00–End',start:1200,lines:[]}],
   orders:base.orders.slice(),ordersTitle:base.ordersTitle||'Orders',roleNotes:clone(base.roleNotes)};}
-function addPlan(p){var id=uid('p');S.plans[id]=p;S.planOrder.push(id);view.plan=id;view.sel=null;view.focus=null;view.phase=1;persist();touch();}
+function showPlan(id){view.plan=id;view.chosen=true;view.sel=null;view.focus=null;view.phase=1;try{history.replaceState(null,'','#plan-'+id);}catch(x){}persist();}
+function addPlan(p){var id=uid('p');S.plans[id]=p;S.planOrder.push(id);showPlan(id);touch();}
 
 /* ---------- map geometry ---------- */
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -1112,11 +1113,14 @@ function playerEditor(id,z,isS){var pl=P(),cur=z||(isS?'subs':'bench');var o='<s
  o+='<div class="row"><button class="btn danger" data-act="delplayer">'+(view.confirmDel==='p:'+id?'Tap again to delete from every plan':'Delete player')+'</button></div></section>';return o;}
 
 function subsCard(){var pl=P();return '<div class="card dropzone" data-drop="subs"><div class="sechead"><h2>Substitutes ('+pl.subs.length+')</h2><p>Not part of the opening '+M(pl).fieldSize+'</p></div>'+(pl.subs.length?'<div class="sublist">'+
- pl.subs.map(function(s,i){var c=coverOf(pl,s),t=(pl.subZone||{})[s];return '<div class="subrow"><span class="n">S'+(i+1)+'</span><div>'+chip(s)+'<span class="cv">'+(c?'→ for '+esc(nm(c.main))+' · '+cyc(c.order):(t&&Z(pl,t)?esc(zname(pl,t))+' reserve · standby':'Standby'))+'</span></div></div>';}).join('')+'</div>':'<p class="empty">No substitutes yet.</p>')+'</div>';}
+ pl.subs.map(function(s,i){var c=coverOf(pl,s),t=(pl.subZone||{})[s];return '<div class="subrow"><span class="n">S'+(i+1)+'</span><div>'+chip(s)+'<span class="cv">'+[c?'→ for '+esc(nm(c.main))+' · Cycle 1':''].concat(swapsIn(pl,s).map(function(w){return '→ for '+esc(nm(w.out))+' · Cycle '+w.c;})).filter(Boolean).join('<br>')+(!c&&!swapsIn(pl,s).length?(t&&Z(pl,t)?esc(zname(pl,t))+' reserve · standby':'Standby'):'')+'</span></div></div>';}).join('')+'</div>':'<p class="empty">No substitutes yet.</p>')+'</div>';}
 function rotationCard(){var pl=P(),rows=[];pl.zones.forEach(function(z){var any=z.members.filter(function(m){return (pl.pairs[m]||[]).length;});if(any.length){rows.push({head:z});any.forEach(function(m){rows.push(m);});}});
- var used={};rows.forEach(function(m){if(m.head)return;pl.pairs[m].forEach(function(s){used[s]=1;});});var free=pl.subs.filter(function(s){return !used[s];});
+ var used={};rows.forEach(function(m){if(m.head)return;pl.pairs[m].forEach(function(s){used[s]=1;});});swapsOf(pl).forEach(function(w){used[w.in]=1;});var free=pl.subs.filter(function(s){return !used[s];});
+ pl.zones.forEach(function(z){var sc=swapCycles(pl,z.id);if(!sc.length)return;var hi=-1;rows.forEach(function(r,k){if(r.head&&r.head.id===z.id)hi=k;});if(hi<0){rows.push({head:z});hi=rows.length-1;}var at=hi+1;while(at<rows.length&&!rows[at].head)at++;var add=[];sc.forEach(function(g){add.push({cyc:g.c});g.list.forEach(function(w){add.push({sw:w});});});rows.splice.apply(rows,[at,0].concat(add));});
  var o='<div class="card"><div class="sechead"><h2>Rotation Chain</h2><p>Who comes in when a player rotates out</p></div>';
  if(rows.length)o+='<div class="schedwrap"><table class="rot"><tbody>'+rows.map(function(m){if(m.head){var mg=managerOf(pl,m.head.id);return '<tr><td colspan="4" style="padding-top:10px;font-family:var(--cond);font-weight:700;letter-spacing:.06em;color:'+m.head.color+'">'+esc(m.head.name.toUpperCase())+(mg?' <span style="color:var(--muted);font-weight:600">· Manager: '+esc(nm(mg))+'</span>':'')+'</td></tr>';}
+  if(m.cyc)return '<tr><td colspan="4" class="cyh" style="padding-top:6px">'+esc(Tt('Cycle {n}',{n:m.cyc}))+'</td></tr>';
+  if(m.sw)return '<tr><td>'+chip(m.sw.out)+'</td><td class="arrow">⇄</td><td><div class="chips">'+chip(m.sw.in)+'</div></td><td class="when">'+esc(Tt('Cycle {n}',{n:m.sw.c}))+'</td></tr>';
   return '<tr><td>'+chip(m)+'</td><td class="arrow">⇄</td><td><div class="chips">'+cycleSeq(pl,m).map(function(e,i,sq){return (i?'<span class="arrow" style="align-self:center">→</span>':'')+chip(e.who,sq.length>1?cycLbl(e):'');}).join('')+'</div></td><td class="when">'+esc(rotLbl(pl,m))+'</td></tr>';}).join('')+'</tbody></table></div>';
  else o+='<p class="empty">No pairings yet. '+(editing?'Use “Auto-pair subs” above, or tap a player to choose their substitutes.':'Leadership hasn’t paired substitutes with players for this plan.')+'</p>';
  if(free.length)o+='<div style="margin-top:12px"><h4 style="margin:0 0 6px;font-family:var(--cond);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Unpaired substitutes ('+free.length+')</h4><div class="chips">'+free.map(function(s){return chip(s);}).join('')+'</div></div>';
@@ -1665,7 +1669,7 @@ document.addEventListener('click',function(e){var t=e.target;
   select({type:'building',id:bid});return;}
  if(t.classList&&t.classList.contains('modal-bg'))closeModal();
 });
-var APPVER='2026-11-22h';
+var APPVER='2026-11-22i';
 var VSCOPE=null;
 function act(k,el,ev){var sc=el&&el.closest?el.closest('[data-pedit]'):null;VSCOPE=sc;try{return act0(k,el,ev,sc?sc.getAttribute('data-pedit'):null);}finally{VSCOPE=null;}}
 function act0(k,el,ev,pid){var pl=P(),id=pid||(view.sel&&view.sel.id);
@@ -1774,10 +1778,10 @@ function act0(k,el,ev,pid){var pl=P(),id=pid||(view.sel&&view.sel.id);
   else if(k==='exportplan'){exportPlan();}
   else if(k==='importplan'){pickPlanFile();}
   else if(k==='loadplan'){openModal('loadplan');}
-  else if(k==='loadready'){var rr=readyPlans()[+el.getAttribute('data-i')];if(rr){closeModal();importPlanText(JSON.stringify(rr.data),{replace:true});}}
+  else if(k==='loadready'){var rr=readyPlans()[+el.getAttribute('data-i')];if(rr){closeModal();importPlanText(JSON.stringify(rr.data),(view.loadMode||'replace')==='replace'?{replace:true,into:view.plan}:{replace:true});}}
   else if(k==='saveplan'){openModal('saveplan');var spn=document.getElementById('m-spname');if(spn){spn.focus();spn.select();}}
   else if(k==='plsave'){planSave(val('m-spname'));}
-  else if(k==='plload'){var sv=savedPlans().filter(function(x){return x.id===el.getAttribute('data-id');})[0];if(sv){closeModal();importPlanText(sv.data,{replace:true});}}
+  else if(k==='plload'){var sv=savedPlans().filter(function(x){return x.id===el.getAttribute('data-id');})[0];if(sv){closeModal();importPlanText(sv.data,(view.loadMode||'replace')==='replace'?{replace:true,into:view.plan}:{replace:true});}}
   else if(k==='pldel'){var did=el.getAttribute('data-id');if(view.confirmDel!=='pl:'+did){view.confirmDel='pl:'+did;openModal('loadplan');return;}view.confirmDel=null;FB.db.collection('swordland_versions').doc(did).delete().then(function(){toast('Saved plan deleted.');});}
 
   else if(k==='attme'){var pid=el.getAttribute('data-p')||(view.sel&&view.sel.type==='player'&&view.sel.id)||view.who;if(!pid||!S.players[pid]){toast(Tt('Type your in-game name'));return;}var stt=el.getAttribute('data-s');var sec0=el.closest('section'),ni0=sec0&&sec0.querySelector('.att-note');var nt=ni0?ni0.value:val('att-note');setAtt(pid,stt,admin.ok?'admin':'player',nt).then(function(){try{localStorage.setItem('swp-me',pid);}catch(x){}view.me=pid;toast(stt==='in'?Tt('Thanks, {player}! You’re confirmed.',{player:nm(pid)}):Tt('Got it. Leadership will see you can’t make it.'));},function(e){toast('Couldn’t save: '+e.message);});}
@@ -1884,6 +1888,7 @@ document.addEventListener('change',function(e){var asel=e.target&&e.target.getAt
   else if(k==='rscover'){setSubCover(pl,t.getAttribute('data-pid'),t.value);touch();}
   else if(k==='rscycle'){setSubCycle(pl,t.getAttribute('data-pid'),+t.value);touch();}
   else if(k==='swc'||k==='swo'){var sw=swapsAll(pl)[+t.getAttribute('data-k')];if(sw){if(k==='swc')sw.c=+t.value;else{sw.out=t.value;if(sw.out&&pl.subs.indexOf(sw.in)>=0&&!coverOf(pl,sw.in)&&!(pl.subZone||{})[sw.in]){var sz5=zoneOf(pl,sw.out)||subZone(pl,sw.out);if(sz5){pl.subZone=pl.subZone||{};pl.subZone[sw.in]=sz5;}}}touch();}}
+  else if(k==='lmode'){view.loadMode=t.value;}
   else if(k==='rsout'){var so2=t.getAttribute('data-pid');pl.subOut=pl.subOut||{};if(t.value)pl.subOut[so2]=1;else delete pl.subOut[so2];touch();}
  else if(k==='rname'){var rv=t.value.trim(),rp=t.getAttribute('data-pid');if(rv&&S.players[rp]){S.players[rp].name=rv;touch();}}
  else if(k==='rpower'){var rp2=t.getAttribute('data-pid'),rn2=+String(t.value).replace(/\D/g,'');if(S.players[rp2]){if(rn2)S.players[rp2].power=rn2;else delete S.players[rp2].power;touch();}}
@@ -2187,7 +2192,7 @@ function savePlanHTML(){var pl=P(),sp=savedPlans(),def=pl.name;
   '<div class="f"><label for="m-spname">Name</label><input id="m-spname" value="'+esc(def)+'" list="sp-names"><datalist id="sp-names">'+sp.map(function(v){return '<option value="'+esc(v.name)+'">';}).join('')+'</datalist></div>'+
   (sp.length?'<p class="note">Saved so far: '+sp.map(function(v){return esc(v.name);}).join(', ')+'</p>':'')+
   '<div class="actions"><button class="btn ghost" data-act="mclose">Cancel</button><button class="btn gold" data-act="plsave">Save</button></div>';}
-function loadPlanHTML(){var rp=readyPlans(),sp=savedPlans(),h='<h3>📥 Load plan</h3><p class="note">Loading opens the plan for editing. If a plan with the same name is already open, it’s replaced; otherwise it’s added. A restore point is saved first.</p>';
+function loadPlanHTML(){var rp=readyPlans(),sp=savedPlans(),lm=view.loadMode||'replace',h='<h3>📥 Load plan</h3><div class="f"><label for="m-lmode">Load into</label><select id="m-lmode" data-set="lmode"><option value="replace"'+(lm==='replace'?' selected':'')+'>Replace the plan you have open (“'+esc(P().name)+'”)</option><option value="new"'+(lm==='new'?' selected':'')+'>Add it as a new plan</option></select></div><p class="note">A restore point is saved first, so you can always go back. When replacing, your match time is kept.</p>';
  h+='<h4 class="admh">Your saved plans</h4>';
  if(!FB.ok)h+='<p class="empty">Saved plans need the online connection.</p>';
  else if(RP.err&&/permission/i.test(RP.err))h+='<p class="empty">Saved plans need the updated Firestore rules (the same ones as Restore points).</p>';
@@ -2511,9 +2516,9 @@ function importPlanText(txt,opts){opts=opts||{};var obj;try{obj=JSON.parse(txt);
  Object.keys(src).forEach(function(id){if(S.players[id])return;var nmn=normName(src[id]&&src[id].name);var same=Object.keys(S.players).filter(function(i){return normName(nm(i))===nmn;})[0];
   if(same)map[id]=same;else{S.players[id]=clone(src[id]);added++;}});
  var names=Object.keys(S.plans).map(function(k){return S.plans[k].name;}),done=[];
- var replaced=0;plans.forEach(function(p){var c=Object.keys(map).length?remapIds(clone(p),map):clone(p);var ex=opts.replace?Object.keys(S.plans).filter(function(k){return S.plans[k].name===c.name;})[0]:null;if(ex){S.plans[ex]=c;view.plan=ex;view.sel=null;view.focus=null;view.phase=1;replaced++;done.push(c.name);return;}if(names.indexOf(c.name)>=0)c.name=c.name+' (imported)';done.push(c.name);addPlan(c);});
+ var replaced=0;plans.forEach(function(p){var c=Object.keys(map).length?remapIds(clone(p),map):clone(p);var ex=opts.into&&S.plans[opts.into]?opts.into:(opts.replace&&!opts.into&&view.loadMode!=='new'?Object.keys(S.plans).filter(function(k){return S.plans[k].name===c.name;})[0]:null);if(ex){var old=S.plans[ex];if(!c.matchStart&&old.matchStart)c.matchStart=old.matchStart;S.plans[ex]=c;showPlan(ex);replaced++;done.push(c.name);return;}if(names.indexOf(c.name)>=0)c.name=c.name+' (imported)';done.push(c.name);addPlan(c);});
  migrateFormats();rerender();
- if(opts.replace){touch();toast('Loaded '+done.map(function(n){return '“'+n+'”';}).join(', ')+(replaced?' (it replaced the open plan with the same name)':'')+(added?'. Added '+added+' new player'+(added>1?'s':'')+' to the roster':'')+'. It saves automatically.');return;}
+ if(opts.replace){touch();toast('Loaded '+done.map(function(n){return '“'+n+'”';}).join(', ')+(replaced?' into the plan you had open':' as a new plan')+(added?'. Added '+added+' new player'+(added>1?'s':'')+' to the roster':'')+'. It saves automatically.');return;}
  toast('Imported '+done.map(function(n){return '“'+n+'”';}).join(', ')+' as a new plan'+(done.length>1?'s':'')+(added?' and added '+added+' player'+(added>1?'s':'')+' to the roster':'')+'. It saves automatically.');}
 seedSetups();migrateFormats();HIST=[JSON.stringify(S)];
 var LINKQ=null;try{var qs0=new URLSearchParams(location.search),lq0=qs0.get('lang'),pq0=qs0.get('p');if(lq0&&LANGS.some(function(l){return l[0]===lq0;})){LANG=lq0;try{localStorage.setItem('swp-lang',lq0);}catch(x){}}if(pq0)LINKQ=pq0;}catch(e){}
