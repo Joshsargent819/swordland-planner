@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "Le match commence dans {time}",
 "kyjpjqanp98hs4": "Ensuite",
 "kv37rxh1c60uq3g": "Suivre l’horloge",
-"k1byotiy13e29icc": "Ta prochaine étape"
+"k1byotiy13e29icc": "Ta prochaine étape",
+"k16o1pkw2kz38ea": "{n} min de jeu",
+"k2bj1i7bzk9l1b": "{a}–{b} min",
+"kpxxc291prmxxbc": "à partir de {n} min",
+"k1cj2x91zivsst1o": "Cycle {n} : {player} sort et tu reprends ta place.",
+"k1wjij1d1qru18n10": "Cycle {n} : {player} prend ta place.",
+"kmxvds9sbaf751g": "Ressors. **{player}** reprend sa place.",
+"k1ulwtsy11eokumq": "**{player}** te remplace.",
+"ktlxc663lkuseu": "Entre à la place de **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** entre à ta place.",
+"kk9n4881fyvtk61w": "Tu n’entres pas en rotation. Ton rôle est de gérer les remplaçants de {zone}."
 }

@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "{time} 후 경기 시작",
 "kyjpjqanp98hs4": "다음",
 "kv37rxh1c60uq3g": "시계 따라가기",
-"k1byotiy13e29icc": "다음 할 일"
+"k1byotiy13e29icc": "다음 할 일",
+"k16o1pkw2kz38ea": "경기 {n}분",
+"k2bj1i7bzk9l1b": "{a}–{b}분",
+"kpxxc291prmxxbc": "{n}분부터",
+"k1cj2x91zivsst1o": "{n}차 교체: {player} 아웃, 자리로 복귀하세요.",
+"k1wjij1d1qru18n10": "{n}차 교체: {player}가 자리에 들어갑니다.",
+"kmxvds9sbaf751g": "다시 빠지세요. **{player}**가 자리로 복귀합니다.",
+"k1ulwtsy11eokumq": "**{player}**가 당신과 교체합니다.",
+"ktlxc663lkuseu": "**{player}** 대신 투입{zone}.",
+"k1vr6nvaujf68et": "**{player}**가 당신 대신 투입됩니다.",
+"kk9n4881fyvtk61w": "당신은 교체로 들어가지 않습니다. {zone} 교체 인원 관리를 맡습니다."
 }

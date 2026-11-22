@@ -378,5 +378,12 @@
 "k1pbs3httkmy8rm": "La partida empieza en {time}",
 "kyjpjqanp98hs4": "Siguiente",
 "kv37rxh1c60uq3g": "Seguir el reloj",
-"k1byotiy13e29icc": "Lo siguiente para ti"
+"k1byotiy13e29icc": "Lo siguiente para ti",
+"k16o1pkw2kz38ea": "{n} min de partida",
+"k2bj1i7bzk9l1b": "{a}–{b} min",
+"kpxxc291prmxxbc": "desde el min {n}",
+"k1cj2x91zivsst1o": "Ciclo {n}: {player} sale y recuperas tu puesto.",
+"k1wjij1d1qru18n10": "Ciclo {n}: {player} ocupa tu puesto.",
+"kmxvds9sbaf751g": "Vuelve a salir. **{player}** recupera su puesto.",
+"k1ulwtsy11eokumq": "**{player}** te reemplaza."
 }

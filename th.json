@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "การแข่งขันเริ่มในอีก {time}",
 "kyjpjqanp98hs4": "ถัดไป",
 "kv37rxh1c60uq3g": "ติดตามนาฬิกา",
-"k1byotiy13e29icc": "ถัดไปสำหรับคุณ"
+"k1byotiy13e29icc": "ถัดไปสำหรับคุณ",
+"k16o1pkw2kz38ea": "นาทีที่ {n} ของแมตช์",
+"k2bj1i7bzk9l1b": "{a}–{b} นาที",
+"kpxxc291prmxxbc": "ตั้งแต่นาทีที่ {n}",
+"k1cj2x91zivsst1o": "รอบ {n}: {player} ออก และคุณกลับเข้าตำแหน่งเดิม",
+"k1wjij1d1qru18n10": "รอบ {n}: {player} เข้าแทนตำแหน่งของคุณ",
+"kmxvds9sbaf751g": "ออกอีกครั้ง **{player}** กลับเข้าตำแหน่งเดิม",
+"k1ulwtsy11eokumq": "**{player}** เข้าแทนคุณ",
+"ktlxc663lkuseu": "ลงแทน **{player}**{zone}",
+"k1vr6nvaujf68et": "**{player}** ลงแทนคุณ",
+"kk9n4881fyvtk61w": "คุณไม่ได้ลงสลับ หน้าที่ของคุณคือจัดการตัวสำรองของ {zone}"
 }

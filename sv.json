@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "Matchen börjar om {time}",
 "kyjpjqanp98hs4": "Nästa",
 "kv37rxh1c60uq3g": "Följ klockan",
-"k1byotiy13e29icc": "Nästa för dig"
+"k1byotiy13e29icc": "Nästa för dig",
+"k16o1pkw2kz38ea": "{n} min in i matchen",
+"k2bj1i7bzk9l1b": "{a}–{b} min",
+"kpxxc291prmxxbc": "från min {n}",
+"k1cj2x91zivsst1o": "Cykel {n}: {player} går ut och du tar tillbaka din plats.",
+"k1wjij1d1qru18n10": "Cykel {n}: {player} tar din plats.",
+"kmxvds9sbaf751g": "Gå ut igen. **{player}** tar tillbaka sin plats.",
+"k1ulwtsy11eokumq": "**{player}** ersätter dig.",
+"ktlxc663lkuseu": "Byt in för **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** byts in för dig.",
+"kk9n4881fyvtk61w": "Du byts inte in. Ditt jobb är att sköta ersättarna i {zone}."
 }

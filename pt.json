@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "A partida começa em {time}",
 "kyjpjqanp98hs4": "A seguir",
 "kv37rxh1c60uq3g": "Seguir o relógio",
-"k1byotiy13e29icc": "A seguir para você"
+"k1byotiy13e29icc": "A seguir para você",
+"k16o1pkw2kz38ea": "{n} min de partida",
+"k2bj1i7bzk9l1b": "{a}–{b} min",
+"kpxxc291prmxxbc": "a partir do min {n}",
+"k1cj2x91zivsst1o": "Ciclo {n}: {player} sai e você retoma sua vaga.",
+"k1wjij1d1qru18n10": "Ciclo {n}: {player} assume sua vaga.",
+"kmxvds9sbaf751g": "Saia novamente. **{player}** retoma a vaga.",
+"k1ulwtsy11eokumq": "**{player}** substitui você.",
+"ktlxc663lkuseu": "Entre no lugar de **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** entra no seu lugar.",
+"kk9n4881fyvtk61w": "Você não entra na rotação. Sua função é gerenciar os reservas de {zone}."
 }

@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "मैच {time} में शुरू होगा",
 "kyjpjqanp98hs4": "अगला",
 "kv37rxh1c60uq3g": "घड़ी का पालन करें",
-"k1byotiy13e29icc": "आपके लिए अगला"
+"k1byotiy13e29icc": "आपके लिए अगला",
+"k16o1pkw2kz38ea": "मैच का {n}वां मिनट",
+"k2bj1i7bzk9l1b": "{a}–{b} मिनट",
+"kpxxc291prmxxbc": "{n} मिनट से",
+"k1cj2x91zivsst1o": "चक्र {n}: {player} बाहर जाता है और आप अपनी जगह वापस लेते हैं।",
+"k1wjij1d1qru18n10": "चक्र {n}: {player} आपकी जगह लेता है।",
+"kmxvds9sbaf751g": "फिर से बाहर जाएं। **{player}** अपनी जगह वापस लेता है।",
+"k1ulwtsy11eokumq": "**{player}** आपकी जगह लेता है।",
+"ktlxc663lkuseu": "**{player}** की जगह उतरें{zone}।",
+"k1vr6nvaujf68et": "**{player}** आपकी जगह उतरता है।",
+"kk9n4881fyvtk61w": "आप रोटेशन में नहीं उतरते। आपका काम {zone} के सब्स्टीट्यूट संभालना है।"
 }

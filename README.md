@@ -163,14 +163,19 @@ Each row in **👥 Roster** reads left to right:
 
 | Zone | Role | Sub for · Later move |
 |---|---|---|
-| Blue, Green, Yellow, Purple, or Not in plan | Supporter, Lead · building, Co-Lead · building, or Substitute | For a sub: who they cover and which cycle. For everyone else: **Moves to Purple from Phase 2**, or Stays all match. |
+| Blue, Green, Yellow, Purple, or Not in plan | Supporter, Lead · building, Co-Lead · building, or Substitute | For a sub: who they cover at Cycle 1. For anyone: who they come in for at later cycles. For everyone else: **Moves to Purple from Phase 2**, or Stays all match. |
 
 - **Substitutes** keep a zone too (that zone's reserve). Pull a Blue sub to Green by changing their Zone.
-- **Moving players between zones mid-match:** tap **+ Move later** on a row and pick the zone and when: the start of a phase, or **At a set time…** and type the time into the match (e.g. 22:00). Tap **+ Another move** to move them again later (e.g. Blue → Purple in Phase 2 → Yellow in Phase 3); ✕ removes a move. To move a group, tick them and use the bar above the list: **Later move to Purple**, pick a phase or a set time, **Apply**. Their orders change at each phase ("15:00 · Move to Purple and reinforce…"), the zone tabs list them under **Moving out** and **Arriving**, and the map follows them when you switch phases.
+- **Every edit saves as you make it.** Names and power save while you type, and anything left in the **Add players** box is added when you close the roster. There are no tick boxes.
+- **Moving players between zones mid-match:** tap **+ Move later** on a row and pick the zone and when: the start of a phase, or **At a set time…** and type the minutes into the match (e.g. `22`, or `22:30`). Tap **+ Another move** to move them again later; ✕ removes a move. Their orders show the moves, the zone tabs list them under **Moving out** and **Arriving**, and the map follows them.
+- **Sub rotations by cycle:** **Cycle 1** is the sub's pairing: pick **For *player*** on the sub's row (e.g. QueenJ for Thied). For later cycles, tap **+ Sub in at a later cycle** on anyone's row, pick the cycle and who they come in for. Anyone can come in for anyone, subs and regular players alike: QueenJ in for Dr Maged at Cycle 2, or Seafarer back in for Kung Fu Panda at Cycle 2. Exits you'll handle on the day (a sub leaving when their troops are spent) don't need planning. The zone tab and briefing list Cycle 1 pairs, then each later cycle as *out → in*, and each player's orders say "Cycle 2 · Sub in for Dr Maged Shaban (Green)" or "Cycle 2 · QueenJ subs in for you"
+- **Times:** every time in the plan means minutes into the match: "15 min in". When the plan has a match start time (🛠 Admin → 🕒 Match time), the real clock time is shown too, e.g. "7:15 PM EST (15 min in)".
 - **Subs:** every sub has the same **+ Move later** button, whether paired, on standby in a zone, or in **Any zone**. A paired sub with no moves of their own follows the player they cover; give them their own move (e.g. Green at 20:00) and that takes over.
 - If players move into a zone that is still conceded at that phase, Plan check says so. Change that zone's concede setting to an earlier phase.
 
 ## Town Center spots
+
+In edit mode, each player listed on a Town Center pin has a zone box next to their name, so you can change their zone right there. **Add everyone in this zone to the pin** adds a whole zone at once.
 
 Place 📍 Town Center spots on the map and add players to them. Each of those players then sees a **📍 Show my spot on the map** button at the top of their orders: it jumps to the map, switches to the right phase and marks their pin with **★ Your spot**.
 

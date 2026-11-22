@@ -378,5 +378,15 @@
 "k1pbs3httkmy8rm": "La partita inizia tra {time}",
 "kyjpjqanp98hs4": "Prossimo",
 "kv37rxh1c60uq3g": "Segui l’orologio",
-"k1byotiy13e29icc": "Prossimo per te"
+"k1byotiy13e29icc": "Prossimo per te",
+"k16o1pkw2kz38ea": "{n} min di gioco",
+"k2bj1i7bzk9l1b": "{a}–{b} min",
+"kpxxc291prmxxbc": "dal min {n}",
+"k1cj2x91zivsst1o": "Ciclo {n}: {player} esce e riprendi il tuo posto.",
+"k1wjij1d1qru18n10": "Ciclo {n}: {player} prende il tuo posto.",
+"kmxvds9sbaf751g": "Esci di nuovo. **{player}** riprende il suo posto.",
+"k1ulwtsy11eokumq": "**{player}** ti sostituisce.",
+"ktlxc663lkuseu": "Entra al posto di **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** entra al posto tuo.",
+"kk9n4881fyvtk61w": "Non entri a rotazione. Il tuo compito è gestire le riserve di {zone}."
 }
