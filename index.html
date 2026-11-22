@@ -1678,7 +1678,7 @@ document.addEventListener('click',function(e){var t=e.target;
   select({type:'building',id:bid});return;}
  if(t.classList&&t.classList.contains('modal-bg'))closeModal();
 });
-var APPVER='2026-11-22n';
+var APPVER='2026-11-22o';
 var VSCOPE=null;
 function act(k,el,ev){var sc=el&&el.closest?el.closest('[data-pedit]'):null,zs=!sc&&el&&el.closest?el.closest('[data-zedit]'):null;VSCOPE=sc||zs;try{return act0(k,el,ev,sc?sc.getAttribute('data-pedit'):zs?zs.getAttribute('data-zedit'):null);}finally{VSCOPE=null;}}
 function act0(k,el,ev,pid){var pl=P(),id=pid||(view.sel&&view.sel.id);
@@ -2365,7 +2365,7 @@ function textW(t,fs){return String(t).length*fs*0.56;}
 function fitFs(t,w,max){var fs=max;while(fs>9&&textW(t,fs)>w-12)fs--;return fs;}
 function cardSVG(box,lines,bg,stroke){var x1=box[0],y1=box[1],x2=box[2],y2=box[3],w=x2-x1,h=y2-y1,o='<rect x="'+x1+'" y="'+y1+'" width="'+w+'" height="'+h+'" rx="8" fill="'+bg+'" stroke="'+stroke+'" stroke-width="2"/>';
  var n=lines.length,lh=h/n;lines.forEach(function(l,i){var fs=fitFs(l.t,w,l.fs||15);o+='<text x="'+(x1+w/2)+'" y="'+(y1+lh*i+lh/2+fs*0.36)+'" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="'+(l.b?700:600)+'" font-size="'+fs+'" fill="'+(l.c||'#fff')+'">'+esc(l.t)+'</text>';});return o;}
-function mapSVG(){var pl=P(),ph=view.phase,o=[];
+function mapSVG(){var pl=P(),ph=view.phase,o=[],selG=null;
  var focusZone=view.focus?(zoneAt(pl,view.focus,ph)||subZone(pl,view.focus)):null,focusB=view.focus?leadsOf(pl,view.focus).concat(coLeadsOf(pl,view.focus)):[];
  var selZ=view.sel&&view.sel.type==='zone'?view.sel.id:null,selB=view.sel&&view.sel.type==='building'?view.sel.id:null,selC=view.sel&&view.sel.type==='cellar'?view.sel.id:null;
  o.push('<svg viewBox="0 0 '+MAPW+' '+MAPH+'" role="img" aria-label="Battle map for '+esc(pl.name)+'"><image href="map.jpg" x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" preserveAspectRatio="none"/>');
@@ -2379,7 +2379,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
  BL().forEach(function(b){var p=BPOS[b.id],box=BOX[b.id];if(!p||!box)return;var x=p[0],y=p[1];
   var zid=bz(pl,b.id),lid=blead(pl,b.id),lz=lid?zoneOf(pl,lid):null,act=liveActive(pl,b.id,ph),e=eff(pl,b.id),fc=fullCon(pl,b.id),cos=coOf(pl,b.id);
   var hl=focusB.indexOf(b.id)>=0||selB===b.id;
-  o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
+  var gs=o.length;o.push('<g data-building="'+b.id+'" style="cursor:pointer">');
   o.push('<rect x="'+(Math.min(box[0],x-70))+'" y="'+(y-40)+'" width="'+(Math.max(box[2],x+70)-Math.min(box[0],x-70))+'" height="'+(box[3]-y+40)+'" fill="transparent"/>');
   if(hl)o.push('<ellipse cx="'+x+'" cy="'+(y+4)+'" rx="52" ry="40" fill="none" stroke="#111" stroke-width="9" stroke-opacity=".5"/><ellipse class="pulse" cx="'+x+'" cy="'+(y+4)+'" rx="52" ry="40" fill="none" stroke="#ffd34d" stroke-width="5"/>');
   var ut=clockAt(pl,unlockOf(pl,b.id)),tag=ut?ut.replace(/ (UTC|[A-Z]{2,5}|GMT[+-]?\d*)$/,''):'P'+e,lines,bg,stroke;
@@ -2397,7 +2397,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   if(view.focus&&focusB.indexOf(b.id)>=0){var tx2=x<MAPW/2?x+92:x-92;o.push(plate(tx2,y-6,'★ '+nm(view.focus),'#ffd34d','#1b1404','#111',false,14));}
   var bs0=bStatus(b.id);if(bs0&&BSTAT[bs0]){o.push('<g'+(bs0==='contested'?' class="pulse"':'')+'><circle cx="'+(x+38)+'" cy="'+(y-24)+'" r="15" fill="'+BSTAT[bs0][2]+'" stroke="#111" stroke-width="2.5"/><text x="'+(x+38)+'" y="'+(y-19)+'" text-anchor="middle" font-size="15" fill="#fff">'+(bs0==='ours'?'✓':bs0==='enemy'?'✕':'⚔')+'</text></g>');if(bs0==='enemy')o.push('<ellipse cx="'+x+'" cy="'+(y+4)+'" rx="50" ry="38" fill="none" stroke="#e5484d" stroke-width="5" stroke-dasharray="8 6"/>');}
   if(anchoredTo(pl,'building',b.id).some(function(c){return isActiveC(c.id);}))o.push('<text x="'+(x-62)+'" y="'+(y-14)+'" font-size="22">⚡</text>');
-  o.push('</g>');});
+  o.push('</g>');if(b.id===selB)selG=o.splice(gs,o.length-gs);});
  // Undercellars: printed on the map; show refresh times under each
  Object.keys(CELLARS).forEach(function(id){var c=CELLARS[id],lab=cellarLabel(pl,id),nx=nextRefresh(pl,id),hl=selC===id;
   o.push('<g data-cellar="'+id+'" style="cursor:pointer"><rect x="'+(c.x-48)+'" y="'+(c.y-16)+'" width="96" height="'+(lab?52:32)+'" fill="transparent"/>');
@@ -2417,7 +2417,7 @@ function mapSVG(){var pl=P(),ph=view.phase,o=[];
   else{o.push('<g transform="translate('+m.x+','+(m.y-12)+')"><path d="M-15,-2 h30 v13 h-30z" fill="#b8741a" stroke="#3b2208" stroke-width="2.2"/><path d="M-15,-2 v-6 a6,6 0 0 1 6,-6 h18 a6,6 0 0 1 6,6 v6z" fill="#d99a2b" stroke="#3b2208" stroke-width="2.2"/><path d="M-2,-6 h4 v8 h-4z" fill="#f4d35e" stroke="#3b2208" stroke-width="1.4"/></g>');
    if(m.label)o.push(plate(m.x,m.y+14,m.label,'#fff3d6','#3b2208','#3b2208',false,12));}
   o.push('<rect x="'+(m.x-20)+'" y="'+(m.y-44)+'" width="40" height="52" fill="transparent"/></g>');});
- return o.join('')+'</svg>';}
+ return o.join('')+(selG?selG.join(''):'')+'</svg>';}
 function mapTools(){var pl=P(),t=view.tool;var cur=allSetups().filter(function(st){return setupMatches(pl,st);})[0];
  var o='<div class="maptools" role="group"><span class="lbl">Place</span><button class="tool" data-act="tool" data-t="select" aria-pressed="'+(t==='select')+'">Select / drag</button><button class="tool" data-act="tool" data-t="place:tp" aria-pressed="'+(t==='place:tp')+'">📍 Town Center</button><button class="tool" data-act="tool" data-t="place:loot" aria-pressed="'+(t==='place:loot')+'">🎁 Loot</button>'+
  '<details class="more"><summary class="tool">Zones ▾</summary><div class="morebox"><span class="lbl">Tap buildings to move them into</span>'+pl.zones.map(function(z){return '<button class="tool" style="background:'+z.color+';color:'+inkOn(z.color)+'" data-act="tool" data-t="paint:'+esc(z.id)+'" aria-pressed="'+(t==='paint:'+z.id)+'">'+esc(z.name)+'</button>';}).join('')+'<button class="tool" data-act="tool" data-t="paint:" aria-pressed="'+(t==='paint:')+'">Not in plan</button><span class="lbl">Setup</span><select id="ed-setup" data-set="setup" style="background:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 8px"><option value="">'+(cur?'':'Custom layout')+'</option>'+allSetups().map(function(st){return '<option value="'+esc(st.id)+'"'+(cur&&cur.id===st.id?' selected':'')+'>'+esc(st.name)+'</option>';}).join('')+'</select></div></details>';
