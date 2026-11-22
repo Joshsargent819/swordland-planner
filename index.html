@@ -368,6 +368,7 @@ details.bench .chips{margin-top:10px}
 .cyh{margin:8px 0 2px;font-size:13px;opacity:.85;text-transform:uppercase;letter-spacing:.04em}
 .admh{margin:14px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
 .readyrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:10px;margin:6px 0}.readyrow span{display:block;font-size:13px}
+.zmap svg{display:block;margin:0 auto;height:auto;overflow:hidden}
 </style>
 </head>
 <body>
@@ -499,6 +500,13 @@ function changesUI(pl,bid){var m=pl.bmap[bid]||{},raw=rawChanges(pl,bid),st0={le
   if(c.co!==undefined){var lz=c.lead||before.lead;o+='<div style="display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px">'+pl.zones.map(function(z){return z.members.filter(function(x){return x!==lz;}).map(function(x){return '<label style="display:flex;gap:4px;align-items:center;font-weight:400;font-size:13px"><input type="checkbox" data-set="chco" data-b="'+bid+'" data-k="'+k+'" value="'+esc(x)+'"'+(c.co.indexOf(x)>=0?' checked':'')+'>'+esc(nm(x))+'</label>';}).join('');}).join('')+'</div>';}
   o+='</div>';});
  return o+'<button class="btn" data-act="chadd" data-b="'+bid+'">+ Add a change</button>';}
+function leadLaterUI(pl,id){var o='<label>Takes command later</label>',rows='';
+ BL().forEach(function(b){if(!bz(pl,b.id))return;var bn=esc(bname(pl,b.id)),u=unlockOf(pl,b.id);
+  if(blead(pl,b.id)===id&&u>0)rows+='<div class="note">'+esc(offLbl(pl,u))+': leads '+bn+' when it opens</div>';
+  rawChanges(pl,b.id).forEach(function(c,k){if(c.lead===id)rows+='<div style="display:flex;gap:6px;align-items:center">'+esc(chWhen(pl,c))+': takes command of '+bn+' <button class="mini" data-act="llrm" data-b="'+esc(b.id)+'" data-k="'+k+'" title="Remove">✕</button></div>';});
+  changeSteps(pl,b.id).forEach(function(c){if(c.from===id&&c.to!==id)rows+='<div class="note">'+esc(chWhen(pl,c))+': hands '+bn+' to '+esc(c.to?nm(c.to):'nobody')+'</div>';});});
+ var opts=BL().filter(function(b){return bz(pl,b.id)&&!fullCon(pl,b.id);}).map(function(b){return '<option value="'+esc(b.id)+'">'+esc(bname(pl,b.id))+'</option>';}).join('');
+ return o+rows+'<div class="row" style="flex-wrap:wrap;gap:6px"><select id="ed-llb" aria-label="Building">'+opts+'</select><select id="ed-llw" aria-label="When">'+phaseOpts(pl,2)+'<option value="t">At a set time…</option></select><input id="ed-llt" placeholder="min in" inputmode="numeric" style="width:70px" aria-label="Minutes into the match (for a set time)"><button class="btn" data-act="lladd">Add</button></div><p class="note" style="margin:2px 0 0">The current lead hands the building over at that time. Their orders update too.</p>';}
 function rawChanges(pl,bid){var m=pl.bmap[bid];if(!m)return [];if(!m.changes&&m.hand){m.changes=[m.hand];delete m.hand;}return (m.changes||[]).slice().sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});}
 function saveChanges(pl,bid,arr){var m=bm(pl,bid);delete m.hand;var c=arr.filter(function(x){return x&&(x.ph||x.at!=null);}).map(function(x){var o=x.at!=null?{at:+x.at}:{ph:+x.ph};if(x.lead)o.lead=x.lead;if(x.co!==undefined)o.co=x.co.slice();return o;}).sort(function(a,b){return moveT(pl,a)-moveT(pl,b);});if(c.length)m.changes=c;else delete m.changes;}
 function changeSteps(pl,bid){if(!bz(pl,bid))return [];var cur={lead:blead(pl,bid),co:coOf(pl,bid).slice()},out=[];
@@ -1038,9 +1046,9 @@ function zonePanel(zid){var pl=P(),z=Z(pl,zid);if(!z)return overviewPanel();
  zoneBuildings(pl,zid).forEach(function(b){o+=bRow(pl,b,'margin:6px 0');});
  var sup=supportersOf(pl,zid);if(sup.length)o+='<section><h4>Supporters</h4><div class="chips">'+sup.map(function(i){return chip(i,badgeFor(pl,i));}).join('')+'</div></section>';
  var sb=pl.subs.filter(function(s){return subZone(pl,s)===zid;});if(sb.length)o+='<section><h4>Reserves for this zone</h4><div class="chips">'+sb.map(function(i){return chip(i);}).join('')+'</div></section>';
- if(editing){o+='<section class="ed"><h4>Edit zone</h4><label for="ed-zn">Name</label><input id="ed-zn" data-set="zname" value="'+esc(z.name)+'">'+
+ if(editing){o+='<section class="ed" data-zedit="'+esc(zid)+'"><h4>Edit zone</h4><label for="ed-zn">Name</label><input id="ed-zn" data-set="zname" value="'+esc(z.name)+'">'+
   '<label>Color</label><div class="swatches">'+PAL.map(function(p){return '<button type="button" class="sw" title="'+p[0]+'" aria-label="'+p[0]+'" style="background:'+p[1]+'" data-act="zcolor" data-c="'+p[1]+'" aria-pressed="'+(z.color.toLowerCase()===p[1].toLowerCase())+'"></button>';}).join('')+'</div>'+
-  '<label for="ed-zc">Concede this zone</label><select id="ed-zc" data-set="zconcede"><option value="0">No, fight from the start</option>'+pl.phases.map(function(p,i){return '<option value="'+(i+1)+'"'+(z.concede===i+1?' selected':'')+'>'+(i===0?'Through Phase 1 ('+esc(p.time)+')':'Through Phase '+(i+1)+' ('+esc(p.time)+')')+'</option>';}).join('')+'</select>'+
+  '<label for="ed-zc">Concede this zone</label><select id="ed-zc" data-set="zconcede"><option value="0"'+(!z.concede?' selected':'')+'>No, we fight here all match</option>'+pl.phases.map(function(p,i){var last=i===pl.phases.length-1,c=+z.concede||0,sel=last?c>=pl.phases.length:c===i+1;return '<option value="'+(i+1)+'"'+(sel?' selected':'')+'>'+(last?'Yes, conceded the whole match':'Conceded in Phase '+(i+1===1?'1':'1–'+(i+1))+', we fight here from Phase '+(i+2)+' ('+esc(phRange(pl,i+2))+')')+'</option>';}).join('')+'</select>'+
   '<label for="ed-zm">Substitute Manager</label><select id="ed-zm" data-set="zmgr"><option value="">None</option>'+pl.zones.map(function(k){return k.members.length?'<optgroup label="'+esc(k.name)+'">'+k.members.map(function(x){return '<option value="'+esc(x)+'"'+(z.subManager===x?' selected':'')+'>'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'';}).join('')+(pl.subs.length?'<optgroup label="Substitutes">'+pl.subs.map(function(x){return '<option value="'+esc(x)+'"'+(z.subManager===x?' selected':'')+'>'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'')+'</select>'+mgrChangesUI(pl,zid)+
   '<label>Buildings in this zone</label>'+BL().map(function(b){var cur=bz(pl,b.id);return '<label class="bcheck"><input type="checkbox" data-set="zbuild" data-b="'+b.id+'"'+(cur===zid?' checked':'')+'> '+esc(b.name)+' <small>· '+posHint(b)+'</small>'+(cur&&cur!==zid?' <small>(now '+esc(zname(pl,cur))+')</small>':'')+(!cur?' <small>(not in plan)</small>':'')+'</label>';}).join('')+
   '<label for="ed-addz">Add a player to '+esc(z.name)+'</label><div class="row"><select id="ed-addz"><option value="">Choose…</option><optgroup label="Substitutes">'+pl.subs.map(function(i){return '<option value="'+esc(i)+'">'+esc(nm(i))+'</option>';}).join('')+'</optgroup><optgroup label="Not in this plan">'+benchOf(pl).map(function(i){return '<option value="'+esc(i)+'">'+esc(nm(i))+'</option>';}).join('')+'</optgroup></select><button class="btn" data-act="addtozone">Add</button></div>'+
@@ -1096,7 +1104,7 @@ function playerPanel(id){var pl=P(),z=zoneOf(pl,id),isS=pl.subs.indexOf(id)>=0,s
 function playerEditor(id,z,isS){var pl=P(),cur=z||(isS?'subs':'bench');var o='<section class="ed" data-pedit="'+esc(id)+'"><h4>Edit player</h4><div class="row">';
  pl.zones.forEach(function(k){o+='<button class="mv" style="background:'+k.color+';color:'+inkOn(k.color)+';border-color:transparent" data-act="move" data-to="'+esc(k.id)+'"'+(cur===k.id?' disabled':'')+'>'+esc(k.name)+'</button>';});
  o+='<button class="mv" data-act="move" data-to="subs"'+(cur==='subs'?' disabled':'')+'>Subs</button><button class="mv" data-act="move" data-to="bench"'+(cur==='bench'?' disabled':'')+'>Bench</button></div>';
- if(z){o+='<label for="ed-role">Role in '+esc(zname(pl,z))+'</label><select id="ed-role" data-set="role">'+roleOptions(pl,id)+'</select>';}
+ if(z){o+='<label for="ed-role">Role in '+esc(zname(pl,z))+'</label><select id="ed-role" data-set="role">'+roleOptions(pl,id)+'</select>'+leadLaterUI(pl,id);}
  if(z||isS){var mz=pl.zones.filter(function(k){return k.subManager===id;}).map(function(k){return k.id;});o+='<label>Manages substitutes for (from the start)</label><div class="row">'+pl.zones.map(function(k){var other=k.subManager&&k.subManager!==id?k.subManager:null;return '<label class="bcheck"><input type="checkbox" data-set="mgrof" data-z="'+esc(k.id)+'"'+(mz.indexOf(k.id)>=0?' checked':'')+'> '+esc(k.name)+(other?' <small>(now '+esc(nm(other))+')</small>':'')+'</label>';}).join('')+'</div>';}
  o+='<label for="ed-swap">Swap places with</label><div class="row"><select id="ed-swap"><option value="">Choose a player…</option>'+pl.zones.map(function(k){var c=k.members.filter(function(x){return x!==id;});return c.length?'<optgroup label="'+esc(k.name)+'">'+c.map(function(x){return '<option value="'+esc(x)+'">'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'';}).join('')+
   (pl.subs.length?'<optgroup label="Substitutes">'+pl.subs.filter(function(x){return x!==id;}).map(function(x){return '<option value="'+esc(x)+'">'+esc(nm(x))+'</option>';}).join('')+'</optgroup>':'')+
@@ -1652,6 +1660,7 @@ document.addEventListener('click',function(e){var t=e.target;
  if(drag&&(drag.moved||drag.tapped))return;
  var cl0=t.closest('[data-cellar]');if(cl0&&!(editing&&view.tool.indexOf('place:')===0)){select({type:'cellar',id:cl0.getAttribute('data-cellar')});return;}
  var tb=t.closest('[data-tab]');if(tb){goTab(tb.getAttribute('data-tab'));return;}
+ if(!editing&&(view.tab||'map')==='map'&&t.closest('#map svg')&&!t.closest('[data-building],[data-marker],[data-cellar],[data-zone],[data-player]')){var zp=svgPoint(e),zz=zp?zoneAtPoint(P(),zp.x,zp.y):null;if(zz&&Z(P(),zz)){goTab('z:'+zz);return;}}
  var a=t.closest('[data-act]');if(a){if(a.hasAttribute('data-needs-edit')&&!editing&&admin.ok){editing=true;wantEdit=true;persist();}act(a.getAttribute('data-act'),a,e);return;}
  var ab=t.closest('[data-att]');if(ab){if(!admin.ok)return;var aid=ab.getAttribute('data-att'),cur=attOf(aid),nx=!cur?'in':cur.status==='in'?'out':null;setAtt(aid,nx,'admin',cur&&cur.note).catch(function(e){toast('Couldn’t update: '+e.message);});return;}
  var pb=t.closest('[data-plan]');if(pb){view.chosen=true;if(pb.getAttribute('data-plan')!==view.plan){view.plan=pb.getAttribute('data-plan');view.phase=1;view.confirmDel=null;if(view.sel&&view.sel.type!=='player'&&view.sel.type!=='building'&&view.sel.type!=='landmark')view.sel=null;if(view.tool.indexOf('paint:')===0)view.tool='select';try{history.replaceState(null,'','#plan-'+view.plan);}catch(x){}persist();render();}return;}
@@ -1669,9 +1678,9 @@ document.addEventListener('click',function(e){var t=e.target;
   select({type:'building',id:bid});return;}
  if(t.classList&&t.classList.contains('modal-bg'))closeModal();
 });
-var APPVER='2026-11-22i';
+var APPVER='2026-11-22n';
 var VSCOPE=null;
-function act(k,el,ev){var sc=el&&el.closest?el.closest('[data-pedit]'):null;VSCOPE=sc;try{return act0(k,el,ev,sc?sc.getAttribute('data-pedit'):null);}finally{VSCOPE=null;}}
+function act(k,el,ev){var sc=el&&el.closest?el.closest('[data-pedit]'):null,zs=!sc&&el&&el.closest?el.closest('[data-zedit]'):null;VSCOPE=sc||zs;try{return act0(k,el,ev,sc?sc.getAttribute('data-pedit'):zs?zs.getAttribute('data-zedit'):null);}finally{VSCOPE=null;}}
 function act0(k,el,ev,pid){var pl=P(),id=pid||(view.sel&&view.sel.id);
  if(k==='edit'){if(!admin.ok)return;rpSave('auto','Before editing');editing=true;wantEdit=true;persist();render();}
  else if(k==='discard'){if(FB.ok&&admin.ok&&(AUTO.state==='pending'||dirty))save(true);else if(!FB.ok&&dirty){toast('This preview can’t save online. Use Plan data to copy your changes.');}editing=false;wantEdit=false;view.tool='select';persist();render();}
@@ -1751,6 +1760,8 @@ function act0(k,el,ev,pid){var pl=P(),id=pid||(view.sel&&view.sel.id);
  else if(k==='tfins'){tplFillInsert(true);}
   else if(k==='tfskip'){tplFillInsert(false);}
   else if(k==='rmgr'){var gp=P(),gz=Z(gp,el.getAttribute('data-z')),gi=el.getAttribute('data-pid');if(gz){if(gz.subManager===gi)delete gz.subManager;else gz.subManager=gi;touch();}}
+  else if(k==='lladd'){var lb=val('ed-llb'),lw=val('ed-llw'),lc;if(!lb)return;if(lw==='t'){var lt=parseOff(val('ed-llt'));if(!(lt>0)){toast('Type the minutes into the match, e.g. 22');return;}lc={at:lt};}else lc={ph:+lw};lc.lead=id;saveChanges(pl,lb,rawChanges(pl,lb).concat([lc]));touch();toast(nm(id)+' takes command of '+bname(pl,lb)+' '+chWhen(pl,lc)+'.');}
+  else if(k==='llrm'){var rb=el.getAttribute('data-b'),ra=rawChanges(pl,rb);ra.splice(+el.getAttribute('data-k'),1);saveChanges(pl,rb,ra);touch();}
   else if(k==='swadd'){swapsAll(pl).push({c:2,in:el.getAttribute('data-pid'),out:''});touch();}
   else if(k==='swdel'){swapsAll(pl).splice(+el.getAttribute('data-k'),1);touch();}
   else if(k==='mgcadd'){var ap=P(),az=el.getAttribute('data-z'),ar2=mgrSorted(ap,az),last2=ar2.length?moveT(ap,ar2[ar2.length-1]):0,nc2=null;for(var q2=2;q2<=ap.phases.length;q2++){if(moveT(ap,{ph:q2})>last2){nc2={ph:q2};break;}}if(!nc2)nc2={at:Math.max(last2+300,300)};nc2.m=null;ar2.push(nc2);mgrSave(ap,az,ar2);touch();}
@@ -1844,7 +1855,7 @@ document.addEventListener('change',function(e){var asel=e.target&&e.target.getAt
  if(e.target&&e.target.id==='plansel'){view.plan=e.target.value;view.chosen=true;view.phase=1;try{history.replaceState(null,'','#plan-'+view.plan);}catch(x){}persist();render();return;}
 
  if(e.target&&e.target.id==='langsel'){LANG=e.target.value;try{localStorage.setItem('swp-lang',LANG);}catch(x){}subLang();render();return;}if(e.target&&e.target.id==='trlang'){view.trlang=e.target.value;openModal('i18n');return;}if(e.target&&e.target.id==='trai'){view.trai=e.target.value;return;}if(e.target&&e.target.id==='trfilter'){view.trfilter=e.target.value;openModal('i18n');return;}
- var t=e.target,k=t.getAttribute&&t.getAttribute('data-set');if(!k)return;var pl=P(),id=view.sel&&view.sel.id,b=t.getAttribute('data-b');var psc=t.closest&&t.closest('[data-pedit]');if(psc)id=psc.getAttribute('data-pedit');
+ var t=e.target,k=t.getAttribute&&t.getAttribute('data-set');if(!k)return;var pl=P(),id=view.sel&&view.sel.id,b=t.getAttribute('data-b');var psc=t.closest&&t.closest('[data-pedit]');if(psc)id=psc.getAttribute('data-pedit');else{var zsc=t.closest&&t.closest('[data-zedit]');if(zsc)id=zsc.getAttribute('data-zedit');}
  if(k==='lead'){var ml=bm(pl,b);ml.lead=t.value||null;if(ml.co)ml.co=ml.co.filter(function(x){return x!==ml.lead;});touch();}
  else if(k==='bzone'){var m=bm(pl,b);m.zone=t.value;if(!t.value)m.lead=null;touch();}
  else if(k==='unlock'){var mu=bm(pl,b),ov=parseOff(t.value);if(ov==null)delete mu.unlock;else mu.unlock=ov;touch();}
@@ -2117,7 +2128,7 @@ function markersCard(){var pl=P(),ms=pl.markers||[];if(!ms.length)return '';
  var row=function(m){return '<tr><td><button class="mini" data-marker="'+m.id+'" style="border:0;background:none;padding:0;font-size:14px;color:var(--text);text-decoration:underline dotted">'+mkIcon(m)+' '+esc(Tt(mkTitle(pl,m)))+'</button>'+(m.note?'<div class="note">'+lineHTML(m.note)+'</div>':'')+'</td><td class="t">'+esc(m.phase?Tt('Phase {n}',{n:m.phase})+(clockAt(pl,phStart(pl,m.phase))?' · '+clockAt(pl,phStart(pl,m.phase)):''):Tt('All phases'))+'</td><td>'+(m.type==='tp'?((m.players||[]).length?'<div class="chips">'+m.players.map(function(p){return chip(p);}).join('')+'</div>':''):'')+'</td></tr>';};
  var order={tp:0,cellar:1,loot:2};return '<div class="card"><div class="sechead"><h2>'+Th('Map markers')+'</h2></div><div class="schedwrap"><table class="sched"><tbody>'+ms.slice().sort(function(a,b){return order[a.type]-order[b.type]||(a.phase||0)-(b.phase||0);}).map(row).join('')+'</tbody></table></div></div>';}
 /* --- navigation --- */
-function zoneTabs(pl){return pl.zones.filter(function(z){return editing||z.members.length||!fullConZone(pl,z.id)||anchoredTo(pl,'zone',z.id).length;});}
+function zoneTabs(pl){return pl.zones.slice();}
 function tabList(){var pl=P(),t=[['me','👤',admin.ok?'Players':'My orders'],['map','🗺️','Map']];
  zoneTabs(pl).forEach(function(z){t.push(['z:'+z.id,emojiFor(z.color),z.name,1]);});
  if(editing||(pl.briefingText||'').trim())t.push(['brief','📜','Briefing']);
@@ -2153,12 +2164,31 @@ function tabBody(t,pl){
   (editing?mapTools():liveBar()+clockStrip())+'<div class="mapbox'+(editing?' editing':'')+(editing&&view.tool.indexOf('place:')===0?' place':'')+(editing&&view.tool.indexOf('paint:')===0?' paint':'')+'" id="map">'+mapSVG()+'</div>'+
   '<div class="legend">'+pl.zones.map(function(z){return '<button type="button" data-zone="'+esc(z.id)+'">'+dot(z.color)+esc(Tt(z.name))+'</button>';}).join('')+'<span>📍 '+Th('Town Center')+' · ⛏ '+Th('Undercellar')+' · 🎁 '+Th('Loot')+'</span></div></section>'+
   '<aside class="card panel" id="panel">'+panelHTML()+'</aside></main>';
- if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
+ if(t.indexOf('z:')===0)return zoneMapHTML(pl,t.slice(2))+zoneTab(pl,t.slice(2));
  if(t==='brief')return (pl.mission?'<div class="card"><p class="mission" style="max-width:none"><b>'+Th('Mission')+'</b>'+lineHTML(pl.mission)+'</p></div>':'')+briefingCard();
  if(t==='ifthen')return playbookCard();
  if(t==='times')return scheduleCard()+cellarCard()+timelineCard()+ordersCard()+markersCard();
  if(t==='admin')return adminTab(pl);
  return '';}
+function picSites(){return BL().filter(function(b){return BPOS[b.id];}).map(function(b){var p=BPOS[b.id];return {x:p[0],y:p[1]+20,bid:b.id};});}
+function zoneAtPoint(pl,x,y){var ss=picSites(),best=null,bd=1e12;ss.forEach(function(q){var d=(q.x-x)*(q.x-x)+(q.y-y)*(q.y-y);if(d<bd){bd=d;best=q;}});return best?bz(pl,best.bid):null;}
+function zoneCutout(pl,zid){var ss=picSites(),cells=voronoi(ss),hole='';
+ cells.forEach(function(c,i){if(bz(pl,ss[i].bid)!==zid||!c.poly.length)return;hole+='<path d="M'+c.poly.map(function(p){return Math.round(p[0])+' '+Math.round(p[1]);}).join('L')+'Z" fill="black" stroke="black" stroke-width="14" stroke-linejoin="round"/>';});
+ (pl.markers||[]).forEach(function(m){if(m.type==='tp'&&(m.players||[]).some(function(x){return zoneAt(pl,x,view.phase)===zid||zoneOf(pl,x)===zid;}))hole+='<circle cx="'+m.x+'" cy="'+(m.y-14)+'" r="36" fill="black"/>';});
+ Object.keys(CELLARS).forEach(function(k){if(CELLARS[k].zone===zid)hole+='<circle cx="'+CELLARS[k].x+'" cy="'+(CELLARS[k].y+10)+'" r="42" fill="black"/>';});
+ return '<defs><mask id="zcut" maskUnits="userSpaceOnUse" x="0" y="0" width="'+MAPW+'" height="'+MAPH+'"><rect x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" fill="white"/>'+hole+'</mask></defs><rect x="0" y="0" width="'+MAPW+'" height="'+MAPH+'" fill="#0b0f16" fill-opacity=".88" mask="url(#zcut)" pointer-events="none"/>';}
+function zoneBBox(pl,zid){var xs=[],ys=[],add=function(x,y){if(x!=null&&y!=null&&!isNaN(x)&&!isNaN(y)){xs.push(+x);ys.push(+y);}};
+ BL().forEach(function(b){if(bz(pl,b.id)!==zid)return;var p=BPOS[b.id];if(p){add(p[0],p[1]-40);add(p[0],p[2]||p[1]);}else add(b.x,b.y);var bx=BOX[b.id];if(bx){add(bx[0],bx[1]);add(bx[2],bx[3]);}});
+ (pl.markers||[]).forEach(function(m){if(m.type!=='tp'||!(m.players||[]).length)return;if(m.players.some(function(x){return zoneAt(pl,x,view.phase)===zid||zoneOf(pl,x)===zid;})){add(m.x,m.y-30);add(m.x,m.y+12);}});
+ Object.keys(CELLARS).forEach(function(k){if(CELLARS[k].zone===zid){add(CELLARS[k].x,CELLARS[k].y);add(CELLARS[k].x,CELLARS[k].y+28);}});
+ if(!xs.length){var zp=ZPOS[zid];if(!zp)return null;add(zp[0]-200,zp[1]-150);add(zp[0]+200,zp[1]+150);}
+ var pad=40,x0=Math.min.apply(null,xs)-pad,x1=Math.max.apply(null,xs)+pad,y0=Math.min.apply(null,ys)-pad,y1=Math.max.apply(null,ys)+pad;
+ if(x1-x0<320){var cx=(x0+x1)/2;x0=cx-160;x1=cx+160;}if(y1-y0<240){var cy=(y0+y1)/2;y0=cy-120;y1=cy+120;}
+ x0=Math.max(0,x0);y0=Math.max(0,y0);x1=Math.min(MAPW,x1);y1=Math.min(MAPH,y1);return [Math.round(x0),Math.round(y0),Math.round(x1-x0),Math.round(y1-y0)];}
+function zoneMapHTML(pl,zid){var z=Z(pl,zid),bb=z&&zoneBBox(pl,zid);if(!bb)return '';
+ var raw=mapSVG(),li=raw.lastIndexOf('</svg>');raw=raw.slice(0,li)+zoneCutout(pl,zid)+raw.slice(li);var svg=raw.replace(/viewBox="0 0 [^"]+"/,'viewBox="'+bb.join(' ')+'" style="aspect-ratio:'+bb[2]+'/'+bb[3]+';width:min(100%,calc(62vh * '+(bb[2]/bb[3]).toFixed(3)+'))"');
+ return '<div class="card"><div class="maptop"><div class="phases" role="group" aria-label="Show phase">'+pl.phases.map(function(p,i){return '<button class="phase" data-phase="'+(i+1)+'" aria-pressed="'+(view.phase===i+1)+'">'+Th('Phase {n}',{n:i+1})+'<small>'+esc(clockAt(pl,phStart(pl,i+1))||phRange(pl,i+1,true))+'</small></button>';}).join('')+'</div></div>'+clockStrip()+
+  '<div class="mapbox zmap'+(editing?' editing':'')+'" id="map">'+svg+'</div><p class="note" style="margin:6px 0 0">'+Th('Zoomed in on {zone}. The Map tab shows the whole battlefield.',{zone:esc(Tt(z.name))})+'</p></div>';}
 function zoneTab(pl,zid){var z=Z(pl,zid);if(!z)return '<p class="empty">This zone no longer exists.</p>';var c=concedeOf(pl,zid),mg=managerOf(pl,zid);
  var o='<div class="card zt" style="--zc:'+z.color+'"><div class="zbanner" style="'+zoneStyle(z.color)+'"><b>'+Th('{zone} Zone',{zone:esc(Tt(z.name))})+'</b><span>'+Th('{n} players',{n:z.members.length})+(zoneSum(pl,zid)?' · '+fk(zoneSum(pl,zid)):'')+(c?' · '+(c>=pl.phases.length?Th('Conceded all match'):esc(concedeText(pl,zid))):'')+'</span></div>'+switchesHTML(pl,'zone',zid);
  var bs=zoneBuildings(pl,zid);
@@ -2288,7 +2318,7 @@ function tabBody(t,pl){
   if(w)o+=meNextHTML(w)+'<div class="card mecard panel" id="mecard">'+playerPanel(w)+'</div>';
   else o+='<div class="card hint"><p>'+Th('Type your in-game name above to see your zone, your building, your orders and your substitutes.')+'</p></div>';
   return o;}
- if(t.indexOf('z:')===0)return zoneTab(pl,t.slice(2));
+ if(t.indexOf('z:')===0)return zoneMapHTML(pl,t.slice(2))+zoneTab(pl,t.slice(2));
  if(t==='brief')return (pl.mission?'<div class="card"><p class="mission" style="max-width:none"><b>'+Th('Mission')+'</b>'+lineHTML(pl.mission)+'</p></div>':'')+briefingCard();
  if(t==='ifthen')return playbookCard();
  if(t==='times')return scheduleCard()+cellarCard()+timelineCard()+ordersCard()+markersCard();
