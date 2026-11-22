@@ -467,7 +467,7 @@ function planFromHash(){var m=/^#plan-([a-z0-9]+)$/.exec(location.hash||'');retu
 function $(s){return document.querySelector(s);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function P(){return S.plans[view.plan];}
-function nm(id){return S.players[id]?S.players[id].name:id;}
+function nm(id){return S.players[id]?String(S.players[id].name||id):(id==null?'?':String(id));}
 function pw(id){return (S.players[id]&&+S.players[id].power)||0;}
 function fk(p){return p?(p/1000).toFixed(1)+'k':'';}
 function fmt(n){return Number(n||0).toLocaleString('en-US');}
@@ -625,7 +625,7 @@ function roleOptions(pl,id){var z=zoneOf(pl,id);if(!z)return '';var cur=roleValu
   o+='<option value="co:'+b.id+'"'+(cur==='co:'+b.id?' selected':'')+'>Co-Lead · '+esc(b.name)+'</option>';});return o;}
 function swapPlayers(pl,a,b){function w(x){return x===a?b:x===b?a:x;}function wk(obj){if(!obj)return obj;var n={};Object.keys(obj).forEach(function(k){n[w(k)]=obj[k];});return n;}
  pl.zones.forEach(function(z){z.members=z.members.map(w);if(z.subManager)z.subManager=w(z.subManager);if(z.mgrChanges)z.mgrChanges.forEach(function(c){if(c.m)c.m=w(c.m);});});pl.subs=pl.subs.map(w);
- for(var bid in pl.bmap){var m=pl.bmap[bid];if(m.lead)m.lead=w(m.lead);if(m.co)m.co=m.co.map(w);if(m.backup)m.backup=w(m.backup);}
+ for(var bid in pl.bmap){var m=pl.bmap[bid];if(m.lead)m.lead=w(m.lead);if(m.co)m.co=m.co.map(w);if(m.backup)m.backup=w(m.backup);(m.changes||[]).forEach(function(c){if(c.lead)c.lead=w(c.lead);if(c.co)c.co=c.co.map(w);});}
  var np={};Object.keys(pl.pairs).forEach(function(k){np[w(k)]=pl.pairs[k].map(w);});pl.pairs=np;
  pl.rotateAt=wk(pl.rotateAt);pl.joinAt=wk(pl.joinAt);pl.subZone=wk(pl.subZone);if(pl.moves)pl.moves=wk(pl.moves);
  (pl.markers||[]).forEach(function(mk){if(mk.players)mk.players=mk.players.map(w);});}
@@ -1971,7 +1971,20 @@ function migrateFormats(){if(!(S.map.buildings||[]).some(function(b){return b.id
  (pl.contingencies||[]).forEach(function(c){if(c.ifText==null){var t=c.trigger||{};c.ifText=t.t==='tpl'?tplPlainEN(pl,t):(t.text||'');}if(c.thenText==null)c.thenText=blocksToMD(pl,c.actions||[]);});
  (pl.markers||[]).forEach(function(m){});pl.bmap=pl.bmap||{};if(!pl.bmap.shrine)pl.bmap.shrine={zone:'',lead:null,phase:2};if(k==='c'&&!(S.meta&&S.meta.r3shrine)&&!pl.bmap.shrine.zone&&pl.bmap.green_sanctum&&pl.bmap.green_sanctum.lead==='duvy'&&Z(pl,'green')){pl.bmap.shrine={zone:'green',lead:'duvy',phase:2};pl.bmap.green_sanctum.changes=[{lead:'demadues',ph:2}];S.meta=S.meta||{};S.meta.r3shrine=1;}Object.keys(pl.bmap).forEach(function(bid){var mb=pl.bmap[bid];if(mb&&mb.hand&&!mb.changes){mb.changes=[mb.hand];delete mb.hand;}});if(pl.phases&&pl.phases.length>1)['hall','merc','shrine'].forEach(function(bid){var mb=pl.bmap&&pl.bmap[bid];if(mb&&mb.phase==null)mb.phase=2;});view.plan=keep;});
  // undercellars become per-plan markers; buildings fixed to Duvy's map
- S.map.landmarks=(S.map.landmarks||[]).filter(function(l){return l.type!=='cellar';});}
+ S.map.landmarks=(S.map.landmarks||[]).filter(function(l){return l.type!=='cellar';});
+ Object.keys(S.plans).forEach(function(k){cleanPlanIds(S.plans[k]);});}
+/* Remove slots that point at no player (left by the old swap bug, deleted players, bad imports). */
+function cleanPlanIds(pl){if(!pl)return 0;var n=0,ok=function(x){return typeof x==='string'&&!!S.players[x];};
+ function fl(a){if(!Array.isArray(a))return a;var seen={},r=a.filter(function(x){if(!ok(x)||seen[x])return false;seen[x]=1;return true;});n+=a.length-r.length;return r;}
+ function fk(o){if(!o||typeof o!=='object')return o;Object.keys(o).forEach(function(k){if(!ok(k)){delete o[k];n++;}});return o;}
+ (pl.zones||[]).forEach(function(z){z.members=fl(z.members||[]);if(z.subManager&&!ok(z.subManager)){delete z.subManager;n++;}(z.mgrChanges||[]).forEach(function(c){if(c.m&&!ok(c.m)){c.m=null;n++;}});});
+ pl.subs=fl(pl.subs||[]);
+ Object.keys(pl.bmap||{}).forEach(function(bid){var m=pl.bmap[bid];if(!m)return;if(m.lead&&!ok(m.lead)){delete m.lead;n++;}if(m.co)m.co=fl(m.co);if(m.backup&&!ok(m.backup)){delete m.backup;n++;}
+  (m.changes||[]).forEach(function(c){if(c.lead&&!ok(c.lead)){delete c.lead;n++;}if(c.co)c.co=fl(c.co);});});
+ if(pl.pairs){fk(pl.pairs);Object.keys(pl.pairs).forEach(function(k){pl.pairs[k]=(pl.pairs[k]||[]).map(function(x){if(x!=null&&!ok(x)){n++;return null;}return x;});});}
+ ['rotateAt','joinAt','subZone','moves'].forEach(function(f){if(pl[f])fk(pl[f]);});
+ (pl.markers||[]).forEach(function(mk){if(mk.players)mk.players=fl(mk.players);});
+ return n;}
 /* --- overrides that read the text format --- */
 function briefingHTML(){var pl=P();return mdHTML(pl,pl.briefingText||'');}
 function briefingText(){var pl=P(),m=M(pl),L=['⚔️ '+m.us.k+' ['+m.us.tag+'] — '+Tt('Mega Legion Battle Plan').toUpperCase(),m.league.toUpperCase()+' | '+m.round.toUpperCase(),Tt('Opponent')+': '+m.them.k+' ['+m.them.tag+']'];
