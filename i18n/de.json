@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "Zyklus {n}: {player} geht raus und du übernimmst deinen Platz wieder.",
 "k1wjij1d1qru18n10": "Zyklus {n}: {player} übernimmt deinen Platz.",
 "kmxvds9sbaf751g": "Geh wieder raus. **{player}** übernimmt seinen Platz wieder.",
-"k1ulwtsy11eokumq": "**{player}** ersetzt dich."
+"k1ulwtsy11eokumq": "**{player}** ersetzt dich.",
+"ktlxc663lkuseu": "Komm für **{player}** rein{zone}.",
+"k1vr6nvaujf68et": "**{player}** kommt für dich rein.",
+"kk9n4881fyvtk61w": "Du wirst nicht eingewechselt. Deine Aufgabe ist es, die Ersatzspieler für {zone} zu managen."
 }

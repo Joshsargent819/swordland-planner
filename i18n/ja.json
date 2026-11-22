@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "サイクル{n}：{player}が抜け、あなたが枠に戻ります。",
 "k1wjij1d1qru18n10": "サイクル{n}：{player}があなたの枠に入ります。",
 "kmxvds9sbaf751g": "再び抜けてください。**{player}**が枠に戻ります。",
-"k1ulwtsy11eokumq": "**{player}**があなたと交代します。"
+"k1ulwtsy11eokumq": "**{player}**があなたと交代します。",
+"ktlxc663lkuseu": "**{player}**と交代で入る{zone}。",
+"k1vr6nvaujf68et": "**{player}**があなたと交代で入ります。",
+"kk9n4881fyvtk61w": "あなたは交代で入りません。{zone}の控えの管理が担当です。"
 }

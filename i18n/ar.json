@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "الدورة {n}: يخرج {player} وتستعيد مكانك.",
 "k1wjij1d1qru18n10": "الدورة {n}: يأخذ {player} مكانك.",
 "kmxvds9sbaf751g": "اخرج مجددًا. يستعيد **{player}** مكانه.",
-"k1ulwtsy11eokumq": "**{player}** يحل محلك."
+"k1ulwtsy11eokumq": "**{player}** يحل محلك.",
+"ktlxc663lkuseu": "ادخل بدلًا من **{player}**{zone}.",
+"k1vr6nvaujf68et": "يدخل **{player}** بدلًا منك.",
+"kk9n4881fyvtk61w": "لن تدخل في التبديل. مهمتك إدارة البدلاء في {zone}."
 }

@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "Cykl {n}: {player} schodzi, a ty wracasz na swoje miejsce.",
 "k1wjij1d1qru18n10": "Cykl {n}: {player} zajmuje twoje miejsce.",
 "kmxvds9sbaf751g": "Zejdź z powrotem. **{player}** wraca na swoje miejsce.",
-"k1ulwtsy11eokumq": "**{player}** cię zastępuje."
+"k1ulwtsy11eokumq": "**{player}** cię zastępuje.",
+"ktlxc663lkuseu": "Wejdź za **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** wchodzi za ciebie.",
+"kk9n4881fyvtk61w": "Nie wchodzisz do rotacji. Twoim zadaniem jest zarządzanie rezerwowymi w {zone}."
 }

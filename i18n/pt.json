@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "Ciclo {n}: {player} sai e você retoma sua vaga.",
 "k1wjij1d1qru18n10": "Ciclo {n}: {player} assume sua vaga.",
 "kmxvds9sbaf751g": "Saia novamente. **{player}** retoma a vaga.",
-"k1ulwtsy11eokumq": "**{player}** substitui você."
+"k1ulwtsy11eokumq": "**{player}** substitui você.",
+"ktlxc663lkuseu": "Entre no lugar de **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** entra no seu lugar.",
+"kk9n4881fyvtk61w": "Você não entra na rotação. Sua função é gerenciar os reservas de {zone}."
 }

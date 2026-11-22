@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "Cycle {n} : {player} sort et tu reprends ta place.",
 "k1wjij1d1qru18n10": "Cycle {n} : {player} prend ta place.",
 "kmxvds9sbaf751g": "Ressors. **{player}** reprend sa place.",
-"k1ulwtsy11eokumq": "**{player}** te remplace."
+"k1ulwtsy11eokumq": "**{player}** te remplace.",
+"ktlxc663lkuseu": "Entre à la place de **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** entre à ta place.",
+"kk9n4881fyvtk61w": "Tu n’entres pas en rotation. Ton rôle est de gérer les remplaçants de {zone}."
 }

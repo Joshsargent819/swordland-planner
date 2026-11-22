@@ -194,11 +194,15 @@ Every player has a link that opens straight to their own orders, with nothing to
 - **Leaders:** in **👥 Roster**, tap **🔗 Link** next to any name to copy that player's link, or **🔗 Copy all links** for a list to paste into Discord. **🛠 Admin → 🔗 Player links** does the same.
 - A link looks like `your-site.netlify.app/?p=Boshbon`. Add `&lang=es` (or any language code) to open it in that language.
 
-## Saving and reusing plans
+## Saving and loading plans
 
-- **🛠 Admin → ⬇️ Export plan** saves the plan you're viewing as a file on your device.
-- **🛠 Admin → ⬆️ Import plan** adds a plan from one of those files as a new plan. It never replaces an existing one. Players in the file who aren't on the roster are added; players already on the roster are matched by name. It saves automatically.
-- **💾 Plan data** is still there for a backup of the whole planner at once.
+In 🛠 Admin → **Plans**:
+
+- **💾 Save plan** stores the plan you're on, under a name, in the planner's online storage. Saving again with the same name updates it. You don't need Edit mode to save.
+- **📥 Load plan** lists your saved plans (with who saved them and when) and the ready-made ones, such as **Round 3 v2 · Semi-Finals** built from the zone graphics. If a plan with the same name is already open, loading replaces it; otherwise it's added. A restore point is saved first, and players are matched to the roster by name.
+- **➕ New plan**, **📄 Duplicate plan**, **🕘 Restore points** and **🗑 Delete plan** are in the same group.
+
+Saved plans use the same Firestore rules as restore points, so nothing extra to publish.
 
 ## Attendance
 

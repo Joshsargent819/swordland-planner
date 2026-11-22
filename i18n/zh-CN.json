@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "第{n}轮：{player}下场，你回到自己的位置。",
 "k1wjij1d1qru18n10": "第{n}轮：{player}接替你的位置。",
 "kmxvds9sbaf751g": "再次下场。**{player}**回到他的位置。",
-"k1ulwtsy11eokumq": "**{player}**替换你。"
+"k1ulwtsy11eokumq": "**{player}**替换你。",
+"ktlxc663lkuseu": "替换**{player}**上场{zone}。",
+"k1vr6nvaujf68et": "**{player}**替换你上场。",
+"kk9n4881fyvtk61w": "你不参与轮换上场。你的任务是管理{zone}的替补。"
 }

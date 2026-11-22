@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "Ciclo {n}: {player} sale y recuperas tu puesto.",
 "k1wjij1d1qru18n10": "Ciclo {n}: {player} ocupa tu puesto.",
 "kmxvds9sbaf751g": "Vuelve a salir. **{player}** recupera su puesto.",
-"k1ulwtsy11eokumq": "**{player}** te reemplaza."
+"k1ulwtsy11eokumq": "**{player}** te reemplaza.",
+"ktlxc663lkuseu": "Entra por **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** entra por ti.",
+"kk9n4881fyvtk61w": "No entras en rotación. Tu trabajo es gestionar los suplentes de {zone}."
 }

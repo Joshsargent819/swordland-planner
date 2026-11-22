@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "סבב {n}: {player} יוצא ואתה חוזר למקומך.",
 "k1wjij1d1qru18n10": "סבב {n}: {player} תופס את מקומך.",
 "kmxvds9sbaf751g": "צא שוב. **{player}** חוזר למקומו.",
-"k1ulwtsy11eokumq": "**{player}** מחליף אותך."
+"k1ulwtsy11eokumq": "**{player}** מחליף אותך.",
+"ktlxc663lkuseu": "היכנס במקום **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** נכנס במקומך.",
+"kk9n4881fyvtk61w": "אתה לא נכנס לסבב. התפקיד שלך הוא לנהל את המחליפים של {zone}."
 }

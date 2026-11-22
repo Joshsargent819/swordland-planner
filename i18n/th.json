@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "รอบ {n}: {player} ออก และคุณกลับเข้าตำแหน่งเดิม",
 "k1wjij1d1qru18n10": "รอบ {n}: {player} เข้าแทนตำแหน่งของคุณ",
 "kmxvds9sbaf751g": "ออกอีกครั้ง **{player}** กลับเข้าตำแหน่งเดิม",
-"k1ulwtsy11eokumq": "**{player}** เข้าแทนคุณ"
+"k1ulwtsy11eokumq": "**{player}** เข้าแทนคุณ",
+"ktlxc663lkuseu": "ลงแทน **{player}**{zone}",
+"k1vr6nvaujf68et": "**{player}** ลงแทนคุณ",
+"kk9n4881fyvtk61w": "คุณไม่ได้ลงสลับ หน้าที่ของคุณคือจัดการตัวสำรองของ {zone}"
 }

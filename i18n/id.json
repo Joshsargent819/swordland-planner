@@ -385,5 +385,8 @@
 "k1cj2x91zivsst1o": "Siklus {n}: {player} keluar dan kamu kembali ke posisimu.",
 "k1wjij1d1qru18n10": "Siklus {n}: {player} mengambil posisimu.",
 "kmxvds9sbaf751g": "Keluar lagi. **{player}** kembali ke posisinya.",
-"k1ulwtsy11eokumq": "**{player}** menggantikanmu."
+"k1ulwtsy11eokumq": "**{player}** menggantikanmu.",
+"ktlxc663lkuseu": "Masuk menggantikan **{player}**{zone}.",
+"k1vr6nvaujf68et": "**{player}** masuk menggantikanmu.",
+"kk9n4881fyvtk61w": "Kamu tidak masuk rotasi. Tugasmu mengelola cadangan {zone}."
 }
